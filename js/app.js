@@ -383,7 +383,7 @@ function renderTopPicks() {
   box.innerHTML = "";
   scored.slice(0, 3).forEach((entry, rank) => {
     const row = document.createElement("div");
-    row.className = "pick";
+    row.className = "pick" + (rank === 0 ? " best" : "");
     row.innerHTML =
       `<span class="rank">${rank + 1}</span>` +
       `<span class="icon">${CROP_ICONS[entry.crop.name]}</span>` +
