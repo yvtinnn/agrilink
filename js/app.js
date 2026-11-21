@@ -255,7 +255,8 @@ async function loadFarmData(parishName) {
   renderSeasonChips();
 }
 
-// 7-day forecast strip: one open column per day, rain bars warn about heavy days.
+// 7-day forecast strip: one open column per day.
+// Rain bars: orange = too wet to work, mint = good planting moisture.
 function renderForecastStrip() {
   const strip = document.getElementById("forecast-strip");
   if (!currentWeather || !currentWeather.daily) {
@@ -265,17 +266,36 @@ function renderForecastStrip() {
   const today = new Date();
   const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
   strip.innerHTML = "";
+  const goodDays = [];
   currentWeather.daily.forEach((day, i) => {
     const date = new Date(today);
     date.setDate(date.getDate() + i);
     const col = document.createElement("div");
-    col.className = "forecast-day" + (day.rain >= 20 ? " wet" : "");
+    let cls = "forecast-day";
+    if (day.rain >= 20) cls += " wet";               // too wet for field work
+    else if (i > 0 && day.rain >= 2) {               // light rain = free irrigation
+      cls += " good";
+      goodDays.push(dayNames[date.getDay()]);
+    }
+    col.className = cls;
     col.innerHTML =
       `<span class="f-day">${i === 0 ? "Today" : dayNames[date.getDay()]}</span>` +
       `<span class="f-temp">${day.tmax}°</span>` +
       `<span class="f-rain">${day.rain} mm</span>`;
     strip.appendChild(col);
   });
+
+  // the practical answer: when should you actually plant this week?
+  const plantBox = document.getElementById("plant-days");
+  if (goodDays.length) {
+    plantBox.innerHTML = `Good days to plant this week: <b>${goodDays.join(" · ")}</b> — light rain settles seeds in, no washout.`;
+    plantBox.classList.remove("hidden");
+  } else if (currentWeather.daily.some((d) => d.rain >= 20)) {
+    plantBox.innerHTML = `Too wet this week — wait for the strip to turn mint before planting.`;
+    plantBox.classList.remove("hidden");
+  } else {
+    plantBox.classList.add("hidden");
+  }
 }
 
 // "Planting right now" chips: crops whose season is open this month.
@@ -486,6 +506,28 @@ document.getElementById("share-plan").addEventListener("click", async () => {
   }
 });
 
+// Tip of the day: one practical farming tip, changes daily.
+const TIPS = [
+  "Water early morning or after 4 pm — midday water burns leaves and evaporates fast.",
+  "Mulch with dry grass or banana leaves. It holds soil moisture and feeds worms.",
+  "Plant marigold around the field — it pushes away some pests, for free.",
+  "Don't plant the same crop in the same spot every season — rotate to protect the soil.",
+  "Ash from the wood fire pot helps against some leaf-eating pests. Dust lightly.",
+  "Check plants every 2 days — catching one worm early saves a whole row.",
+  "Compost your crop leftovers — free fertiliser by next season.",
+  "Weeds steal water and food. Pull them small, before they seed.",
+  "Collect rainwater from the roof in drums — free irrigation for dry weeks.",
+  "Healthy soil smells earthy and sweet. If it smells sour, rest that bed with compost.",
+];
+
+function renderTipOfDay() {
+  // changes at midnight: day-of-year decides which tip shows
+  const now = new Date();
+  const start = new Date(now.getFullYear(), 0, 0);
+  const dayOfYear = Math.floor((now - start) / 86400000);
+  document.getElementById("tip-text").textContent = TIPS[dayOfYear % TIPS.length];
+}
+
 // ============ 5. TRACKER SCREEN ============
 const trackCropSelect = document.getElementById("track-crop");
 CROPS.forEach((crop) => {
@@ -512,11 +554,21 @@ document.getElementById("build-timeline").addEventListener("click", () => {
   const totalDays = (roadmap[roadmap.length - 1].date - plantingDate) / (1000 * 60 * 60 * 24);
   const daysIn = Math.max(0, (today - plantingDate) / (1000 * 60 * 60 * 24));
   const percent = Math.min(100, Math.round((daysIn / totalDays) * 1000) / 10);
-  document.getElementById("progress-fill").style.width = percent + "%";
+
+  // progress ring (like a fitness ring) — smooth sweep to the right spot
+  const RING = 2 * Math.PI * 52; // matches r=52 in the SVG
+  const ringFill = document.getElementById("ring-fill");
+  ringFill.style.strokeDashoffset = RING * (1 - percent / 100);
+  document.getElementById("ring-num").textContent = Math.round(percent);
+
+  const stageNow = roadmap.find((s) => s.date >= today);
+  const stageName = stageNow ? stageNow.name : "all done";
   document.getElementById("progress-text").textContent =
-    daysIn <= 0
-      ? `Roadmap ready — it starts on your chosen planting date.`
-      : `${Math.round(daysIn)} days since planting — ${percent}% of the way to harvest.`;
+    daysIn <= 0 ? "Roadmap ready — plant on your chosen date." :
+    `Currently in the ${stageName.toLowerCase()} stage.`;
+  document.getElementById("progress-sub").textContent =
+    daysIn <= 0 ? `${crop.name} · ${roadmap.length} stages ahead of you.` :
+    `${Math.round(daysIn)} of ${Math.round(totalDays)} days since planting · ${crop.name}`;
 
   const timeline = document.getElementById("timeline");
   timeline.innerHTML = "";
@@ -632,6 +684,7 @@ document.getElementById("chat-form").addEventListener("submit", (event) => {
 // ============ START THE APP ============
 renderChat();
 renderReports();
+renderTipOfDay();
 
 const savedParish = localStorage.getItem("agrilink-parish");
 if (savedParish) {

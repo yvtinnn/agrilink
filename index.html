@@ -50,6 +50,18 @@
       <div class="card">
         <span class="label">Next 7 days</span>
         <div id="forecast-strip" class="forecast-strip muted">Loading forecast…</div>
+        <div id="plant-days" class="plant-days hidden"></div>
+      </div>
+
+      <!-- tip of the day -->
+      <div class="card tip-card">
+        <div class="tip-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 0 0-4 10.5c.7.6 1 1.5 1 2.5h6c0-1 .3-1.9 1-2.5A6 6 0 0 0 12 3z"/></svg>
+        </div>
+        <div>
+          <span class="label">Tip of the day</span>
+          <b id="tip-text">Loading tip…</b>
+        </div>
       </div>
 
       <!-- about card (only shown before the farm is set up) -->
@@ -126,9 +138,19 @@
       </div>
 
       <div id="timeline-output" class="hidden">
-        <div id="timeline-progress" class="card soft">
-          <b id="progress-text"></b>
-          <div class="progress-track"><div id="progress-fill"></div></div>
+        <div class="card">
+          <span class="label">Journey to harvest</span>
+          <div class="progress-wrap" style="margin-top:10px">
+            <svg class="ring" viewBox="0 0 120 120" aria-hidden="true">
+              <circle class="ring-bg" cx="60" cy="60" r="52"/>
+              <circle class="ring-fill" id="ring-fill" cx="60" cy="60" r="52"/>
+              <text x="60" y="60" text-anchor="middle" dominant-baseline="central"><tspan class="ring-num" id="ring-num">0</tspan><tspan class="ring-unit" x="60" dy="16">%</tspan></text>
+            </svg>
+            <div class="progress-copy">
+              <b id="progress-text"></b>
+              <span id="progress-sub"></span>
+            </div>
+          </div>
         </div>
         <div id="timeline" class="timeline"></div>
       </div>
@@ -251,6 +273,6 @@
   <script src="js/planner.js?v=8"></script>
   <script src="js/community.js?v=8"></script>
   <script src="js/problems.js?v=8"></script>
-  <script src="js/app.js?v=8"></script>
+  <script src="js/app.js?v=9"></script>
 </body>
 </html>
