@@ -314,6 +314,7 @@ function renderFarmStats() {
   if (!currentWeather) return;
   box.classList.remove("hidden");
   const climate = currentClimate ? `${currentClimate.rain}<small> mm/mo</small>` : "–";
+  document.getElementById("hero-temp").textContent = currentWeather.temp;
   box.innerHTML =
     `<div class="stat"><span class="label">Temp now</span><span class="value">${currentWeather.temp}<small> °C</small></span></div>` +
     `<div class="stat"><span class="label">Rain 7 days</span><span class="value">${currentWeather.rain7}<small> mm</small></span></div>` +

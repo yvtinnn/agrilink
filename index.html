@@ -28,76 +28,27 @@
   <main>
 
     <!-- =========================================================
-         SCREEN 1: HOME — your farm (after onboarding) + quick info
+         SCREEN 1: HOME — your farm hero (weather-app style)
     ========================================================== -->
     <section id="screen-home" class="screen active">
 
-      <!-- Jamaica farmland illustration -->
-      <div class="hero" role="img" aria-label="Illustration of Jamaican farmland with hills and palm trees">
-        <svg viewBox="0 0 400 180" preserveAspectRatio="xMidYMid slice">
-          <defs>
-            <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0" stop-color="#7ec8e3"/>
-              <stop offset="1" stop-color="#cdeef7"/>
-            </linearGradient>
-          </defs>
-          <rect width="400" height="180" fill="url(#sky)"/>
-          <circle cx="330" cy="38" r="20" fill="#f6b93b" opacity="0.9"/>
-          <!-- Blue Mountains -->
-          <path d="M0 96 L60 44 L120 96 Z" fill="#4d8a6a" opacity="0.85"/>
-          <path d="M40 96 L110 30 L185 96 Z" fill="#2f6b4f"/>
-          <path d="M150 96 L215 52 L280 96 Z" fill="#4d8a6a" opacity="0.7"/>
-          <!-- rolling hills -->
-          <path d="M0 110 Q100 70 210 108 T400 100 V180 H0 Z" fill="#57a05e"/>
-          <!-- field rows -->
-          <path d="M0 150 Q120 132 210 148 T400 142 V180 H0 Z" fill="#3d7d4a"/>
-          <g stroke="#6db36f" stroke-width="2" opacity="0.6" fill="none">
-            <path d="M-10 158 Q120 140 220 154 T410 148"/>
-            <path d="M-10 168 Q120 152 220 164 T410 158"/>
-            <path d="M-10 178 Q120 162 220 174 T410 168"/>
-          </g>
-          <!-- palm trees -->
-          <g id="palms">
-            <g transform="translate(70 122)" stroke-linecap="round">
-              <path d="M0 0 Q1 -14 3 -26" stroke="#8a5a33" stroke-width="4" fill="none"/>
-              <g stroke="#2f6b4f" stroke-width="3.5" fill="none">
-                <path d="M3 -26 Q-8 -32 -18 -30"/>
-                <path d="M3 -26 Q14 -32 24 -30"/>
-                <path d="M3 -26 Q-4 -38 -12 -41"/>
-                <path d="M3 -26 Q10 -38 18 -41"/>
-                <path d="M3 -26 Q2 -38 0 -43"/>
-              </g>
-            </g>
-            <g transform="translate(340 132) scale(0.8)" stroke-linecap="round">
-              <path d="M0 0 Q1 -14 3 -26" stroke="#8a5a33" stroke-width="4" fill="none"/>
-              <g stroke="#2f6b4f" stroke-width="3.5" fill="none">
-                <path d="M3 -26 Q-8 -32 -18 -30"/>
-                <path d="M3 -26 Q14 -32 24 -30"/>
-                <path d="M3 -26 Q-4 -38 -12 -41"/>
-                <path d="M3 -26 Q10 -38 18 -41"/>
-                <path d="M3 -26 Q2 -38 0 -43"/>
-              </g>
-            </g>
-          </g>
-        </svg>
-      </div>
-
-      <!-- your farm card (shows where you farm, can be changed) -->
-      <div class="card farm-card">
-        <div class="farm-row">
-          <div>
-            <span class="farm-label">Your farm</span>
-            <b id="farm-place" class="farm-place">Not set yet</b>
+      <!-- your farm hero: big temp, place, forecast — no boxes, the sky IS the card -->
+      <div class="card" id="farm-hero">
+        <span class="label">Your farm</span>
+        <div class="hero-place" id="farm-place">Not set yet</div>
+        <div class="hero-row">
+          <div class="hero-temp"><span id="hero-temp">–</span><small>°C now</small></div>
+          <div class="farm-actions">
+            <button id="change-farm" class="btn-ghost">Change</button>
+            <button id="replay-tutorial" class="btn-ghost">Tutorial</button>
           </div>
-          <button id="change-farm" class="btn-ghost">Change</button>
-          <button id="replay-tutorial" class="btn-ghost">Tutorial</button>
         </div>
         <div id="farm-stats" class="stat-strip hidden"></div>
       </div>
 
       <!-- 7-day forecast strip -->
       <div class="card">
-        <h2>Next 7 days at your farm</h2>
+        <span class="label">Next 7 days</span>
         <div id="forecast-strip" class="forecast-strip muted">Loading forecast…</div>
       </div>
 
@@ -297,9 +248,9 @@
     </button>
   </nav>
 
-  <script src="js/planner.js?v=6"></script>
-  <script src="js/community.js?v=6"></script>
-  <script src="js/problems.js?v=6"></script>
-  <script src="js/app.js?v=6"></script>
+  <script src="js/planner.js?v=8"></script>
+  <script src="js/community.js?v=8"></script>
+  <script src="js/problems.js?v=8"></script>
+  <script src="js/app.js?v=8"></script>
 </body>
 </html>
