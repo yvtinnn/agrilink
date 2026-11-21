@@ -201,10 +201,25 @@ function addReport(crop, problem, note, parish) {
   renderReports();
 }
 
+// Board filter: "all" or "mine" (the farmer's own parish).
+let boardFilter = "all";
+
+function setBoardFilter(mode) {
+  boardFilter = mode;
+  document.querySelectorAll("#board-filter button").forEach((b) => {
+    b.classList.toggle("on", b.dataset.filter === mode);
+  });
+  renderReports();
+}
+
 function renderReports() {
   const feed = document.getElementById("report-feed");
   feed.innerHTML = "";
+  const myParish = localStorage.getItem("agrilink-parish") || "";
+  let shown = 0;
   for (const report of loadReports()) {
+    if (boardFilter === "mine" && report.parish !== myParish) continue;
+    shown++;
     const card = document.createElement("div");
     card.className = "report" + (report.mine ? " mine" : "");
     const top = document.createElement("div");
@@ -222,5 +237,8 @@ function renderReports() {
     }
     card.appendChild(meta);
     feed.appendChild(card);
+  }
+  if (!shown) {
+    feed.innerHTML = `<p class="muted small">No reports from ${myParish || "your parish"} yet — that's either great news, or you'll be the first to spot something.</p>`;
   }
 }

@@ -197,6 +197,8 @@ async function loadFarmData(parishName) {
       renderTopPicks();
       renderForecastStrip();
       renderSeasonChips();
+      renderHeroCondition();
+      updateOfflineBadge();
       return;
     }
   } catch {
@@ -254,7 +256,18 @@ async function loadFarmData(parishName) {
   renderForecastStrip();
   renderSeasonChips();
   renderHeroCondition();
+  updateOfflineBadge();
 }
+
+// Offline indicator — the PWA story: it still works, just tells you.
+function updateOfflineBadge() {
+  const el = document.getElementById("offline-note");
+  if (!el) return;
+  el.textContent = navigator.onLine ? "" : "You're offline — showing saved data. Everything still works.";
+  el.classList.toggle("hidden", navigator.onLine);
+}
+window.addEventListener("online", updateOfflineBadge);
+window.addEventListener("offline", updateOfflineBadge);
 
 // One human line about the week ahead, right under the big temp.
 function renderHeroCondition() {
@@ -403,7 +416,7 @@ function renderTopPicks() {
       `<span class="icon">${CROP_ICONS[entry.crop.name]}</span>` +
       `<span class="pick-info">` +
         `<span class="pick-name">${entry.crop.name}</span>` +
-        `<div class="pick-why">${entry.rec.verdict} · rain ${entry.rec.rain} mm · ${entry.rec.score}% fit</div>` +
+        `<div class="pick-why">${entry.rec.verdict} · harvest around ${harvestDate(entry.crop).replace(/,.*/, "")}</div>` +
       `</span>` +
       `<span class="pick-score"><span class="num">${entry.rec.score}%</span>` +
         `<div class="bar"><div style="width:${entry.rec.score}%"></div></div></span>`;
@@ -437,11 +450,19 @@ async function fetchClimateYear(parish, year, now) {
 }
 
 // ============ 4. PLANNER SCREEN ============
-function renderCrops() {
+function renderCrops(filterText) {
   const grid = document.getElementById("crop-grid");
   grid.innerHTML = "";
+  const filter = (filterText || "").toLowerCase();
 
-  CROPS.forEach((crop, index) => {
+  const visible = CROPS.filter((crop) => crop.name.toLowerCase().includes(filter));
+  if (!visible.length) {
+    grid.innerHTML = `<p class="muted small">No crop called "${filterText}" — try lettuce, okra, corn…</p>`;
+    return;
+  }
+
+  visible.forEach((crop) => {
+    const index = CROPS.indexOf(crop);
     const tile = document.createElement("button");
     tile.className = "crop-tile";
     tile.type = "button";
@@ -453,6 +474,10 @@ function renderCrops() {
     grid.appendChild(tile);
   });
 }
+
+document.getElementById("crop-search").addEventListener("input", (event) => {
+  renderCrops(event.target.value.trim());
+});
 
 function showPlan(index) {
   const crop = CROPS[index];
@@ -695,10 +720,16 @@ document.getElementById("chat-form").addEventListener("submit", (event) => {
   messageBox.value = "";
 });
 
+// board filter buttons
+document.querySelectorAll("#board-filter button").forEach((btn) => {
+  btn.addEventListener("click", () => setBoardFilter(btn.dataset.filter));
+});
+
 // ============ START THE APP ============
 renderChat();
 renderReports();
 renderTipOfDay();
+updateOfflineBadge();
 
 const savedParish = localStorage.getItem("agrilink-parish");
 if (savedParish) {

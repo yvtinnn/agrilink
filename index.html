@@ -44,6 +44,7 @@
           </div>
         </div>
         <div class="hero-condition" id="hero-condition"></div>
+        <p id="offline-note" class="small muted hidden" style="margin-top:6px"></p>
         <div id="farm-stats" class="stat-strip hidden"></div>
       </div>
 
@@ -104,7 +105,11 @@
         <label>Planting right now in your parish</label>
         <div id="season-chips" class="season-chips"></div>
 
-        <label>All crops</label>
+        <label for="crop-search">All crops</label>
+        <div class="search-wrap">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+          <input id="crop-search" type="text" placeholder="Search 14 crops…" />
+        </div>
         <div id="crop-grid" class="crop-list"></div>
       </div>
 
@@ -210,7 +215,11 @@
       <!-- public problem board (read-only) -->
       <div class="card">
         <h2>Problem Board</h2>
-        <p class="muted">What farmers near you are dealing with right now — reported from the field.</p>
+        <p class="muted">What farmers are dealing with right now — reported from the field.</p>
+        <div class="seg" id="board-filter">
+          <button class="on" data-filter="all">All parishes</button>
+          <button data-filter="mine">My parish</button>
+        </div>
         <div id="report-feed" class="report-feed"></div>
       </div>
     </section>
@@ -272,9 +281,9 @@
     </button>
   </nav>
 
-  <script src="js/planner.js?v=8"></script>
-  <script src="js/community.js?v=8"></script>
-  <script src="js/problems.js?v=8"></script>
-  <script src="js/app.js?v=11"></script>
+  <script src="js/planner.js?v=12"></script>
+  <script src="js/community.js?v=12"></script>
+  <script src="js/problems.js?v=12"></script>
+  <script src="js/app.js?v=12"></script>
 </body>
 </html>

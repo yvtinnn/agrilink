@@ -79,9 +79,26 @@ function renderChat() {
 
     const when = document.createElement("div");
     when.className = "when";
-    when.textContent = post.time;
+    when.textContent = post.time + (post.helpful ? ` · ${post.helpful} found this helpful` : "");
 
     bubble.append(who, text, when);
+
+    // "Helpful" reaction — thanks a farmer for good advice.
+    // The button lives inside MY view only (it's a local demo app).
+    const helpful = document.createElement("button");
+    helpful.type = "button";
+    helpful.className = "helpful" + (post.iHelped ? " did" : "");
+    helpful.textContent = post.iHelped ? "You found this helpful" : "Helpful";
+    helpful.addEventListener("click", () => {
+      const posts = loadPosts();
+      const target = posts.find((x) => x === post);
+      if (target.iHelped) { target.iHelped = false; target.helpful = (target.helpful || 1) - 1; }
+      else { target.iHelped = true; target.helpful = (target.helpful || 0) + 1; }
+      savePosts(posts);
+      renderChat();
+    });
+    bubble.appendChild(helpful);
+
     div.append(avatar, bubble);
     feed.appendChild(div);
   }
