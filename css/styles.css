@@ -42,7 +42,13 @@ body {
   box-shadow: 0 1px 8px rgba(15, 61, 33, .3);
 }
 .logo { display: flex; align-items: center; gap: 10px; min-width: 0; }
-.logo-leaf { width: 32px; height: 32px; flex: none; }
+.logo-badge {
+  width: 38px; height: 38px; flex: none;
+  background: #fff;
+  border-radius: 10px;
+  padding: 3px;
+  object-fit: contain;
+}
 .logo h1 { font-size: 19px; letter-spacing: .2px; line-height: 1.1; }
 .logo h1 span { color: #b8e986; font-weight: 800; }
 .logo p { font-size: 11px; opacity: .8; }
@@ -249,6 +255,26 @@ select:focus, input:focus { outline: 2px solid var(--green-500); border-color: v
 
 .progress-track { height: 8px; background: #dfe8de; border-radius: 999px; overflow: hidden; margin-top: 9px; }
 #progress-fill { height: 100%; width: 0%; background: var(--green-500); transition: width .6s ease; }
+
+/* ---------- Steps list ---------- */
+.steps { list-style: none; counter-reset: step; margin: 10px 0; }
+.steps li {
+  counter-increment: step;
+  position: relative;
+  padding: 8px 0 8px 38px;
+}
+.steps li::before {
+  content: counter(step);
+  position: absolute; left: 0; top: 9px;
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  background: var(--green-700);
+  color: #fff;
+  font-size: 13px; font-weight: 800;
+  display: flex; align-items: center; justify-content: center;
+}
+.steps b { display: block; font-size: 14.5px; color: var(--green-900); }
+.steps span { font-size: 13.5px; color: var(--muted); }
 
 /* ---------- Bottom tab bar ---------- */
 .tabbar {

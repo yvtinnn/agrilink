@@ -16,11 +16,7 @@
   <!-- ===== Top bar ===== -->
   <header class="topbar">
     <div class="logo">
-      <svg class="logo-leaf" viewBox="0 0 40 40" aria-hidden="true">
-        <path d="M20 34 C20 22 12 18 4 18 C4 28 12 34 20 34 Z" fill="#57b65f"/>
-        <path d="M20 34 C20 18 26 10 38 8 C36 24 30 32 20 34 Z" fill="#a8e063"/>
-        <path d="M20 34 C20 26 20 18 20 10" stroke="#ffffff" stroke-width="2.5" fill="none" stroke-linecap="round"/>
-      </svg>
+      <img src="assets/logo-mark.png" alt="AgriLink logo" class="logo-badge" />
       <div>
         <h1>Agri<span>Link</span></h1>
         <p>Plant smarter. Harvest more.</p>
@@ -62,17 +58,25 @@
           </g>
           <!-- palm trees -->
           <g id="palms">
-            <g transform="translate(70 118)">
-              <path d="M0 0 L3 -26" stroke="#7a5230" stroke-width="4" stroke-linecap="round"/>
-              <path d="M3 -26 C-8 -30 -16 -26 -18 -20 C-10 -24 -2 -24 3 -22 Z" fill="#2f6b4f"/>
-              <path d="M3 -26 C14 -30 22 -26 24 -20 C16 -24 8 -24 3 -22 Z" fill="#2f6b4f"/>
-              <path d="M3 -26 C0 -36 -4 -40 -10 -42 C-2 -38 2 -32 3 -24 Z" fill="#3d7d4a"/>
+            <g transform="translate(70 122)" stroke-linecap="round">
+              <path d="M0 0 Q1 -14 3 -26" stroke="#8a5a33" stroke-width="4" fill="none"/>
+              <g stroke="#2f6b4f" stroke-width="3.5" fill="none">
+                <path d="M3 -26 Q-8 -32 -18 -30"/>
+                <path d="M3 -26 Q14 -32 24 -30"/>
+                <path d="M3 -26 Q-4 -38 -12 -41"/>
+                <path d="M3 -26 Q10 -38 18 -41"/>
+                <path d="M3 -26 Q2 -38 0 -43"/>
+              </g>
             </g>
-            <g transform="translate(340 128) scale(0.8)">
-              <path d="M0 0 L3 -26" stroke="#7a5230" stroke-width="4" stroke-linecap="round"/>
-              <path d="M3 -26 C-8 -30 -16 -26 -18 -20 C-10 -24 -2 -24 3 -22 Z" fill="#2f6b4f"/>
-              <path d="M3 -26 C14 -30 22 -26 24 -20 C16 -24 8 -24 3 -22 Z" fill="#2f6b4f"/>
-              <path d="M3 -26 C0 -36 -4 -40 -10 -42 C-2 -38 2 -32 3 -24 Z" fill="#3d7d4a"/>
+            <g transform="translate(340 132) scale(0.8)" stroke-linecap="round">
+              <path d="M0 0 Q1 -14 3 -26" stroke="#8a5a33" stroke-width="4" fill="none"/>
+              <g stroke="#2f6b4f" stroke-width="3.5" fill="none">
+                <path d="M3 -26 Q-8 -32 -18 -30"/>
+                <path d="M3 -26 Q14 -32 24 -30"/>
+                <path d="M3 -26 Q-4 -38 -12 -41"/>
+                <path d="M3 -26 Q10 -38 18 -41"/>
+                <path d="M3 -26 Q2 -38 0 -43"/>
+              </g>
             </g>
           </g>
         </svg>
@@ -100,11 +104,12 @@
 
       <!-- about card -->
       <div class="card soft">
-        <h3>What AgriLink does for you</h3>
-        <ul class="feature-list">
-          <li><b>Predictive crop planning</b><span>know the best time to plant, using live weather and 10-year climate history.</span></li>
-          <li><b>Growth tracking</b><span>a dated roadmap from seed to harvest for every crop.</span></li>
-        </ul>
+        <h3>How it works</h3>
+        <ol class="steps">
+          <li><b>Tell us your location</b><span>parish and town — takes 10 seconds.</span></li>
+          <li><b>We analyse the data</b><span>live forecast + 10 years of rainfall history for your parish.</span></li>
+          <li><b>You get clear advice</b><span>when to plant, what to expect, and every growth date.</span></li>
+        </ol>
         <p class="muted foot">Free for everyone — no paywall, no account. Built with farmers, for farmers.</p>
       </div>
     </section>
