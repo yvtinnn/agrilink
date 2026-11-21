@@ -1,13 +1,13 @@
 /* ============================================================
    app.js — the glue that connects everything.
-   1. Tab navigation between the screens
-   2. Location form + validation (the flowchart's decision step)
-   3. Live weather from Open-Meteo (free, no API key)
-   4. 10-year climate history from Open-Meteo's archive API
-      — this is what makes the advice "predictive", not just a
-      weather read-out. Fallback sample data if offline.
-   5. Planner screen: crop cards + recommendation
-   6. Tracker screen: growth roadmap with real dates
+
+   1. Onboarding: first visit → 2 quick steps → done forever
+   2. Tab navigation
+   3. Live weather + 10-year climate history (Open-Meteo, free)
+   4. Planner: crop cards + recommendation
+   5. Tracker: growth roadmap with real dates
+   6. Photo check: colour analysis + problem matching
+   7. Public problem board
 ============================================================ */
 
 // ---- The 14 parishes of Jamaica with rough map coordinates ----
@@ -31,7 +31,64 @@ const PARISHES = [
 let currentWeather = null; // live 7-day forecast
 let currentClimate = null; // 10-year average for the coming month
 
-// ============ 1. TAB NAVIGATION ============
+// ============ 1. ONBOARDING (first launch only) ============
+const onboardParish = document.getElementById("onboard-parish");
+PARISHES.forEach((p) => {
+  const option = document.createElement("option");
+  option.value = p.name;
+  option.textContent = p.name;
+  onboardParish.appendChild(option);
+});
+
+// show onboarding if the farmer hasn't set a location yet
+if (!localStorage.getItem("agrilink-parish")) {
+  document.getElementById("onboarding").classList.remove("hidden");
+}
+
+document.getElementById("onboard-next").addEventListener("click", () => {
+  document.getElementById("onboard-step-1").classList.remove("active");
+  document.getElementById("onboard-step-2").classList.add("active");
+  onboardParish.focus();
+});
+
+document.getElementById("onboard-finish").addEventListener("click", () => {
+  const parish = onboardParish.value;
+  const town = document.getElementById("onboard-town").value.trim();
+  const errorBox = document.getElementById("onboard-error");
+
+  // keep it simple: we really just need a parish + town
+  if (!parish || !town) {
+    errorBox.textContent = "Just pick your parish and type your town — that's all we need.";
+    errorBox.classList.remove("hidden");
+    return;
+  }
+  finishOnboarding(parish, town);
+});
+
+document.getElementById("onboard-skip").addEventListener("click", () => {
+  document.getElementById("onboarding").classList.add("hidden");
+});
+
+// shared by the finish button and the "Change" button on Home
+function finishOnboarding(parish, town) {
+  localStorage.setItem("agrilink-parish", parish);
+  localStorage.setItem("agrilink-town", town);
+  document.getElementById("onboarding").classList.add("hidden");
+  document.getElementById("farm-place").textContent = `${town}, ${parish}`;
+  loadFarmData(parish);
+  renderCrops();
+}
+
+// "Change" button on the Home card re-opens onboarding
+document.getElementById("change-farm").addEventListener("click", () => {
+  onboardParish.value = localStorage.getItem("agrilink-parish") || "";
+  document.getElementById("onboard-town").value = localStorage.getItem("agrilink-town") || "";
+  document.getElementById("onboard-step-1").classList.remove("active");
+  document.getElementById("onboard-step-2").classList.add("active");
+  document.getElementById("onboarding").classList.remove("hidden");
+});
+
+// ============ 2. TAB NAVIGATION ============
 document.querySelectorAll(".tab").forEach((tab) => {
   tab.addEventListener("click", () => showScreen(tab.dataset.screen));
 });
@@ -45,47 +102,7 @@ function showScreen(id) {
   window.scrollTo({ top: 0 });
 }
 
-// ============ 2. LOCATION FORM ============
-const parishSelect = document.getElementById("input-parish");
-PARISHES.forEach((p) => {
-  const option = document.createElement("option");
-  option.value = p.name;
-  option.textContent = p.name;
-  parishSelect.appendChild(option);
-});
-
-// If the farmer set a location before, remember it.
-const savedParish = localStorage.getItem("agrilink-parish");
-if (savedParish) {
-  parishSelect.value = savedParish;
-  document.getElementById("input-town").value = localStorage.getItem("agrilink-town") || "";
-}
-
-document.getElementById("location-form").addEventListener("submit", (event) => {
-  event.preventDefault(); // stay on the page instead of reloading
-
-  const parish = parishSelect.value;
-  const town = document.getElementById("input-town").value.trim();
-  const errorBox = document.getElementById("location-error");
-
-  // --- The "Valid Location?" decision from our flowchart ---
-  if (!parish || !town) {
-    errorBox.textContent = "Please choose a parish and type your town, then try again.";
-    errorBox.classList.remove("hidden");
-    return; // "No" branch → back to the form
-  }
-
-  // "Yes" branch → save and move on!
-  errorBox.classList.add("hidden");
-  localStorage.setItem("agrilink-parish", parish);
-  localStorage.setItem("agrilink-town", town);
-
-  loadFarmData(parish);
-  renderCrops();
-  showScreen("screen-planner");
-});
-
-// ============ 3 + 4. WEATHER & CLIMATE HISTORY ============
+// ============ 3. WEATHER & CLIMATE HISTORY ============
 async function loadFarmData(parishName) {
   const chip = document.getElementById("weather-chip");
   chip.textContent = "Loading local data…";
@@ -104,6 +121,7 @@ async function loadFarmData(parishName) {
         ? { rain: data.climate.avg_rain, years: data.climate.years_used }
         : null;
       updateWeatherChip(true, true);
+      renderFarmStats();
       return;
     }
   } catch {
@@ -150,6 +168,7 @@ async function loadFarmData(parishName) {
   }
 
   updateWeatherChip(currentWeather.live, !!currentClimate);
+  renderFarmStats();
 }
 
 // One line of live status in the top bar.
@@ -161,9 +180,19 @@ function updateWeatherChip(hasWeather, hasClimate) {
   chip.textContent = `${currentWeather.temp}°C · ${currentWeather.rain7} mm/7d · ${climateLabel} (${liveLabel})`;
 }
 
+// Small stat tiles on the Home "your farm" card.
+function renderFarmStats() {
+  const box = document.getElementById("farm-stats");
+  if (!currentWeather) return;
+  box.classList.remove("hidden");
+  const climate = currentClimate ? `${currentClimate.rain}<small> mm/mo</small>` : "–";
+  box.innerHTML =
+    `<div class="stat"><span class="label">Temp now</span><span class="value">${currentWeather.temp}<small> °C</small></span></div>` +
+    `<div class="stat"><span class="label">Rain 7 days</span><span class="value">${currentWeather.rain7}<small> mm</small></span></div>` +
+    `<div class="stat"><span class="label">10-yr avg</span><span class="value">${climate}</span></div>`;
+}
+
 // Rainfall total for `month` of `year`, at this parish.
-// The archive API needs start/end dates in the past, so we ask for
-// this same calendar month of previous years.
 async function fetchClimateYear(parish, year, now) {
   const month = now.getMonth(); // 0-based
   const start = new Date(year, month, 1);
@@ -184,7 +213,7 @@ async function fetchClimateYear(parish, year, now) {
   return days.reduce((a, b) => a + (b ?? 0), 0);
 }
 
-// ============ 5. PLANNER SCREEN ============
+// ============ 4. PLANNER SCREEN ============
 function renderCrops() {
   const grid = document.getElementById("crop-grid");
   grid.innerHTML = "";
@@ -233,7 +262,7 @@ function showPlan(index) {
   document.getElementById("track-crop").value = crop.name;
 }
 
-// ============ 6. TRACKER SCREEN ============
+// ============ 5. TRACKER SCREEN ============
 const trackCropSelect = document.getElementById("track-crop");
 CROPS.forEach((crop) => {
   const option = document.createElement("option");
@@ -283,9 +312,97 @@ document.getElementById("build-timeline").addEventListener("click", () => {
   });
 });
 
+// ============ 6. PHOTO CHECK ============
+document.getElementById("photo-btn").addEventListener("click", () => {
+  document.getElementById("photo-input").click(); // opens the camera or photo picker
+});
+
+document.getElementById("photo-input").addEventListener("change", (event) => {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const img = document.getElementById("photo-img");
+  img.src = URL.createObjectURL(file);
+
+  img.onload = () => {
+    document.getElementById("photo-preview").classList.remove("hidden");
+
+    // 1. count the colours in the photo
+    const analysis = analysePhoto(img);
+
+    // 2. draw simple colour bars so the farmer can see what we measured
+    const bars = document.getElementById("photo-bars");
+    bars.innerHTML =
+      colourBar("Healthy green", analysis.greenPct, "#2e9e55") +
+      colourBar("Yellowing", analysis.yellowPct, "#e0b03a") +
+      colourBar("Brown / dry", analysis.brownPct, "#a3703f");
+
+    // 3. which crop? (from the planner selection, or ask via the tracker dropdown)
+    const cropName = document.getElementById("track-crop").value || "Tomato";
+
+    // 4. match against the problem dataset
+    const matches = matchProblems(analysis, cropName);
+    const box = document.getElementById("photo-matches");
+    box.innerHTML =
+      `<p class="small muted">Checking as: <b>${cropName}</b> (change it in the Tracker tab)</p>` +
+      matches.slice(0, 3).map((m) =>
+        `<div class="match">
+           <div class="match-head"><b>${m.problem.name}</b>
+             <span class="match-score">${m.score}% match</span></div>
+           <div class="small muted"><b>Looks like:</b> ${m.problem.looksLike}</div>
+           <div class="small"><b>What to do:</b> ${m.problem.fix}</div>
+         </div>`
+      ).join("");
+
+    document.getElementById("photo-result").classList.remove("hidden");
+  };
+});
+
+// one labelled progress bar for the colour report
+function colourBar(label, pct, colour) {
+  return `<div class="colour-row">
+    <span class="colour-label">${label}</span>
+    <div class="colour-track"><div class="colour-fill" style="width:${pct}%; background:${colour}"></div></div>
+    <span class="colour-pct">${pct}%</span>
+  </div>`;
+}
+
+// ============ 7. PUBLIC PROBLEM BOARD ============
+const reportCropSelect = document.getElementById("report-crop");
+CROPS.forEach((crop) => {
+  const option = document.createElement("option");
+  option.value = crop.name;
+  option.textContent = crop.name;
+  reportCropSelect.appendChild(option);
+});
+
+const reportProblemSelect = document.getElementById("report-problem");
+PROBLEMS.forEach((p) => {
+  if (p.name === "Healthy plant") return; // not a reportable problem
+  const option = document.createElement("option");
+  option.value = p.name;
+  option.textContent = p.name;
+  reportProblemSelect.appendChild(option);
+});
+
+document.getElementById("report-form").addEventListener("submit", (event) => {
+  event.preventDefault();
+  addReport(
+    reportCropSelect.value,
+    reportProblemSelect.value,
+    document.getElementById("report-note").value.trim()
+  );
+  document.getElementById("report-note").value = "";
+});
+
 // ============ START THE APP ============
+renderReports();
+
+const savedParish = localStorage.getItem("agrilink-parish");
 if (savedParish) {
-  // returning user → data loads straight away
+  // returning user → fill in the farm card and load data
+  const savedTown = localStorage.getItem("agrilink-town") || "";
+  document.getElementById("farm-place").textContent = `${savedTown}, ${savedParish}`;
   loadFarmData(savedParish);
   renderCrops();
 }

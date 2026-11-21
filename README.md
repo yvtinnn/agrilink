@@ -3,8 +3,10 @@
 AgriLink helps smallholder and local farmers fight climate unpredictability with:
 - **Predictive Crop Planning** — the best time to plant, built from a live 7-day forecast **and 10 years of rainfall history for your exact parish**
 - **Growth Lifecycle Tracking** — a dated roadmap from seed to harvest for every crop
+- **Crop Photo Check** — a photo of a sick plant is analysed against our dataset of 8 common crop problems (runs fully on the phone, no upload needed)
+- **Public Problem Board** — farmers report what's attacking their crops so neighbours in the same parish can watch out for it
 
-**Free for everyone. No paywall. No account needed.**
+**Free for everyone. No paywall. No account needed. Built by high school students.**
 
 ---
 
@@ -54,6 +56,7 @@ Then open **http://localhost:8000** — the same app, now served by FastAPI, wit
 | `GET /api/farm-data/{parish}` | live forecast + 10-year climate history |
 | `GET /api/crops` | crop database with planting windows and growth stages |
 | `GET /api/recommend/{parish}?crop=Corn` | full scored planting recommendation |
+| `GET /api/problems` | the crop-problem dataset used by the photo checker |
 | `/docs` | automatic interactive API documentation |
 
 When the frontend is served by the backend, it automatically uses these API
@@ -78,6 +81,25 @@ The same scoring rules exist in two places that agree with each other:
 If the APIs are unreachable (offline farm, no signal), the app falls back to sensible
 sample values so it never breaks.
 
+## 🔎 How the photo check works
+
+Honest and simple — no machine learning, so anyone can understand it:
+
+1. The photo is shrunk to 160×160 pixels inside the browser (it never leaves the phone)
+2. Every pixel is sorted into three colour families: **healthy green**, **yellowing**, and **brown/dry**
+3. The colour mix is compared with the expected pattern of each problem in our dataset
+4. The best matches are shown with what the problem looks like and what to do about it
+
+The app tells the farmer straight: *this is a simple colour check, not a lab test* —
+and suggests confirming with a RADA extension officer for serious cases.
+
+## 📋 The problem dataset
+
+`js/problems.js` (browser) and `backend/problems.py` (API) hold 8 common Jamaican crop
+problems — nitrogen deficiency, drought stress, early blight, waterlogging, army worm,
+sun scorch, powdery mildew, and healthy. Each lists which crops it affects, what it looks
+like on the leaf, the colour pattern the analyser expects, and a practical fix.
+
 ## 🗂 Project structure
 
 ```
@@ -85,15 +107,18 @@ agrilink/
 ├── index.html            ← the whole app (open this!)
 ├── css/styles.css        ← the AgriLink look
 ├── js/planner.js         ← crop database + planting advice + growth roadmap
-├── js/app.js             ← glue: navigation, location, weather, climate, screens
+├── js/problems.js        ← crop-problem dataset + photo analyser + problem board
+├── js/app.js             ← glue: onboarding, navigation, weather, climate, screens
 ├── backend/main.py       ← FastAPI server (serves the app + JSON API)
 ├── backend/crops.py      ← crop database (server-side copy)
+├── backend/problems.py   ← crop-problem dataset (server-side copy)
 ├── backend/recommend.py  ← scoring rules (server-side copy)
 ├── backend/requirements.txt
+├── assets/               ← logo files
 ├── manifest.json         ← makes it installable as an app
 ├── service-worker.js     ← makes it work offline
-├── icons/                ← app icons
-└── docs/                 ← flow chart & design documents
+├── icons/                ← app icons (built from the real logo)
+└── docs/                 ← flow chart, logo, screenshots & captions
 ```
 
 ## 🛠 Built with

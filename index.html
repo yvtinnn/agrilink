@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>AgriLink — Plant smarter. Harvest more.</title>
-  <meta name="description" content="AgriLink helps farmers pick the best planting time and track crop growth using real weather and 10-year climate history." />
+  <meta name="description" content="AgriLink helps farmers pick the best planting time, track crop growth, and check crop problems using real weather and 10-year climate history." />
   <meta name="theme-color" content="#14532d" />
   <link rel="manifest" href="manifest.json" />
   <link rel="icon" href="icons/icon-192.png" />
@@ -28,7 +28,7 @@
   <main>
 
     <!-- =========================================================
-         SCREEN 1: HOME — location input (the flowchart's first step)
+         SCREEN 1: HOME — your farm (after onboarding) + quick info
     ========================================================== -->
     <section id="screen-home" class="screen active">
 
@@ -82,24 +82,16 @@
         </svg>
       </div>
 
-      <div class="card">
-        <h2>Where do you farm?</h2>
-        <p class="muted">Tell us your location to get local weather, planting advice, and growth planning.</p>
-
-        <form id="location-form">
-          <label for="input-parish">Region (Parish)</label>
-          <select id="input-parish" required>
-            <option value="">Choose your parish</option>
-          </select>
-
-          <label for="input-town">Town / Community</label>
-          <input id="input-town" type="text" placeholder="e.g. Santa Cruz" autocomplete="address-level3" required />
-
-          <button type="submit" class="btn-primary">Find My Farm</button>
-        </form>
-
-        <!-- shown when the location is not valid (the "No" branch of our flowchart) -->
-        <div id="location-error" class="error hidden"></div>
+      <!-- your farm card (shows where you farm, can be changed) -->
+      <div class="card farm-card">
+        <div class="farm-row">
+          <div>
+            <span class="farm-label">Your farm</span>
+            <b id="farm-place" class="farm-place">Not set yet</b>
+          </div>
+          <button id="change-farm" class="btn-ghost">Change</button>
+        </div>
+        <div id="farm-stats" class="stat-grid hidden"></div>
       </div>
 
       <!-- about card -->
@@ -109,6 +101,7 @@
           <li><b>Tell us your location</b><span>parish and town — takes 10 seconds.</span></li>
           <li><b>We analyse the data</b><span>live forecast + 10 years of rainfall history for your parish.</span></li>
           <li><b>You get clear advice</b><span>when to plant, what to expect, and every growth date.</span></li>
+          <li><b>Check crop problems</b><span>take a photo of a sick plant and we compare it with our problem dataset.</span></li>
         </ol>
         <p class="muted foot">Free for everyone — no paywall, no account. Built with farmers, for farmers.</p>
       </div>
@@ -163,7 +156,81 @@
       </div>
     </section>
 
+    <!-- =========================================================
+         SCREEN 4: PHOTO CHECK — analyse a plant photo + problem board
+    ========================================================== -->
+    <section id="screen-photo" class="screen">
+      <div class="card">
+        <h2>Crop Photo Check</h2>
+        <p class="muted">Take or upload a photo of the sick plant. We compare its colours with our
+          dataset of common crop problems. <b>Works on your phone, no internet needed.</b></p>
+
+        <div class="upload-box">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 16l4-5 3 3 4-6 5 8"/><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="9" cy="9" r="1.6"/></svg>
+          <button id="photo-btn" class="btn-primary" type="button">Choose a Plant Photo</button>
+          <span class="upload-hint">JPG or PNG — stays on your phone, nothing is uploaded</span>
+          <input id="photo-input" type="file" accept="image/*" capture="environment" hidden />
+        </div>
+
+        <div id="photo-preview" class="hidden">
+          <img id="photo-img" alt="Uploaded plant photo" />
+        </div>
+      </div>
+
+      <div id="photo-result" class="card hidden">
+        <h3>What we see</h3>
+        <div id="photo-bars" class="colour-bars"></div>
+        <div id="photo-matches" class="problem-matches"></div>
+        <p class="disclaimer">We're students, and this is a simple colour check — not a lab test.
+          For anything serious, confirm with your local RADA extension officer.</p>
+      </div>
+
+      <!-- public problem board -->
+      <div class="card">
+        <h2>Public Problem Board</h2>
+        <p class="muted">What are farmers around you dealing with right now? Report a problem so others in your parish can watch out for it too.</p>
+
+        <form id="report-form">
+          <label for="report-crop">Crop affected</label>
+          <select id="report-crop"></select>
+
+          <label for="report-problem">Problem</label>
+          <select id="report-problem"></select>
+
+          <label for="report-note">Details (optional)</label>
+          <input id="report-note" type="text" placeholder="e.g. seen on 3 rows near the gully" />
+
+          <button type="submit" class="btn-primary">Post to the Board</button>
+        </form>
+
+        <div id="report-feed" class="report-feed"></div>
+      </div>
+    </section>
+
   </main>
+
+  <!-- ===== Onboarding (first launch only) ===== -->
+  <div id="onboarding" class="onboarding hidden">
+    <div class="onboard-card">
+      <div class="onboard-step active" id="onboard-step-1">
+        <img src="assets/logo-mark.png" alt="" class="onboard-logo" />
+        <h2>Welcome to AgriLink</h2>
+        <p class="muted">Plant at the right time, track your crop, and check plant problems — all free.</p>
+        <p class="muted small">Setting up takes about 30 seconds. We just need to know where you farm.</p>
+        <button id="onboard-next" class="btn-primary">Let's go</button>
+      </div>
+      <div class="onboard-step" id="onboard-step-2">
+        <h2>Where do you farm?</h2>
+        <label for="onboard-parish">Parish</label>
+        <select id="onboard-parish"><option value="">Choose your parish</option></select>
+        <label for="onboard-town">Town / Community</label>
+        <input id="onboard-town" type="text" placeholder="e.g. Santa Cruz" autocomplete="address-level3" />
+        <div id="onboard-error" class="error hidden"></div>
+        <button id="onboard-finish" class="btn-primary">Start Growing</button>
+        <button id="onboard-skip" class="btn-text">Skip for now</button>
+      </div>
+    </div>
+  </div>
 
   <!-- ===== Bottom tab bar (app-style navigation) ===== -->
   <nav class="tabbar">
@@ -179,9 +246,14 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20h18"/><path d="M4 16l4-6 4 3 5-8"/></svg>
       <span>Tracker</span>
     </button>
+    <button class="tab" data-screen="screen-photo">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 16l4-5 3 3 4-6 5 8"/><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="9" cy="9" r="1.6"/></svg>
+      <span>Photo Check</span>
+    </button>
   </nav>
 
   <script src="js/planner.js"></script>
+  <script src="js/problems.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>

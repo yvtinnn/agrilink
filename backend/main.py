@@ -131,6 +131,13 @@ async def list_crops():
     return CROPS
 
 
+@app.get("/api/problems")
+async def list_problems():
+    """Our dataset of common crop problems (used by the photo checker)."""
+    from backend.problems import PROBLEMS
+    return PROBLEMS
+
+
 @app.get("/api/recommend/{parish}")
 async def recommend(parish: str, crop: str = Query(..., description="Crop name, e.g. Corn")):
     """Full planting recommendation for one crop in one parish."""
