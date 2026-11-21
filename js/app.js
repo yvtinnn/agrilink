@@ -90,9 +90,30 @@ async function loadFarmData(parishName) {
   const chip = document.getElementById("weather-chip");
   chip.textContent = "Loading local data…";
 
+  // --- Preferred path: our own FastAPI backend (same origin) ---
+  try {
+    const backend = await fetch(`/api/farm-data/${encodeURIComponent(parishName)}`);
+    if (backend.ok) {
+      const data = await backend.json();
+      currentWeather = {
+        temp: data.forecast.temp,
+        rain7: data.forecast.rain_7d,
+        live: data.forecast.live,
+      };
+      currentClimate = data.climate
+        ? { rain: data.climate.avg_rain, years: data.climate.years_used }
+        : null;
+      updateWeatherChip(true, true);
+      return;
+    }
+  } catch {
+    // no backend running (e.g. opened as a file) → use the browser path below
+  }
+
+  // --- Standalone path: call Open-Meteo directly from the browser ---
   const parish = PARISHES.find((p) => p.name === parishName);
 
-  // --- A. live 7-day forecast ---
+  // A. live 7-day forecast
   try {
     const url =
       "https://api.open-meteo.com/v1/forecast" +
@@ -112,10 +133,7 @@ async function loadFarmData(parishName) {
     currentWeather = { temp: 27, rain7: 24, live: false };
   }
 
-  // --- B. 10-year climate history for the same month each year ---
-  // We ask Open-Meteo's archive for daily rainfall from this month in
-  // the previous 10 years, then average it. That gives each parish its
-  // own "what December/June/etc. is normally like" number.
+  // B. 10-year climate history for the same month each year
   try {
     const now = new Date();
     const thisYear = now.getFullYear();
@@ -126,15 +144,20 @@ async function loadFarmData(parishName) {
     for (const rain of results) {
       if (rain !== null) { rainSum += rain; years++; }
     }
-    if (years > 0) {
-      currentClimate = { rain: Math.round(rainSum / years), years };
-    }
+    if (years > 0) currentClimate = { rain: Math.round(rainSum / years), years };
   } catch {
     currentClimate = null; // the recommendation falls back gracefully
   }
 
+  updateWeatherChip(currentWeather.live, !!currentClimate);
+}
+
+// One line of live status in the top bar.
+function updateWeatherChip(hasWeather, hasClimate) {
+  const chip = document.getElementById("weather-chip");
+  if (!hasWeather) { chip.textContent = "Weather unavailable — sample data in use"; return; }
   const liveLabel = currentWeather.live ? "live" : "sample";
-  const climateLabel = currentClimate ? `${currentClimate.years}-yr avg ${currentClimate.rain} mm/mo` : "climate offline";
+  const climateLabel = hasClimate ? `${currentClimate.years}-yr avg ${currentClimate.rain} mm/mo` : "climate offline";
   chip.textContent = `${currentWeather.temp}°C · ${currentWeather.rain7} mm/7d · ${climateLabel} (${liveLabel})`;
 }
 
@@ -187,6 +210,14 @@ function showPlan(index) {
   document.getElementById("plan-title").textContent = `${crop.name} — Planting Advice`;
   document.getElementById("plan-verdict").textContent = rec.verdict;
   document.getElementById("plan-verdict").className = "verdict " + rec.cls;
+
+  // the three key numbers, as clean stat tiles
+  const climateRain = rec.climateRain ? `${rec.climateRain}<small> mm/mo</small>` : "–";
+  document.getElementById("plan-stats").innerHTML =
+    `<div class="stat"><span class="label">Forecast</span><span class="value">${rec.rain}<small> mm/7d</small></span></div>` +
+    `<div class="stat"><span class="label">Climate avg</span><span class="value">${climateRain}</span></div>` +
+    `<div class="stat"><span class="label">Temp</span><span class="value">${rec.temp}<small> °C</small></span></div>`;
+
   document.getElementById("confidence-bar").style.width = rec.score + "%";
   document.getElementById("confidence-label").textContent =
     `Confidence ${rec.score}% — season + parish climate history + 7-day forecast.`;
