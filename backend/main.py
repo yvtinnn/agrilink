@@ -90,6 +90,10 @@ async def farm_data(parish: str):
     daily = forecast_response.json()["daily"]
     temp = round((daily["temperature_2m_max"][0] + daily["temperature_2m_min"][0]) / 2)
     rain7 = round(sum(daily["precipitation_sum"]))
+    daily_list = [
+        {"rain": round(p), "tmax": round(t)}
+        for p, t in zip(daily["precipitation_sum"], daily["temperature_2m_max"])
+    ]
 
     # --- 10-year climate history (same month, previous 10 years) ---
     import datetime as dt
@@ -119,7 +123,7 @@ async def farm_data(parish: str):
 
     return {
         "parish": parish,
-        "forecast": {"temp": temp, "rain_7d": rain7, "rain_3d": [round(p) for p in daily["precipitation_sum"][:3]], "live": True},
+        "forecast": {"temp": temp, "rain_7d": rain7, "rain_3d": [round(p) for p in daily["precipitation_sum"][:3]], "daily": daily_list, "live": True},
         "climate": climate,
     }
 

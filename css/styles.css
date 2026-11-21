@@ -504,6 +504,67 @@ select:focus, input:focus { outline: 2px solid var(--green-500); border-color: v
 .report-note { font-size: 13px; color: var(--text); margin-top: 4px; }
 .report-meta { font-size: 11.5px; color: var(--muted); margin-top: 5px; }
 
+/* ---------- 7-day forecast strip ---------- */
+.forecast-strip {
+  display: flex;
+  margin-top: 10px;
+}
+.forecast-day {
+  flex: 1;
+  text-align: center;
+  padding: 6px 2px;
+  display: flex; flex-direction: column; gap: 3px;
+}
+.forecast-day + .forecast-day { border-left: 1px solid var(--border); }
+.forecast-day .f-day { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; }
+.forecast-day .f-temp { font-size: 15px; font-weight: 800; color: var(--green-900); }
+.forecast-day .f-rain { font-size: 11px; color: #3d84a8; font-weight: 600; }
+.forecast-day.wet .f-rain { color: var(--orange); font-weight: 800; }
+.forecast-day.wet .f-day { color: #9a6106; }
+
+/* ---------- Season chips ---------- */
+.season-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+.chip {
+  display: inline-flex; align-items: center; gap: 7px;
+  border: 1px solid #cfe6d3;
+  background: var(--green-100);
+  color: var(--green-900);
+  font-size: 13.5px;
+  font-weight: 700;
+  padding: 8px 14px;
+  border-radius: 999px;
+  cursor: pointer;
+  font-family: inherit;
+}
+.chip:active { transform: scale(.97); }
+.chip .icon { width: 20px; height: 20px; color: var(--green-700); }
+
+/* ---------- Community chat ---------- */
+.chat-card { display: flex; flex-direction: column; }
+.chat-feed { display: flex; flex-direction: column; gap: 12px; max-height: 52vh; overflow-y: auto; padding: 4px 2px; margin: 10px 0; }
+.msg { display: flex; gap: 9px; max-width: 92%; }
+.msg.other { align-self: flex-start; }
+.msg.mine  { align-self: flex-end; flex-direction: row-reverse; }
+.avatar {
+  flex: none;
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  background: var(--green-700);
+  color: #fff;
+  font-size: 14px; font-weight: 800;
+  display: flex; align-items: center; justify-content: center;
+  margin-top: 2px;
+}
+.msg.mine .avatar { background: var(--orange); }
+.bubble { background: #eef3ee; border-radius: 4px 16px 16px 16px; padding: 9px 13px; font-size: 14.5px; line-height: 1.45; }
+.msg.mine .bubble { background: #e0f3e5; border-radius: 16px 4px 16px 16px; }
+.msg .who { font-size: 12px; font-weight: 700; color: var(--green-700); }
+.msg .when { font-size: 10.5px; color: var(--muted); margin-top: 3px; }
+.chat-form { display: flex; gap: 8px; }
+.chat-form input { flex: 1; }
+#chat-name { flex: 0 0 90px; }
+.chat-form .btn-primary { margin-top: 0; width: auto; padding: 11px 18px; }
+
 /* ---------- Bottom tab bar ---------- */
 .tabbar {
   position: fixed; bottom: 0; left: 0; right: 0; z-index: 10;

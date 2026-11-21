@@ -190,10 +190,13 @@ async function loadFarmData(parishName) {
       currentClimate = data.climate
         ? { rain: data.climate.avg_rain, years: data.climate.years_used }
         : null;
+      currentWeather.daily = data.forecast.daily; // 7-day list for the forecast strip
       updateWeatherChip(true, true);
       renderFarmStats();
       checkRainAlert();
       renderTopPicks();
+      renderForecastStrip();
+      renderSeasonChips();
       return;
     }
   } catch {
@@ -217,6 +220,10 @@ async function loadFarmData(parishName) {
       temp: Math.round((data.daily.temperature_2m_max[0] + data.daily.temperature_2m_min[0]) / 2),
       rain7: Math.round(data.daily.precipitation_sum.reduce((a, b) => a + b, 0)),
       rain3: data.daily.precipitation_sum.slice(0, 3).map((mm) => Math.round(mm)),
+      daily: data.daily.precipitation_sum.slice(0, 7).map((mm, i) => ({
+        rain: Math.round(mm),
+        tmax: Math.round(data.daily.temperature_2m_max[i]),
+      })),
       live: true,
     };
   } catch {
@@ -244,6 +251,52 @@ async function loadFarmData(parishName) {
   renderFarmStats();
   checkRainAlert();
   renderTopPicks();
+  renderForecastStrip();
+  renderSeasonChips();
+}
+
+// 7-day forecast strip: one open column per day, rain bars warn about heavy days.
+function renderForecastStrip() {
+  const strip = document.getElementById("forecast-strip");
+  if (!currentWeather || !currentWeather.daily) {
+    strip.textContent = "Forecast unavailable — showing sample data only.";
+    return;
+  }
+  const today = new Date();
+  const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  strip.innerHTML = "";
+  currentWeather.daily.forEach((day, i) => {
+    const date = new Date(today);
+    date.setDate(date.getDate() + i);
+    const col = document.createElement("div");
+    col.className = "forecast-day" + (day.rain >= 20 ? " wet" : "");
+    col.innerHTML =
+      `<span class="f-day">${i === 0 ? "Today" : dayNames[date.getDay()]}</span>` +
+      `<span class="f-temp">${day.tmax}°</span>` +
+      `<span class="f-rain">${day.rain} mm</span>`;
+    strip.appendChild(col);
+  });
+}
+
+// "Planting right now" chips: crops whose season is open this month.
+function renderSeasonChips() {
+  const box = document.getElementById("season-chips");
+  const month = new Date().getMonth() + 1;
+  const inSeason = CROPS.filter((c) => c.bestMonths.includes(month));
+  box.innerHTML = "";
+  if (!inSeason.length) {
+    box.innerHTML = `<p class="muted small">Nothing is in season this month — check the top picks above for what's closest.</p>`;
+    return;
+  }
+  inSeason.forEach((crop) => {
+    const index = CROPS.indexOf(crop);
+    const chip = document.createElement("button");
+    chip.type = "button";
+    chip.className = "chip";
+    chip.innerHTML = `<span class="icon">${CROP_ICONS[crop.name]}</span>${crop.name}`;
+    chip.addEventListener("click", () => showPlan(index));
+    box.appendChild(chip);
+  });
 }
 
 // One line of live status in the top bar.
@@ -565,35 +618,18 @@ function syncPhotoCrop() {
   photoCropSelect.value = document.getElementById("track-crop").value;
 }
 
-// ============ 7. PUBLIC PROBLEM BOARD ============
-const reportCropSelect = document.getElementById("report-crop");
-CROPS.forEach((crop) => {
-  const option = document.createElement("option");
-  option.value = crop.name;
-  option.textContent = crop.name;
-  reportCropSelect.appendChild(option);
-});
-
-const reportProblemSelect = document.getElementById("report-problem");
-PROBLEMS.forEach((p) => {
-  if (p.name === "Healthy plant") return; // not a reportable problem
-  const option = document.createElement("option");
-  option.value = p.name;
-  option.textContent = p.name;
-  reportProblemSelect.appendChild(option);
-});
-
-document.getElementById("report-form").addEventListener("submit", (event) => {
+// ============ 7. COMMUNITY ============
+document.getElementById("chat-form").addEventListener("submit", (event) => {
   event.preventDefault();
-  addReport(
-    reportCropSelect.value,
-    reportProblemSelect.value,
-    document.getElementById("report-note").value.trim()
-  );
-  document.getElementById("report-note").value = "";
+  const messageBox = document.getElementById("chat-message");
+  const nameBox = document.getElementById("chat-name");
+  if (nameBox.value.trim()) localStorage.setItem("agrilink-name", nameBox.value.trim()); // save FIRST so the message shows as "mine"
+  sendMessage(nameBox.value.trim(), messageBox.value.trim());
+  messageBox.value = "";
 });
 
 // ============ START THE APP ============
+renderChat();
 renderReports();
 
 const savedParish = localStorage.getItem("agrilink-parish");

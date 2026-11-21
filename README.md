@@ -3,8 +3,10 @@
 AgriLink helps smallholder and local farmers fight climate unpredictability with:
 - **Predictive Crop Planning** — the best time to plant, built from a live 7-day forecast **and 10 years of rainfall history for your exact parish**
 - **Growth Lifecycle Tracking** — a dated roadmap from seed to harvest for every crop
-- **Crop Photo Check** — a photo of a sick plant is analysed against our dataset of 8 common crop problems (runs fully on the phone, no upload needed)
-- **Public Problem Board** — farmers report what's attacking their crops so neighbours in the same parish can watch out for it
+- **Crop Photo Check** — a photo of a sick plant is analysed against our dataset of 14 common crop problems (runs fully on the phone, no upload needed)
+- **Farmer Community** — a peer chat with parish tags, plus a read-only Problem Board of what farmers near you are dealing with
+- **7-day forecast strip + rain alerts** — day-by-day rain and temperature, with a warning before heavy rain days
+- **In-season row** — the Planner shows every crop whose planting window is open this month
 
 **Free for everyone. No paywall. No account needed. Built by high school students.**
 
@@ -95,7 +97,7 @@ and suggests confirming with a RADA extension officer for serious cases.
 
 ## 📋 The problem dataset
 
-`js/problems.js` (browser) and `backend/problems.py` (API) hold 8 common Jamaican crop
+`js/problems.js` (browser) and `backend/problems.py` (API) hold 14 common Jamaican crop
 problems — nitrogen deficiency, drought stress, early blight, waterlogging, army worm,
 sun scorch, powdery mildew, and healthy. Each lists which crops it affects, what it looks
 like on the leaf, the colour pattern the analyser expects, and a practical fix.

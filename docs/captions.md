@@ -11,7 +11,8 @@ Each file below is named so it clearly describes what it shows.
 | `screenshot-crop-planner-screen.png` | **Predictive Crop Planner screen** — the crop picker with clean SVG icons and a planting recommendation with stat tiles (7-day forecast, climate average, temperature) and a confidence score. |
 | `screenshot-growth-tracker-screen.png` | **Growth Lifecycle Tracker screen** — the dated growth-stage roadmap with a progress bar showing how far the crop is from harvest. |
 | `screenshot-photo-check-and-problem-board.png` | **Crop Photo Check + Public Problem Board** — a plant photo analysed against our crop-problem dataset (colour bars + matched problems), and the public board where farmers report problems in their parish. |
-| `screenshot-home-onboarding.png` | **Onboarding screen** — the simple two-step setup new farmers see on first launch. |
+| `screenshot-community-chat.png` | **Farmer Community + Problem Board** — the peer chat with farmer avatars and parish tags, and the read-only problem board showing what farmers near you are dealing with. |
+| `screenshot-home-onboarding.png` | **Onboarding screen** — the simple two-step setup with a 3-slide tutorial that new farmers see on first launch. |
 
 ## Screenshots
 Live screenshots of each screen (Home, Planner, Tracker, Community) can be added here after hosting, named like:

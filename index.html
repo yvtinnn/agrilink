@@ -95,6 +95,12 @@
         <div id="farm-stats" class="stat-strip hidden"></div>
       </div>
 
+      <!-- 7-day forecast strip -->
+      <div class="card">
+        <h2>Next 7 days at your farm</h2>
+        <div id="forecast-strip" class="forecast-strip muted">Loading forecast…</div>
+      </div>
+
       <!-- about card (only shown before the farm is set up) -->
       <div class="card soft" id="how-it-works">
         <h3>How it works</h3>
@@ -129,6 +135,11 @@
       <div class="card">
         <h2>Check any crop</h2>
         <p class="muted">Pick a crop to see its full planting advice.</p>
+
+        <label>Planting right now in your parish</label>
+        <div id="season-chips" class="season-chips"></div>
+
+        <label>All crops</label>
         <div id="crop-grid" class="crop-list"></div>
       </div>
 
@@ -204,25 +215,27 @@
           (we used a little AI help to build it, but it's still just colours and rules).
           For anything serious, confirm with your local RADA extension officer.</p>
       </div>
+    </section>
 
-      <!-- public problem board -->
-      <div class="card">
-        <h2>Public Problem Board</h2>
-        <p class="muted">What are farmers around you dealing with right now? Report a problem so others in your parish can watch out for it too.</p>
-
-        <form id="report-form">
-          <label for="report-crop">Crop affected</label>
-          <select id="report-crop"></select>
-
-          <label for="report-problem">Problem</label>
-          <select id="report-problem"></select>
-
-          <label for="report-note">Details (optional)</label>
-          <input id="report-note" type="text" placeholder="e.g. seen on 3 rows near the gully" />
-
-          <button type="submit" class="btn-primary">Post to the Board</button>
+    <!-- =========================================================
+         SCREEN 5: COMMUNITY — farmer chat + problem board
+    ========================================================== -->
+    <section id="screen-community" class="screen">
+      <div class="card chat-card">
+        <h2>Farmer Community</h2>
+        <p class="muted small">Ask questions and share what works in your area. Be kind — every farm is different.</p>
+        <div id="chat-feed" class="chat-feed"></div>
+        <form id="chat-form" class="chat-form">
+          <input id="chat-name" type="text" placeholder="Your name" />
+          <input id="chat-message" type="text" placeholder="Share your experience…" required />
+          <button type="submit" class="btn-primary">Send</button>
         </form>
+      </div>
 
+      <!-- public problem board (read-only) -->
+      <div class="card">
+        <h2>Problem Board</h2>
+        <p class="muted">What farmers near you are dealing with right now — reported from the field.</p>
         <div id="report-feed" class="report-feed"></div>
       </div>
     </section>
@@ -278,10 +291,15 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20h18"/><path d="M4 16l4-6 4 3 5-8"/></svg>
       <span>Tracker</span>
     </button>
+    <button class="tab" data-screen="screen-community">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 12h.01M12 12h.01M16 12h.01"/><path d="M21 12c0 4.4-4 8-9 8-1.2 0-2.4-.2-3.4-.6L3 21l1.8-4.1C4 15.6 3 13.9 3 12c0-4.4 4-8 9-8s9 3.6 9 8z"/></svg>
+      <span>Community</span>
+    </button>
   </nav>
 
-  <script src="js/planner.js"></script>
-  <script src="js/problems.js"></script>
-  <script src="js/app.js"></script>
+  <script src="js/planner.js?v=6"></script>
+  <script src="js/community.js?v=6"></script>
+  <script src="js/problems.js?v=6"></script>
+  <script src="js/app.js?v=6"></script>
 </body>
 </html>
