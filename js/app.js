@@ -115,6 +115,7 @@ async function loadFarmData(parishName) {
       currentWeather = {
         temp: data.forecast.temp,
         rain7: data.forecast.rain_7d,
+        rain3: data.forecast.rain_3d,
         live: data.forecast.live,
       };
       currentClimate = data.climate
@@ -122,6 +123,8 @@ async function loadFarmData(parishName) {
         : null;
       updateWeatherChip(true, true);
       renderFarmStats();
+      checkRainAlert();
+      renderTopPicks();
       return;
     }
   } catch {
@@ -144,6 +147,7 @@ async function loadFarmData(parishName) {
     currentWeather = {
       temp: Math.round((data.daily.temperature_2m_max[0] + data.daily.temperature_2m_min[0]) / 2),
       rain7: Math.round(data.daily.precipitation_sum.reduce((a, b) => a + b, 0)),
+      rain3: data.daily.precipitation_sum.slice(0, 3).map((mm) => Math.round(mm)),
       live: true,
     };
   } catch {
@@ -169,6 +173,8 @@ async function loadFarmData(parishName) {
 
   updateWeatherChip(currentWeather.live, !!currentClimate);
   renderFarmStats();
+  checkRainAlert();
+  renderTopPicks();
 }
 
 // One line of live status in the top bar.
@@ -180,7 +186,7 @@ function updateWeatherChip(hasWeather, hasClimate) {
   chip.textContent = `${currentWeather.temp}°C · ${currentWeather.rain7} mm/7d · ${climateLabel} (${liveLabel})`;
 }
 
-// Small stat tiles on the Home "your farm" card.
+// Small stat strip on the Home "your farm" card.
 function renderFarmStats() {
   const box = document.getElementById("farm-stats");
   if (!currentWeather) return;
@@ -190,6 +196,66 @@ function renderFarmStats() {
     `<div class="stat"><span class="label">Temp now</span><span class="value">${currentWeather.temp}<small> °C</small></span></div>` +
     `<div class="stat"><span class="label">Rain 7 days</span><span class="value">${currentWeather.rain7}<small> mm</small></span></div>` +
     `<div class="stat"><span class="label">10-yr avg</span><span class="value">${climate}</span></div>`;
+}
+
+// Rain alert: warn BEFORE heavy rain arrives so farmers can plan around it.
+function checkRainAlert() {
+  const banner = document.getElementById("rain-alert");
+  const rain3 = currentWeather && currentWeather.rain3;
+  if (!rain3) { banner.classList.add("hidden"); return; }
+
+  const heavyDays = [];
+  const today = new Date();
+  for (let i = 0; i < rain3.length; i++) {
+    if (rain3[i] >= 20) {
+      const day = new Date(today);
+      day.setDate(day.getDate() + i);
+      heavyDays.push(`${rain3[i]} mm on ${day.toLocaleDateString(undefined, { weekday: "long" })}`);
+    }
+  }
+
+  if (heavyDays.length) {
+    document.getElementById("rain-alert-text").textContent =
+      `${heavyDays.join(", ")} expected. Hold off planting and spraying until it passes — good time for mulching instead.`;
+    banner.classList.remove("hidden");
+  } else {
+    banner.classList.add("hidden");
+  }
+}
+
+// TOP PICKS: score every crop for this parish and show the best 3.
+// This is the "what should I plant right now" answer, no clicking needed.
+function renderTopPicks() {
+  const box = document.getElementById("top-picks");
+  if (!currentWeather && !currentClimate) { box.innerHTML = ""; return; }
+
+  const parish = localStorage.getItem("agrilink-parish");
+  if (parish) document.getElementById("picks-parish").textContent = parish;
+
+  const scored = CROPS.map((crop, index) => ({
+    crop, index,
+    rec: recommendCrop(crop, currentWeather, currentClimate),
+  })).sort((a, b) => b.rec.score - a.rec.score);
+
+  box.innerHTML = "";
+  scored.slice(0, 3).forEach((entry, rank) => {
+    const row = document.createElement("div");
+    row.className = "pick";
+    row.innerHTML =
+      `<span class="rank">${rank + 1}</span>` +
+      `<span class="icon">${CROP_ICONS[entry.crop.name]}</span>` +
+      `<span class="pick-info">` +
+        `<span class="pick-name">${entry.crop.name}</span>` +
+        `<div class="pick-why">${entry.rec.verdict.toLowerCase()} · ${entry.rec.score}% fit</div>` +
+      `</span>` +
+      `<span class="pick-score"><span class="num">${entry.rec.score}%</span>` +
+        `<div class="bar"><div style="width:${entry.rec.score}%"></div></div></span>`;
+    row.addEventListener("click", () => {
+      showScreen("screen-planner");
+      showPlan(entry.index);
+    });
+    box.appendChild(row);
+  });
 }
 
 // Rainfall total for `month` of `year`, at this parish.
@@ -219,9 +285,13 @@ function renderCrops() {
   grid.innerHTML = "";
 
   CROPS.forEach((crop, index) => {
-    const tile = document.createElement("div");
+    const tile = document.createElement("button");
     tile.className = "crop-tile";
-    tile.innerHTML = `<span class="icon">${CROP_ICONS[crop.name]}</span>${crop.name}`;
+    tile.type = "button";
+    tile.innerHTML =
+      `<span class="icon">${CROP_ICONS[crop.name]}</span>` +
+      `<span class="crop-name">${crop.name}</span>` +
+      `<span class="crop-months">Best: ${crop.bestMonths.map(monthName).join(", ")}</span>`;
     tile.addEventListener("click", () => showPlan(index));
     grid.appendChild(tile);
   });
@@ -256,11 +326,41 @@ function showPlan(index) {
       `<div class="fact"><span class="mark ${f.cls}">${f.mark}</span><span>${f.text}</span></div>`
     ).join("") +
     `<div class="fact"><span class="mark">·</span><span><b>Best months:</b> ${crop.bestMonths.map(monthName).join(", ")}.</span></div>` +
-    `<div class="fact"><span class="mark">·</span><span>Use the <b>Tracker</b> tab to see every growth stage with real dates.</span></div>`;
+    `<div class="fact"><span class="mark">·</span><span>Planted today, you'd harvest around <b>${harvestDate(crop)}</b>.</span></div>`;
 
   // Also pre-select this crop in the tracker
   document.getElementById("track-crop").value = crop.name;
 }
+
+// Add up the crop's total days to estimate the harvest date.
+function harvestDate(crop) {
+  const totalDays = crop.stages.reduce((sum, stage) => sum + stage.days, 0);
+  const date = new Date();
+  date.setDate(date.getDate() + totalDays);
+  return date.toLocaleDateString(undefined, { day: "numeric", month: "long" });
+}
+
+// SHARE: turn the plan into a short text farmers can paste into WhatsApp.
+document.getElementById("share-plan").addEventListener("click", async () => {
+  const crop = CROPS.find((c) => c.name === document.getElementById("track-crop").value);
+  const rec = recommendCrop(crop, currentWeather, currentClimate);
+  const place = `${localStorage.getItem("agrilink-town") || ""}, ${localStorage.getItem("agrilink-parish") || ""}`.replace(/^, /, "");
+  const text =
+    `AgriLink plan — ${place}\n` +
+    `${crop.name}: ${rec.verdict} (${rec.score}% confidence)\n` +
+    `Best months: ${crop.bestMonths.map(monthName).join(", ")}\n` +
+    `Planted now → harvest around ${harvestDate(crop)}\n` +
+    `Rain this week: ${rec.rain} mm · Temp: ${rec.temp}°C`;
+
+  if (navigator.share) {
+    try { await navigator.share({ title: "AgriLink plan", text }); } catch { /* user cancelled */ }
+  } else {
+    await navigator.clipboard.writeText(text);
+    const btn = document.getElementById("share-plan");
+    btn.textContent = "Copied! Paste it in WhatsApp";
+    setTimeout(() => { btn.textContent = "Copy plan to share (WhatsApp)"; }, 2000);
+  }
+});
 
 // ============ 5. TRACKER SCREEN ============
 const trackCropSelect = document.getElementById("track-crop");
@@ -310,6 +410,11 @@ document.getElementById("build-timeline").addEventListener("click", () => {
       `<div class="tip">${stage.tip}</div>`;
     timeline.appendChild(div);
   });
+});
+
+// ============ PHOTO CHECK FAB (bottom-left button) ============
+document.getElementById("photo-fab").addEventListener("click", () => {
+  showScreen("screen-photo");
 });
 
 // ============ 6. PHOTO CHECK ============
@@ -405,4 +510,5 @@ if (savedParish) {
   document.getElementById("farm-place").textContent = `${savedTown}, ${savedParish}`;
   loadFarmData(savedParish);
   renderCrops();
+  renderTopPicks();
 }

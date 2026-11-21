@@ -148,24 +148,131 @@ select:focus, input:focus { outline: 2px solid var(--green-500); border-color: v
 .feature-list span { font-size: 13.5px; color: var(--muted); }
 .foot { margin-top: 8px; font-size: 12.5px; }
 
-/* ---------- Crop grid ---------- */
-.crop-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 14px; }
-.crop-tile {
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  background: #fbfcfa;
-  padding: 12px 4px 10px;
-  text-align: center;
-  cursor: pointer;
-  font-size: 12.5px;
-  font-weight: 600;
-  color: var(--text);
-  display: flex; flex-direction: column; align-items: center; gap: 6px;
-  transition: border-color .15s ease, background .15s ease;
+/* ---------- Stat strips (no boxes — just clean numbers) ---------- */
+.stat-strip {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  margin: 12px 0 14px;
+  padding: 10px 0;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
 }
-.crop-tile .icon { width: 30px; height: 30px; color: var(--green-700); }
-.crop-tile:hover { border-color: var(--green-500); background: #f1f8f2; }
-.crop-tile.selected { border-color: var(--green-700); background: #e9f5ec; box-shadow: inset 0 0 0 1px var(--green-700); }
+.stat-strip .stat { flex: 1; text-align: center; padding: 0 6px; }
+.stat-strip .stat + .stat { border-left: 1px solid var(--border); }
+.stat-strip .stat .label {
+  display: block;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .07em;
+  color: var(--muted);
+  margin-bottom: 1px;
+}
+.stat-strip .stat .value { font-size: 18px; font-weight: 800; color: var(--green-900); }
+.stat-strip .stat .value small { font-size: 11px; font-weight: 600; color: var(--muted); }
+
+/* ---------- Rain alert ---------- */
+.alert-banner {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  background: #fdf3df;
+  border: 1px solid #f2dfb2;
+  border-left: 4px solid var(--orange);
+  border-radius: 12px;
+  padding: 13px 16px;
+  margin-bottom: 16px;
+}
+.alert-banner b { color: #9a6106; font-size: 14px; }
+.alert-banner span { color: #7a5a1e; font-size: 13px; }
+
+/* ---------- Top picks (ranked, open rows) ---------- */
+.top-picks { display: flex; flex-direction: column; margin-top: 10px; }
+.pick {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  padding: 14px 4px;
+  cursor: pointer;
+}
+.pick + .pick { border-top: 1px solid var(--border); }
+.pick:active { background: #f4f9f5; }
+.pick .icon { width: 34px; height: 34px; color: var(--green-700); flex: none; }
+.pick .pick-info { flex: 1; min-width: 0; }
+.pick .pick-name { font-weight: 700; font-size: 15px; color: var(--green-900); }
+.pick .pick-why { font-size: 12.5px; color: var(--muted); }
+.pick .pick-score { flex: none; width: 62px; text-align: right; }
+.pick .pick-score .num { font-weight: 800; font-size: 15px; color: var(--green-700); }
+.pick .pick-score .bar { height: 5px; border-radius: 999px; background: #e4ebe3; margin-top: 4px; overflow: hidden; }
+.pick .pick-score .bar div { height: 100%; background: var(--green-500); border-radius: 999px; }
+.pick .rank {
+  flex: none;
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  background: var(--green-100);
+  color: var(--green-800);
+  font-size: 12.5px; font-weight: 800;
+  display: flex; align-items: center; justify-content: center;
+}
+
+/* ---------- Crop list (big rows, no tiny boxes) ---------- */
+.crop-list { display: flex; flex-direction: column; margin-top: 8px; }
+.crop-tile {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  border: none;
+  border-top: 1px solid var(--border);
+  background: none;
+  width: 100%;
+  padding: 14px 4px;
+  text-align: left;
+  cursor: pointer;
+  font-size: 15px;
+  font-family: inherit;
+}
+.crop-tile:hover { background: #f4f9f5; }
+.crop-tile .icon { width: 32px; height: 32px; color: var(--green-700); flex: none; }
+.crop-tile .crop-name { font-weight: 700; color: var(--text); flex: 1; }
+.crop-tile .crop-months { font-size: 12px; color: var(--muted); }
+.crop-tile.selected .crop-name { color: var(--green-700); }
+
+/* ---------- Secondary button (share) ---------- */
+.btn-secondary {
+  display: inline-block;
+  margin-top: 16px;
+  width: 100%;
+  padding: 13px;
+  border: 1px solid var(--green-500);
+  border-radius: 12px;
+  background: #fff;
+  color: var(--green-700);
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  min-height: 48px;
+}
+.btn-secondary:hover { background: #f2f9f3; }
+
+/* ---------- Photo check FAB (bottom-left camera button) ---------- */
+.photo-fab {
+  position: fixed;
+  left: 16px;
+  bottom: calc(72px + env(safe-area-inset-bottom));
+  z-index: 15;
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  border: none;
+  background: linear-gradient(135deg, var(--green-700), var(--green-500));
+  color: #fff;
+  cursor: pointer;
+  box-shadow: 0 8px 20px -4px rgba(15, 61, 33, .45);
+  display: flex; align-items: center; justify-content: center;
+}
+.photo-fab svg { width: 26px; height: 26px; }
+.photo-fab:active { transform: scale(.94); }
 
 /* ---------- Plan result ---------- */
 .verdict {
@@ -186,20 +293,6 @@ select:focus, input:focus { outline: 2px solid var(--green-500); border-color: v
 .verdict.good { background: #e2f6e6; color: var(--green-800); }
 .verdict.warn { background: #fdf3df; color: #9a6106; }
 .verdict.bad  { background: #fdf0ec; color: #9a3b26; }
-
-.stat-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
-  margin-bottom: 14px;
-}
-.stat {
-  background: #f6f9f6;
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 10px 8px 9px;
-  text-align: center;
-}
 .stat .label {
   display: block;
   font-size: 10px;
@@ -299,7 +392,7 @@ select:focus, input:focus { outline: 2px solid var(--green-500); border-color: v
   min-height: 40px;
 }
 .btn-ghost:hover { border-color: var(--green-500); }
-.farm-card .stat-grid { margin-top: 14px; margin-bottom: 0; }
+.farm-card .stat-strip { margin-top: 12px; margin-bottom: 0; }
 
 /* ---------- Onboarding ---------- */
 .onboarding {
@@ -420,7 +513,7 @@ select:focus, input:focus { outline: 2px solid var(--green-500); border-color: v
 @media (max-width: 420px) {
   main { padding: 12px; }
   .card { padding: 16px; }
-  .crop-grid { grid-template-columns: repeat(4, 1fr); gap: 8px; }
+  .crop-list { margin-top: 4px; }
   .logo p { display: none; }
   .weather-chip { font-size: 11px; padding: 5px 9px; max-width: 46vw; }
 }

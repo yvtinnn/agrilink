@@ -91,7 +91,7 @@
           </div>
           <button id="change-farm" class="btn-ghost">Change</button>
         </div>
-        <div id="farm-stats" class="stat-grid hidden"></div>
+        <div id="farm-stats" class="stat-strip hidden"></div>
       </div>
 
       <!-- about card -->
@@ -111,22 +111,37 @@
          SCREEN 2: PLANNER — the best time to plant
     ========================================================== -->
     <section id="screen-planner" class="screen">
+
+      <!-- rain alert (shown when heavy rain is coming) -->
+      <div id="rain-alert" class="alert-banner hidden">
+        <b>Heavy rain coming</b>
+        <span id="rain-alert-text"></span>
+      </div>
+
       <div class="card">
-        <h2>Predictive Crop Planner</h2>
-        <p class="muted">Pick a crop. We compare live weather with 10 years of seasonal history for your parish.</p>
-        <div id="crop-grid" class="crop-grid"></div>
+        <h2>What should I plant right now?</h2>
+        <p class="muted">Our top picks for <b id="picks-parish">your parish</b>, best first — based on the season,
+          10 years of rainfall history, and the 7-day forecast.</p>
+        <div id="top-picks" class="top-picks"></div>
+      </div>
+
+      <div class="card">
+        <h2>Check any crop</h2>
+        <p class="muted">Pick a crop to see its full planting advice.</p>
+        <div id="crop-grid" class="crop-list"></div>
       </div>
 
       <!-- recommendation appears here when a crop is picked -->
       <div id="plan-result" class="card hidden">
         <h3 id="plan-title"></h3>
         <div id="plan-verdict" class="verdict"></div>
-        <div id="plan-stats" class="stat-grid"></div>
+        <div id="plan-stats" class="stat-strip"></div>
         <div class="confidence">
           <div id="confidence-bar" class="confidence-bar"></div>
         </div>
         <p id="confidence-label" class="muted small"></p>
         <div id="plan-details" class="plan-details"></div>
+        <button id="share-plan" class="btn-secondary">Copy plan to share (WhatsApp)</button>
       </div>
     </section>
 
@@ -232,7 +247,11 @@
     </div>
   </div>
 
-  <!-- ===== Bottom tab bar (app-style navigation) ===== -->
+  <!-- ===== Bottom tab bar + photo check button ===== -->
+  <button id="photo-fab" class="photo-fab" aria-label="Crop Photo Check" title="Crop Photo Check">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 16l4-5 3 3 4-6 5 8"/><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="9" cy="9" r="1.6"/></svg>
+  </button>
+
   <nav class="tabbar">
     <button class="tab active" data-screen="screen-home">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg>
@@ -245,10 +264,6 @@
     <button class="tab" data-screen="screen-tracker">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20h18"/><path d="M4 16l4-6 4 3 5-8"/></svg>
       <span>Tracker</span>
-    </button>
-    <button class="tab" data-screen="screen-photo">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 16l4-5 3 3 4-6 5 8"/><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="9" cy="9" r="1.6"/></svg>
-      <span>Photo Check</span>
     </button>
   </nav>
 

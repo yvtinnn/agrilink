@@ -119,7 +119,7 @@ async def farm_data(parish: str):
 
     return {
         "parish": parish,
-        "forecast": {"temp": temp, "rain_7d": rain7, "live": True},
+        "forecast": {"temp": temp, "rain_7d": rain7, "rain_3d": [round(p) for p in daily["precipitation_sum"][:3]], "live": True},
         "climate": climate,
     }
 
