@@ -253,6 +253,17 @@ async function loadFarmData(parishName) {
   renderTopPicks();
   renderForecastStrip();
   renderSeasonChips();
+  renderHeroCondition();
+}
+
+// One human line about the week ahead, right under the big temp.
+function renderHeroCondition() {
+  const el = document.getElementById("hero-condition");
+  if (!currentWeather || !currentWeather.daily) { el.textContent = ""; return; }
+  const rain7 = currentWeather.rain7;
+  if (rain7 < 10)      el.innerHTML = `Dry week ahead — <b>plan to irrigate</b> if you plant now.`;
+  else if (rain7 < 40) el.innerHTML = `A few showers around — <b>good week to plant</b>.`;
+  else                 el.innerHTML = `Wet week ahead — <b>mind drainage</b> before planting.`;
 }
 
 // 7-day forecast strip: one open column per day.
@@ -279,6 +290,7 @@ function renderForecastStrip() {
     }
     col.className = cls;
     col.innerHTML =
+      `<span class="f-dot"></span>` +
       `<span class="f-day">${i === 0 ? "Today" : dayNames[date.getDay()]}</span>` +
       `<span class="f-temp">${day.tmax}°</span>` +
       `<span class="f-rain">${day.rain} mm</span>`;
@@ -287,7 +299,10 @@ function renderForecastStrip() {
 
   // the practical answer: when should you actually plant this week?
   const plantBox = document.getElementById("plant-days");
-  if (goodDays.length) {
+  if (goodDays.length >= 5) {
+    plantBox.innerHTML = `The whole week looks gentle — <b>any day works</b>. Light rain all week.`;
+    plantBox.classList.remove("hidden");
+  } else if (goodDays.length) {
     plantBox.innerHTML = `Good days to plant this week: <b>${goodDays.join(" · ")}</b> — light rain settles seeds in, no washout.`;
     plantBox.classList.remove("hidden");
   } else if (currentWeather.daily.some((d) => d.rain >= 20)) {
@@ -322,10 +337,9 @@ function renderSeasonChips() {
 // One line of live status in the top bar.
 function updateWeatherChip(hasWeather, hasClimate) {
   const chip = document.getElementById("weather-chip");
-  if (!hasWeather) { chip.textContent = "Weather unavailable — sample data in use"; return; }
-  const liveLabel = currentWeather.live ? "live" : "sample";
-  const climateLabel = hasClimate ? `${currentClimate.years}-yr avg ${currentClimate.rain} mm/mo` : "climate offline";
-  chip.textContent = `${currentWeather.temp}°C · ${currentWeather.rain7} mm/7d · ${climateLabel} (${liveLabel})`;
+  if (!hasWeather) { chip.textContent = "Offline — sample data"; return; }
+  const climateLabel = hasClimate ? `${currentClimate.years}-yr climate` : "climate offline";
+  chip.textContent = currentWeather.live ? `Live data · ${climateLabel}` : `Sample data · ${climateLabel}`;
 }
 
 // Small stat strip on the Home "your farm" card.
@@ -334,7 +348,7 @@ function renderFarmStats() {
   if (!currentWeather) return;
   box.classList.remove("hidden");
   const climate = currentClimate ? `${currentClimate.rain}<small> mm/mo</small>` : "–";
-  document.getElementById("hero-temp").textContent = currentWeather.temp;
+  document.getElementById("hero-temp").textContent = currentWeather.temp + "°";
   box.innerHTML =
     `<div class="stat"><span class="label">Temp now</span><span class="value">${currentWeather.temp}<small> °C</small></span></div>` +
     `<div class="stat"><span class="label">Rain 7 days</span><span class="value">${currentWeather.rain7}<small> mm</small></span></div>` +

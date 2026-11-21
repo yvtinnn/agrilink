@@ -7,7 +7,7 @@ Each file below is named so it clearly describes what it shows.
 | `agrilink-app-flow-chart.svg` | **AgriLink app flow chart (clean redraw)** — how a farmer's location input is validated and processed into crop planning and growth tracking, ending in optimized yields. |
 | `agrilink-app-flow-chart-original.png` | **Original AgriLink flow chart** — the team's first-drawn version from the planning stage (source of the redraw above). |
 | `agrilink-official-logo.png` | **Official AgriLink logo** — the team's brand mark, used in the app header and app icons. |
-| `screenshot-home-location-screen.png` | **Home screen** — where the farmer enters their parish and town. Invalid input politely asks them to try again. |
+| `screenshot-home-screen.png` | **Home screen** — the farm hero (live temperature, place, stat strip), 7-day forecast with good-planting-day markers, and the tip of the day. |
 | `screenshot-crop-planner-screen.png` | **Predictive Crop Planner screen** — the crop picker with clean SVG icons and a planting recommendation with stat tiles (7-day forecast, climate average, temperature) and a confidence score. |
 | `screenshot-growth-tracker-screen.png` | **Growth Lifecycle Tracker screen** — the dated growth-stage roadmap with a progress bar showing how far the crop is from harvest. |
 | `screenshot-photo-check-and-problem-board.png` | **Crop Photo Check + Public Problem Board** — a plant photo analysed against our crop-problem dataset (colour bars + matched problems), and the public board where farmers report problems in their parish. |

@@ -37,12 +37,13 @@
         <span class="label">Your farm</span>
         <div class="hero-place" id="farm-place">Not set yet</div>
         <div class="hero-row">
-          <div class="hero-temp"><span id="hero-temp">–</span><small>°C now</small></div>
+          <div class="hero-temp"><span id="hero-temp">–</span><small>celsius · live</small></div>
           <div class="farm-actions">
             <button id="change-farm" class="btn-ghost">Change</button>
             <button id="replay-tutorial" class="btn-ghost">Tutorial</button>
           </div>
         </div>
+        <div class="hero-condition" id="hero-condition"></div>
         <div id="farm-stats" class="stat-strip hidden"></div>
       </div>
 
@@ -63,6 +64,7 @@
           <b id="tip-text">Loading tip…</b>
         </div>
       </div>
+    </section>
 
       <!-- about card (only shown before the farm is set up) -->
       <div class="card soft" id="how-it-works">
@@ -199,7 +201,7 @@
         <p class="muted small">Ask questions and share what works in your area. Be kind — every farm is different.</p>
         <div id="chat-feed" class="chat-feed"></div>
         <form id="chat-form" class="chat-form">
-          <input id="chat-name" type="text" placeholder="Your name" />
+          <input id="chat-name" type="text" placeholder="Name" />
           <input id="chat-message" type="text" placeholder="Share your experience…" required />
           <button type="submit" class="btn-primary">Send</button>
         </form>
@@ -273,6 +275,6 @@
   <script src="js/planner.js?v=8"></script>
   <script src="js/community.js?v=8"></script>
   <script src="js/problems.js?v=8"></script>
-  <script src="js/app.js?v=10"></script>
+  <script src="js/app.js?v=11"></script>
 </body>
 </html>
