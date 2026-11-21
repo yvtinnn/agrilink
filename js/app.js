@@ -168,6 +168,7 @@ function showScreen(id) {
   document.querySelectorAll(".tab").forEach((t) => {
     t.classList.toggle("active", t.dataset.screen === id);
   });
+  document.body.dataset.screen = id; // each tab gets its own mood light
   window.scrollTo({ top: 0 });
 }
 
@@ -726,6 +727,7 @@ document.querySelectorAll("#board-filter button").forEach((btn) => {
 });
 
 // ============ START THE APP ============
+document.body.dataset.screen = "screen-home"; // sets the initial mood light
 renderChat();
 renderReports();
 renderTipOfDay();

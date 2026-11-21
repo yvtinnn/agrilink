@@ -6,13 +6,13 @@
 ============================================================ */
 
 :root {
-  --ink:        #f4faf4;            /* primary text on the canvas */
+  --ink:        #f7fcf6;            /* primary text on the canvas */
   --ink-dim:    rgba(244, 250, 244, .62);
   --ink-faint:  rgba(244, 250, 244, .38);
   --glass:      rgba(255, 255, 255, .07);
-  --glass-line: rgba(255, 255, 255, .10);
+  --glass-line: rgba(255, 255, 255, .15);
   --glass-strong: rgba(255, 255, 255, .12);
-  --mint:       #7ee29a;            /* accent for numbers & active states */
+  --mint:       #6ff2a8;            /* accent for numbers & active states */
   --coral:      #ff9d8a;            /* social + "best pick" accent */
   --lavender:   #c3b6f7;            /* photo-check / analysis accent */
   --sun:        #ffd57e;            /* warning accent */
@@ -29,12 +29,39 @@ body {
   color: var(--ink);
   line-height: 1.5;
   background:
-    radial-gradient(560px 280px at 88% -40px, rgba(255, 213, 126, .16), transparent 70%),
-    radial-gradient(480px 380px at -8% 26%, rgba(126, 226, 154, .10), transparent 70%),
-    linear-gradient(180deg, #123f25 0%, #175631 34%, #1f7040 68%, #2a8a52 100%);
+    radial-gradient(560px 280px at 88% -40px, rgba(255, 213, 126, .13), transparent 70%),
+    radial-gradient(480px 380px at -8% 26%, rgba(126, 226, 154, .09), transparent 70%),
+    linear-gradient(180deg, #081710 0%, #0e2a1d 40%, #143d29 78%, #1a5136 100%);
   background-attachment: scroll;
   padding-bottom: 92px;
   -webkit-font-smoothing: antialiased;
+}
+
+/* ---------- per-screen mood light: each tab tints the sky ----------
+   the glows ride on the body background, swapped by showScreen() */
+body[data-screen="screen-planner"] {
+  background-image:
+    radial-gradient(720px 380px at 90% -60px, rgba(111, 242, 168, .20), transparent 70%),
+    radial-gradient(560px 460px at -12% 34%, rgba(159, 216, 242, .12), transparent 70%),
+    linear-gradient(180deg, #081710 0%, #0e2a1d 40%, #143d29 78%, #1a5136 100%);
+}
+body[data-screen="screen-tracker"] {
+  background-image:
+    radial-gradient(680px 340px at 85% -40px, rgba(255, 213, 126, .18), transparent 70%),
+    radial-gradient(520px 420px at -8% 28%, rgba(255, 157, 138, .10), transparent 70%),
+    linear-gradient(180deg, #081710 0%, #0e2a1d 40%, #143d29 78%, #1a5136 100%);
+}
+body[data-screen="screen-photo"] {
+  background-image:
+    radial-gradient(680px 340px at 88% -40px, rgba(195, 182, 247, .18), transparent 70%),
+    radial-gradient(520px 420px at -8% 28%, rgba(126, 226, 154, .10), transparent 70%),
+    linear-gradient(180deg, #081710 0%, #0e2a1d 40%, #143d29 78%, #1a5136 100%);
+}
+body[data-screen="screen-community"] {
+  background-image:
+    radial-gradient(700px 340px at 88% -40px, rgba(255, 157, 138, .19), transparent 70%),
+    radial-gradient(520px 420px at -8% 28%, rgba(195, 182, 247, .10), transparent 70%),
+    linear-gradient(180deg, #081710 0%, #0e2a1d 40%, #143d29 78%, #1a5136 100%);
 }
 
 /* ---------- tiny all-caps labels (the connective tissue) ---------- */
@@ -488,7 +515,7 @@ input::placeholder { color: var(--ink-faint); }
   margin-top: 2px;
 }
 .msg.mine .avatar { background: rgba(255, 157, 138, .22); color: var(--coral); }
-.bubble { background: var(--glass); border-radius: 4px 18px 18px 18px; padding: 9px 13px; font-size: 14.5px; line-height: 1.45; }
+.bubble { background: rgba(255,255,255,.09); border-radius: 4px 18px 18px 18px; padding: 9px 13px; font-size: 14.5px; line-height: 1.45; }
 .msg.mine .bubble { background: rgba(255, 157, 138, .13); border-radius: 18px 4px 18px 18px; }
 .msg .who { font-size: 12px; font-weight: 700; color: var(--mint); }
 .msg.mine .who { color: var(--coral); }
