@@ -1,0 +1,14 @@
+{
+  "name": "AgriLink — Smart Farming, Together",
+  "short_name": "AgriLink",
+  "description": "Crop planting advice and growth tracking powered by live weather and 10-year climate history — free for everyone.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#f4faf5",
+  "theme_color": "#1a7a3c",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

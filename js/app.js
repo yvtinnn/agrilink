@@ -1,0 +1,260 @@
+/* ============================================================
+   app.js — the glue that connects everything.
+   1. Tab navigation between the screens
+   2. Location form + validation (the flowchart's decision step)
+   3. Live weather from Open-Meteo (free, no API key)
+   4. 10-year climate history from Open-Meteo's archive API
+      — this is what makes the advice "predictive", not just a
+      weather read-out. Fallback sample data if offline.
+   5. Planner screen: crop cards + recommendation
+   6. Tracker screen: growth roadmap with real dates
+============================================================ */
+
+// ---- The 14 parishes of Jamaica with rough map coordinates ----
+const PARISHES = [
+  { name: "Kingston",           lat: 17.97, lon: -76.78 },
+  { name: "St. Andrew",         lat: 18.02, lon: -76.75 },
+  { name: "St. Catherine",      lat: 17.99, lon: -77.06 },
+  { name: "Clarendon",          lat: 17.78, lon: -77.37 },
+  { name: "Manchester",         lat: 18.04, lon: -77.44 },
+  { name: "St. Elizabeth",      lat: 18.07, lon: -77.68 },
+  { name: "Westmoreland",       lat: 18.18, lon: -78.14 },
+  { name: "Hanover",            lat: 18.36, lon: -78.12 },
+  { name: "St. James",          lat: 18.35, lon: -77.90 },
+  { name: "Trelawny",           lat: 18.35, lon: -77.55 },
+  { name: "St. Ann",            lat: 18.29, lon: -77.20 },
+  { name: "St. Mary",           lat: 18.19, lon: -76.93 },
+  { name: "Portland",           lat: 18.10, lon: -76.60 },
+  { name: "St. Thomas",         lat: 17.88, lon: -76.42 },
+];
+
+let currentWeather = null; // live 7-day forecast
+let currentClimate = null; // 10-year average for the coming month
+
+// ============ 1. TAB NAVIGATION ============
+document.querySelectorAll(".tab").forEach((tab) => {
+  tab.addEventListener("click", () => showScreen(tab.dataset.screen));
+});
+
+function showScreen(id) {
+  document.querySelectorAll(".screen").forEach((s) => s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+  document.querySelectorAll(".tab").forEach((t) => {
+    t.classList.toggle("active", t.dataset.screen === id);
+  });
+  window.scrollTo({ top: 0 });
+}
+
+// ============ 2. LOCATION FORM ============
+const parishSelect = document.getElementById("input-parish");
+PARISHES.forEach((p) => {
+  const option = document.createElement("option");
+  option.value = p.name;
+  option.textContent = p.name;
+  parishSelect.appendChild(option);
+});
+
+// If the farmer set a location before, remember it.
+const savedParish = localStorage.getItem("agrilink-parish");
+if (savedParish) {
+  parishSelect.value = savedParish;
+  document.getElementById("input-town").value = localStorage.getItem("agrilink-town") || "";
+}
+
+document.getElementById("location-form").addEventListener("submit", (event) => {
+  event.preventDefault(); // stay on the page instead of reloading
+
+  const parish = parishSelect.value;
+  const town = document.getElementById("input-town").value.trim();
+  const errorBox = document.getElementById("location-error");
+
+  // --- The "Valid Location?" decision from our flowchart ---
+  if (!parish || !town) {
+    errorBox.textContent = "Please choose a parish and type your town, then try again.";
+    errorBox.classList.remove("hidden");
+    return; // "No" branch → back to the form
+  }
+
+  // "Yes" branch → save and move on!
+  errorBox.classList.add("hidden");
+  localStorage.setItem("agrilink-parish", parish);
+  localStorage.setItem("agrilink-town", town);
+
+  loadFarmData(parish);
+  renderCrops();
+  showScreen("screen-planner");
+});
+
+// ============ 3 + 4. WEATHER & CLIMATE HISTORY ============
+async function loadFarmData(parishName) {
+  const chip = document.getElementById("weather-chip");
+  chip.textContent = "Loading local data…";
+
+  const parish = PARISHES.find((p) => p.name === parishName);
+
+  // --- A. live 7-day forecast ---
+  try {
+    const url =
+      "https://api.open-meteo.com/v1/forecast" +
+      `?latitude=${parish.lat}&longitude=${parish.lon}` +
+      "&daily=temperature_2m_max,temperature_2m_min,precipitation_sum" +
+      "&forecast_days=7&timezone=auto";
+    const response = await fetch(url);
+    if (!response.ok) throw new Error("forecast request failed");
+    const data = await response.json();
+    currentWeather = {
+      temp: Math.round((data.daily.temperature_2m_max[0] + data.daily.temperature_2m_min[0]) / 2),
+      rain7: Math.round(data.daily.precipitation_sum.reduce((a, b) => a + b, 0)),
+      live: true,
+    };
+  } catch {
+    // Offline or blocked? Use realistic sample data so the app never breaks.
+    currentWeather = { temp: 27, rain7: 24, live: false };
+  }
+
+  // --- B. 10-year climate history for the same month each year ---
+  // We ask Open-Meteo's archive for daily rainfall from this month in
+  // the previous 10 years, then average it. That gives each parish its
+  // own "what December/June/etc. is normally like" number.
+  try {
+    const now = new Date();
+    const thisYear = now.getFullYear();
+    let rainSum = 0, years = 0;
+    const results = await Promise.all(
+      Array.from({ length: 10 }, (_, i) => fetchClimateYear(parish, thisYear - 1 - i, now))
+    );
+    for (const rain of results) {
+      if (rain !== null) { rainSum += rain; years++; }
+    }
+    if (years > 0) {
+      currentClimate = { rain: Math.round(rainSum / years), years };
+    }
+  } catch {
+    currentClimate = null; // the recommendation falls back gracefully
+  }
+
+  const liveLabel = currentWeather.live ? "live" : "sample";
+  const climateLabel = currentClimate ? `${currentClimate.years}-yr avg ${currentClimate.rain} mm/mo` : "climate offline";
+  chip.textContent = `${currentWeather.temp}°C · ${currentWeather.rain7} mm/7d · ${climateLabel} (${liveLabel})`;
+}
+
+// Rainfall total for `month` of `year`, at this parish.
+// The archive API needs start/end dates in the past, so we ask for
+// this same calendar month of previous years.
+async function fetchClimateYear(parish, year, now) {
+  const month = now.getMonth(); // 0-based
+  const start = new Date(year, month, 1);
+  const end = new Date(year, month + 1, 0); // last day of that month
+  const fmt = (d) => d.toISOString().slice(0, 10);
+
+  const url =
+    "https://archive-api.open-meteo.com/v1/archive" +
+    `?latitude=${parish.lat}&longitude=${parish.lon}` +
+    `&start_date=${fmt(start)}&end_date=${fmt(end)}` +
+    "&daily=precipitation_sum&timezone=auto";
+
+  const response = await fetch(url);
+  if (!response.ok) return null;
+  const data = await response.json();
+  const days = data.daily.precipitation_sum || [];
+  if (!days.length) return null;
+  return days.reduce((a, b) => a + (b ?? 0), 0);
+}
+
+// ============ 5. PLANNER SCREEN ============
+function renderCrops() {
+  const grid = document.getElementById("crop-grid");
+  grid.innerHTML = "";
+
+  CROPS.forEach((crop, index) => {
+    const tile = document.createElement("div");
+    tile.className = "crop-tile";
+    tile.innerHTML = `<span class="icon">${CROP_ICONS[crop.name]}</span>${crop.name}`;
+    tile.addEventListener("click", () => showPlan(index));
+    grid.appendChild(tile);
+  });
+}
+
+function showPlan(index) {
+  const crop = CROPS[index];
+  document.querySelectorAll(".crop-tile").forEach((t, i) => {
+    t.classList.toggle("selected", i === index);
+  });
+
+  const rec = recommendCrop(crop, currentWeather, currentClimate);
+
+  document.getElementById("plan-result").classList.remove("hidden");
+  document.getElementById("plan-title").textContent = `${crop.name} — Planting Advice`;
+  document.getElementById("plan-verdict").textContent = rec.verdict;
+  document.getElementById("plan-verdict").className = "verdict " + rec.cls;
+  document.getElementById("confidence-bar").style.width = rec.score + "%";
+  document.getElementById("confidence-label").textContent =
+    `Confidence ${rec.score}% — season + parish climate history + 7-day forecast.`;
+
+  document.getElementById("plan-details").innerHTML =
+    rec.facts.map((f) =>
+      `<div class="fact"><span class="mark ${f.cls}">${f.mark}</span><span>${f.text}</span></div>`
+    ).join("") +
+    `<div class="fact"><span class="mark">·</span><span><b>Best months:</b> ${crop.bestMonths.map(monthName).join(", ")}.</span></div>` +
+    `<div class="fact"><span class="mark">·</span><span>Use the <b>Tracker</b> tab to see every growth stage with real dates.</span></div>`;
+
+  // Also pre-select this crop in the tracker
+  document.getElementById("track-crop").value = crop.name;
+}
+
+// ============ 6. TRACKER SCREEN ============
+const trackCropSelect = document.getElementById("track-crop");
+CROPS.forEach((crop) => {
+  const option = document.createElement("option");
+  option.value = crop.name;
+  option.textContent = crop.name;
+  trackCropSelect.appendChild(option);
+});
+
+// default the planting date to today
+document.getElementById("track-date").value = new Date().toISOString().slice(0, 10);
+
+document.getElementById("build-timeline").addEventListener("click", () => {
+  const cropName = trackCropSelect.value;
+  const crop = CROPS.find((c) => c.name === cropName);
+  const plantingDate = new Date(document.getElementById("track-date").value + "T12:00:00");
+
+  const roadmap = buildRoadmap(crop, plantingDate);
+  const today = new Date();
+
+  document.getElementById("timeline-output").classList.remove("hidden");
+
+  // how far through the journey are we? (both measured in days)
+  const totalDays = (roadmap[roadmap.length - 1].date - plantingDate) / (1000 * 60 * 60 * 24);
+  const daysIn = Math.max(0, (today - plantingDate) / (1000 * 60 * 60 * 24));
+  const percent = Math.min(100, Math.round((daysIn / totalDays) * 1000) / 10);
+  document.getElementById("progress-fill").style.width = percent + "%";
+  document.getElementById("progress-text").textContent =
+    daysIn <= 0
+      ? `Roadmap ready — it starts on your chosen planting date.`
+      : `${Math.round(daysIn)} days since planting — ${percent}% of the way to harvest.`;
+
+  const timeline = document.getElementById("timeline");
+  timeline.innerHTML = "";
+
+  roadmap.forEach((stage) => {
+    const div = document.createElement("div");
+    const isDone = stage.date < today;
+    const isCurrent = !isDone && stage === roadmap.find((s) => s.date >= today);
+
+    div.className = "stage" + (isDone ? " done" : "") + (isCurrent ? " current" : "");
+
+    const dateStr = stage.date.toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" });
+    div.innerHTML =
+      `<b>${stage.name}</b> · <span class="date">${dateStr}</span>` +
+      `<div class="tip">${stage.tip}</div>`;
+    timeline.appendChild(div);
+  });
+});
+
+// ============ START THE APP ============
+if (savedParish) {
+  // returning user → data loads straight away
+  loadFarmData(savedParish);
+  renderCrops();
+}

@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>AgriLink — Plant smarter. Harvest more.</title>
+  <meta name="description" content="AgriLink helps farmers pick the best planting time and track crop growth using real weather and 10-year climate history." />
+  <meta name="theme-color" content="#14532d" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" href="icons/icon-192.png" />
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+
+  <!-- ===== Top bar ===== -->
+  <header class="topbar">
+    <div class="logo">
+      <svg class="logo-leaf" viewBox="0 0 40 40" aria-hidden="true">
+        <path d="M20 34 C20 22 12 18 4 18 C4 28 12 34 20 34 Z" fill="#57b65f"/>
+        <path d="M20 34 C20 18 26 10 38 8 C36 24 30 32 20 34 Z" fill="#a8e063"/>
+        <path d="M20 34 C20 26 20 18 20 10" stroke="#ffffff" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+      </svg>
+      <div>
+        <h1>Agri<span>Link</span></h1>
+        <p>Plant smarter. Harvest more.</p>
+      </div>
+    </div>
+    <div id="weather-chip" class="weather-chip" title="Live weather for your location">Weather loading…</div>
+  </header>
+
+  <main>
+
+    <!-- =========================================================
+         SCREEN 1: HOME — location input (the flowchart's first step)
+    ========================================================== -->
+    <section id="screen-home" class="screen active">
+
+      <!-- Jamaica farmland illustration -->
+      <div class="hero" role="img" aria-label="Illustration of Jamaican farmland with hills and palm trees">
+        <svg viewBox="0 0 400 180" preserveAspectRatio="xMidYMid slice">
+          <defs>
+            <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#7ec8e3"/>
+              <stop offset="1" stop-color="#cdeef7"/>
+            </linearGradient>
+          </defs>
+          <rect width="400" height="180" fill="url(#sky)"/>
+          <circle cx="330" cy="38" r="20" fill="#f6b93b" opacity="0.9"/>
+          <!-- Blue Mountains -->
+          <path d="M0 96 L60 44 L120 96 Z" fill="#4d8a6a" opacity="0.85"/>
+          <path d="M40 96 L110 30 L185 96 Z" fill="#2f6b4f"/>
+          <path d="M150 96 L215 52 L280 96 Z" fill="#4d8a6a" opacity="0.7"/>
+          <!-- rolling hills -->
+          <path d="M0 110 Q100 70 210 108 T400 100 V180 H0 Z" fill="#57a05e"/>
+          <!-- field rows -->
+          <path d="M0 150 Q120 132 210 148 T400 142 V180 H0 Z" fill="#3d7d4a"/>
+          <g stroke="#6db36f" stroke-width="2" opacity="0.6" fill="none">
+            <path d="M-10 158 Q120 140 220 154 T410 148"/>
+            <path d="M-10 168 Q120 152 220 164 T410 158"/>
+            <path d="M-10 178 Q120 162 220 174 T410 168"/>
+          </g>
+          <!-- palm trees -->
+          <g id="palms">
+            <g transform="translate(70 118)">
+              <path d="M0 0 L3 -26" stroke="#7a5230" stroke-width="4" stroke-linecap="round"/>
+              <path d="M3 -26 C-8 -30 -16 -26 -18 -20 C-10 -24 -2 -24 3 -22 Z" fill="#2f6b4f"/>
+              <path d="M3 -26 C14 -30 22 -26 24 -20 C16 -24 8 -24 3 -22 Z" fill="#2f6b4f"/>
+              <path d="M3 -26 C0 -36 -4 -40 -10 -42 C-2 -38 2 -32 3 -24 Z" fill="#3d7d4a"/>
+            </g>
+            <g transform="translate(340 128) scale(0.8)">
+              <path d="M0 0 L3 -26" stroke="#7a5230" stroke-width="4" stroke-linecap="round"/>
+              <path d="M3 -26 C-8 -30 -16 -26 -18 -20 C-10 -24 -2 -24 3 -22 Z" fill="#2f6b4f"/>
+              <path d="M3 -26 C14 -30 22 -26 24 -20 C16 -24 8 -24 3 -22 Z" fill="#2f6b4f"/>
+              <path d="M3 -26 C0 -36 -4 -40 -10 -42 C-2 -38 2 -32 3 -24 Z" fill="#3d7d4a"/>
+            </g>
+          </g>
+        </svg>
+      </div>
+
+      <div class="card">
+        <h2>Where do you farm?</h2>
+        <p class="muted">Tell us your location to get local weather, planting advice, and growth planning.</p>
+
+        <form id="location-form">
+          <label for="input-parish">Region (Parish)</label>
+          <select id="input-parish" required>
+            <option value="">Choose your parish</option>
+          </select>
+
+          <label for="input-town">Town / Community</label>
+          <input id="input-town" type="text" placeholder="e.g. Santa Cruz" autocomplete="address-level3" required />
+
+          <button type="submit" class="btn-primary">Find My Farm</button>
+        </form>
+
+        <!-- shown when the location is not valid (the "No" branch of our flowchart) -->
+        <div id="location-error" class="error hidden"></div>
+      </div>
+
+      <!-- about card -->
+      <div class="card soft">
+        <h3>What AgriLink does for you</h3>
+        <ul class="feature-list">
+          <li><b>Predictive crop planning</b><span>know the best time to plant, using live weather and 10-year climate history.</span></li>
+          <li><b>Growth tracking</b><span>a dated roadmap from seed to harvest for every crop.</span></li>
+        </ul>
+        <p class="muted foot">Free for everyone — no paywall, no account. Built with farmers, for farmers.</p>
+      </div>
+    </section>
+
+    <!-- =========================================================
+         SCREEN 2: PLANNER — the best time to plant
+    ========================================================== -->
+    <section id="screen-planner" class="screen">
+      <div class="card">
+        <h2>Predictive Crop Planner</h2>
+        <p class="muted">Pick a crop. We compare live weather with 10 years of seasonal history for your parish.</p>
+        <div id="crop-grid" class="crop-grid"></div>
+      </div>
+
+      <!-- recommendation appears here when a crop is picked -->
+      <div id="plan-result" class="card hidden">
+        <h3 id="plan-title"></h3>
+        <div id="plan-verdict" class="verdict"></div>
+        <div class="confidence">
+          <div id="confidence-bar" class="confidence-bar"></div>
+        </div>
+        <p id="confidence-label" class="muted small"></p>
+        <div id="plan-details" class="plan-details"></div>
+      </div>
+    </section>
+
+    <!-- =========================================================
+         SCREEN 3: TRACKER — growth lifecycle roadmap
+    ========================================================== -->
+    <section id="screen-tracker" class="screen">
+      <div class="card">
+        <h2>Growth Lifecycle Tracker</h2>
+        <p class="muted">Pick a crop and the day you planted. We build your growth roadmap with real dates.</p>
+
+        <label for="track-crop">Crop</label>
+        <select id="track-crop"></select>
+
+        <label for="track-date">Planting date</label>
+        <input id="track-date" type="date" />
+
+        <button id="build-timeline" class="btn-primary">Build My Roadmap</button>
+      </div>
+
+      <div id="timeline-output" class="hidden">
+        <div id="timeline-progress" class="card soft">
+          <b id="progress-text"></b>
+          <div class="progress-track"><div id="progress-fill"></div></div>
+        </div>
+        <div id="timeline" class="timeline"></div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ===== Bottom tab bar (app-style navigation) ===== -->
+  <nav class="tabbar">
+    <button class="tab active" data-screen="screen-home">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg>
+      <span>Home</span>
+    </button>
+    <button class="tab" data-screen="screen-planner">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21V9"/><path d="M12 9C12 5 9 3 4 3c0 5 3 8 8 6z" fill="currentColor" fill-opacity=".15"/><path d="M12 13c0-4 3-6 8-6 0 5-3 8-8 6z" fill="currentColor" fill-opacity=".3"/></svg>
+      <span>Planner</span>
+    </button>
+    <button class="tab" data-screen="screen-tracker">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20h18"/><path d="M4 16l4-6 4 3 5-8"/></svg>
+      <span>Tracker</span>
+    </button>
+  </nav>
+
+  <script src="js/planner.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
