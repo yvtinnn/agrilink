@@ -100,6 +100,14 @@ problems — nitrogen deficiency, drought stress, early blight, waterlogging, ar
 sun scorch, powdery mildew, and healthy. Each lists which crops it affects, what it looks
 like on the leaf, the colour pattern the analyser expects, and a practical fix.
 
+## 🤖 A note on AI
+
+We're high school students, and we'll say it straight: **we used AI tools to help write
+and polish parts of this code**, the way a professional team would use autocomplete or
+a senior dev's advice. Every design decision, the crop and problem datasets, the scoring
+rules, and all the testing were ours — the AI helped us move faster and fix bugs we
+couldn't figure out alone. We can explain every line of it.
+
 ## 🗂 Project structure
 
 ```

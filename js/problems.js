@@ -23,14 +23,14 @@
 const PROBLEMS = [
   {
     name: "Nitrogen deficiency",
-    crops: ["Tomato", "Cabbage", "Corn", "Callaloo", "Okra"],
+    crops: ["Tomato", "Cabbage", "Corn", "Callaloo", "Okra", "Carrot", "Lettuce", "Onion", "Sweet Pepper", "Cucumber", "Beet"],
     pattern: { yellow: [40, 90], brown: [0, 20], spots: false },
     looksLike: "Whole leaves turning evenly pale-yellow, starting from the bottom of the plant. Growth is slow.",
     fix: "Add organic matter or a balanced fertiliser. Chicken manure or nitrogen-rich fertiliser works fast. Do not overdo it.",
   },
   {
     name: "Water stress (drought)",
-    crops: ["Tomato", "Cabbage", "Corn", "Callaloo", "Pumpkin", "Okra"],
+    crops: ["Tomato", "Cabbage", "Corn", "Callaloo", "Pumpkin", "Okra", "Carrot", "Lettuce", "Onion", "Sweet Pepper", "Cucumber", "Beet"],
     pattern: { yellow: [10, 45], brown: [25, 80], spots: false },
     looksLike: "Leaves drying from the edges inward, brown and crispy. Worst in the afternoon sun.",
     fix: "Water early morning or late evening. Mulch heavily around plants to hold moisture in the soil.",
@@ -44,28 +44,28 @@ const PROBLEMS = [
   },
   {
     name: "Waterlogging / root rot",
-    crops: ["Tomato", "Corn", "Cabbage", "Callaloo"],
+    crops: ["Tomato", "Corn", "Cabbage", "Callaloo", "Lettuce", "Beet"],
     pattern: { yellow: [35, 80], brown: [15, 45], spots: false },
     looksLike: "Leaves yellowing all over after heavy rain, plant wilting even though soil is wet.",
     fix: "Make drains so water can escape. Raise beds. Let the soil dry out before watering again.",
   },
   {
     name: "Army worm / caterpillar damage",
-    crops: ["Corn", "Callaloo", "Cabbage", "Tomato"],
+    crops: ["Corn", "Callaloo", "Cabbage", "Tomato", "Sweet Pepper"],
     pattern: { yellow: [15, 45], brown: [20, 55], spots: true },
     looksLike: "Irregular holes eaten in leaves and chewed edges. You may find the worms at dawn or dusk.",
     fix: "Hand-pick at dawn/dusk, or use a Bt (biological) spray which is safe. Check plants every 2 days.",
   },
   {
     name: "Sun scorch",
-    crops: ["Tomato", "Sweet Potato", "Cabbage", "Callaloo"],
+    crops: ["Tomato", "Sweet Potato", "Cabbage", "Callaloo", "Lettuce", "Cucumber"],
     pattern: { yellow: [10, 40], brown: [30, 70], spots: false },
     looksLike: "Pale, bleached or papery patches on the side of the plant facing the sun.",
     fix: "Shade young plants with shade cloth or palm branches during extreme heat waves.",
   },
   {
     name: "Powdery mildew",
-    crops: ["Pumpkin", "Okra", "Sweet Potato"],
+    crops: ["Pumpkin", "Okra", "Sweet Potato", "Cucumber"],
     pattern: { yellow: [20, 55], brown: [5, 30], spots: true },
     looksLike: "White or grey powder-like patches on top of leaves.",
     fix: "Improve air flow between plants, avoid overhead watering. Baking-soda spray (1 tbsp per litre) is a known home remedy.",
@@ -80,8 +80,9 @@ const PROBLEMS = [
 ];
 
 // ---- Photo analyser --------------------------------------------------
-// We shrink the photo, count the pixels in three colour families,
-// and compare the mix with each problem's pattern.
+// We shrink the photo and sort the LEAF pixels into colour families.
+// Background (soil, sky, shadow) is ignored, so a photo taken from a
+// distance doesn't fool the check. If we can't see enough leaf, we say so.
 function analysePhoto(img) {
   const size = 160; // small = fast on phones
   const canvas = document.createElement("canvas");
@@ -95,43 +96,73 @@ function analysePhoto(img) {
   ctx.drawImage(img, (size - w) / 2, (size - h) / 2, w, h);
   const pixels = ctx.getImageData(0, 0, size, size).data;
 
-  let total = 0, green = 0, yellow = 0, brown = 0, other = 0;
+  let leaf = 0, green = 0, yellow = 0, brown = 0, darkSpots = 0;
   for (let i = 0; i < pixels.length; i += 4) {
     const r = pixels[i], g = pixels[i + 1], b = pixels[i + 2];
-    // skip near-white (background) and near-black (shadow) pixels
     const bright = (r + g + b) / 3;
-    if (bright > 235 || bright < 25) continue;
-    total++;
+    if (bright > 235 || bright < 25) continue; // near-white background / near-black shadow
 
-    if (g > r && g > b && g > 60) green++;                     // healthy leaf green
-    else if (r > 90 && g > 80 && b < g * 0.75 && r >= g) yellow++; // yellowing
-    else if (r > 60 && r > g && g > b) brown++;                // brown / dry
-    else other++;                                              // soil, sky, etc.
+    // ORDER MATTERS: green first (dark green leaves are healthy!), then
+    // dark lesions, then brown (soil is brown, never yellow), then yellow.
+    if (g > r && g > b && g > 60) {
+      leaf++; green++;                                  // healthy leaf green
+    } else if (bright < 70) {
+      leaf++; darkSpots++;                              // dark patches (lesions / fungus)
+    } else if (r > 60 && r > g && g > b && r - g > 20) {
+      leaf++; brown++;                                  // brown / dry — soil lands here, NOT yellow
+    } else if (r > 100 && g > 100 && b < g * 0.8 && r < g * 1.2) {
+      leaf++; yellow++;                                 // yellowing (bright, low blue)
+    }
+    // everything else (grey, soil in shadow, mulch...) is NOT counted as leaf
   }
 
-  // turn counts into percentages of the counted pixels
-  const pct = (n) => total ? Math.round((n / total) * 100) : 0;
-  return { greenPct: pct(green), yellowPct: pct(yellow), brownPct: pct(brown), otherPct: pct(other) };
+  // percentage of the LEAF area, not the whole photo
+  const pct = (n) => leaf ? Math.round((n / leaf) * 100) : 0;
+  return {
+    leafPct: Math.round((leaf / (size * size)) * 100),  // how much of the photo is plant
+    greenPct: pct(green),
+    yellowPct: pct(yellow),
+    brownPct: pct(brown),
+    darkPct: pct(darkSpots),
+  };
 }
 
-// Which problems match this colour mix best?
-// For each problem we check if the detected % falls inside its
-// expected range — the more checks pass, the higher the match score.
+// Which problems match this leaf? Score = how well the detected colour
+// mix falls inside each problem's expected pattern (yellow, brown,
+// and dark-spot hints). Higher is better; ties broken by specificity.
 function matchProblems(analysis, cropName) {
   const results = [];
   for (const problem of PROBLEMS) {
     // skip problems that don't affect this crop
     if (problem.crops.includes("all") === false && !problem.crops.includes(cropName)) continue;
 
-    let checks = 0, passes = 0;
-    for (const key of ["yellow", "brown"]) {
+    let score = 0;
+    const inRange = (key, detected) => {
       const [low, high] = problem.pattern[key];
-      const detected = key === "yellow" ? analysis.yellowPct : analysis.brownPct;
-      checks++;
-      if (detected >= low && detected <= high) passes++;
+      const width = high - low;
+      if (detected >= low && detected <= high) {
+        // closer to the middle of the range = stronger match
+        return 50 + Math.round(25 * (1 - Math.abs(detected - (low + high) / 2) / (width / 2 || 1)));
+      }
+      // just outside the range still gets partial credit, fading with distance
+      const dist = detected < low ? low - detected : detected - high;
+      return Math.max(0, 40 - dist);
+    };
+
+    score += inRange("yellow", analysis.yellowPct);
+    score += inRange("brown", analysis.brownPct);
+
+    // dark spots: bonus for problems that show them, penalty for those that don't
+    if (problem.pattern.spots) {
+      if (analysis.darkPct > 4) score += 15;
+    } else if (analysis.darkPct > 12) {
+      score -= 15;
     }
-    const score = Math.round((passes / checks) * 100);
-    results.push({ problem, score });
+
+    // slight bonus if the crop is specifically listed (vs "all")
+    if (!problem.crops.includes("all")) score += 5;
+
+    results.push({ problem, score: Math.max(0, Math.round(score / 2)) }); // /2 → 0-100 scale
   }
   results.sort((a, b) => b.score - a.score);
   return results;

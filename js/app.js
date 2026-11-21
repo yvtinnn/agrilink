@@ -51,32 +51,99 @@ document.getElementById("onboard-next").addEventListener("click", () => {
   onboardParish.focus();
 });
 
+// temporary spot for the location while the tutorial is showing
+let pendingParish = "", pendingTown = "";
+
 document.getElementById("onboard-finish").addEventListener("click", () => {
-  const parish = onboardParish.value;
-  const town = document.getElementById("onboard-town").value.trim();
+  pendingParish = onboardParish.value;
+  pendingTown = document.getElementById("onboard-town").value.trim();
   const errorBox = document.getElementById("onboard-error");
 
   // keep it simple: we really just need a parish + town
-  if (!parish || !town) {
+  if (!pendingParish || !pendingTown) {
     errorBox.textContent = "Just pick your parish and type your town — that's all we need.";
     errorBox.classList.remove("hidden");
     return;
   }
-  finishOnboarding(parish, town);
+  showTutorialStep(0);
 });
 
 document.getElementById("onboard-skip").addEventListener("click", () => {
   document.getElementById("onboarding").classList.add("hidden");
 });
 
-// shared by the finish button and the "Change" button on Home
+// ---- 3-slide tutorial (shown after location, or replayed from Home) ----
+const TUTORIAL_SLIDES = [
+  {
+    title: "Know when to plant",
+    icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21V9"/><path d="M12 9C12 5 9 3 4 3c0 5 3 8 8 6z" fill="currentColor" fill-opacity=".15"/><path d="M12 13c0-4 3-6 8-6 0 5-3 8-8 6z" fill="currentColor" fill-opacity=".3"/></svg>`,
+    text: "The Planner ranks the best crops for your parish right now — using live weather and 10 years of rainfall history. It even warns you before heavy rain hits.",
+  },
+  {
+    title: "Never miss a stage",
+    icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20h18"/><path d="M4 16l4-6 4 3 5-8"/></svg>`,
+    text: "Pick your planting date and the Tracker builds a dated roadmap: germination, flowering, harvest — with a progress bar so you always know how far along you are.",
+  },
+  {
+    title: "Check sick plants in seconds",
+    icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 16l4-5 3 3 4-6 5 8"/><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="9" cy="9" r="1.6"/></svg>`,
+    text: "The camera button (bottom-left) analyses a photo of a sick plant against our dataset of common crop problems — right on your phone. You can also report problems so your whole parish can watch out.",
+  },
+];
+let tutorialIndex = 0;
+
+function showTutorialStep(index) {
+  // move to step 3 and show slide `index`
+  document.getElementById("onboard-step-1").classList.remove("active");
+  document.getElementById("onboard-step-2").classList.remove("active");
+  document.getElementById("onboard-step-3").classList.add("active");
+  tutorialIndex = index;
+  const slide = TUTORIAL_SLIDES[index];
+  document.getElementById("tutorial-title").textContent = slide.title;
+  document.getElementById("tutorial-icon").innerHTML = slide.icon;
+  document.getElementById("tutorial-text").textContent = slide.text;
+  document.getElementById("tutorial-next").textContent = index === TUTORIAL_SLIDES.length - 1 ? "Start Growing" : "Next";
+  // dots
+  document.getElementById("tutorial-dots").innerHTML = TUTORIAL_SLIDES
+    .map((_, i) => `<span class="dot${i === index ? " on" : ""}"></span>`).join("");
+}
+
+document.getElementById("tutorial-next").addEventListener("click", () => {
+  if (tutorialIndex < TUTORIAL_SLIDES.length - 1) {
+    showTutorialStep(tutorialIndex + 1);
+  } else {
+    finishOnboarding(pendingParish, pendingTown);
+  }
+});
+
+document.getElementById("tutorial-skip").addEventListener("click", () => {
+  // from the tutorial we always have a location (pending or saved)
+  finishOnboarding(
+    pendingParish || localStorage.getItem("agrilink-parish") || "",
+    pendingTown || localStorage.getItem("agrilink-town") || ""
+  );
+});
+
+// Replay button on the Home card
+document.getElementById("replay-tutorial").addEventListener("click", () => {
+  pendingParish = localStorage.getItem("agrilink-parish") || "";
+  pendingTown = localStorage.getItem("agrilink-town") || "";
+  showTutorialStep(0);
+  document.getElementById("onboarding").classList.remove("hidden");
+});
+
+// shared by the tutorial's Start button and the "Change" button on Home
 function finishOnboarding(parish, town) {
-  localStorage.setItem("agrilink-parish", parish);
-  localStorage.setItem("agrilink-town", town);
+  if (parish && town) {
+    localStorage.setItem("agrilink-parish", parish);
+    localStorage.setItem("agrilink-town", town);
+    document.getElementById("farm-place").textContent = `${town}, ${parish}`;
+    loadFarmData(parish);
+    renderCrops();
+  }
   document.getElementById("onboarding").classList.add("hidden");
-  document.getElementById("farm-place").textContent = `${town}, ${parish}`;
-  loadFarmData(parish);
-  renderCrops();
+  document.getElementById("how-it-works").classList.add("hidden"); // setup done — no longer needed
+  window.scrollTo({ top: 0 });
 }
 
 // "Change" button on the Home card re-opens onboarding
@@ -84,6 +151,8 @@ document.getElementById("change-farm").addEventListener("click", () => {
   onboardParish.value = localStorage.getItem("agrilink-parish") || "";
   document.getElementById("onboard-town").value = localStorage.getItem("agrilink-town") || "";
   document.getElementById("onboard-step-1").classList.remove("active");
+  document.getElementById("onboard-step-2").classList.remove("active");
+  document.getElementById("onboard-step-3").classList.remove("active");
   document.getElementById("onboard-step-2").classList.add("active");
   document.getElementById("onboarding").classList.remove("hidden");
 });
@@ -246,7 +315,7 @@ function renderTopPicks() {
       `<span class="icon">${CROP_ICONS[entry.crop.name]}</span>` +
       `<span class="pick-info">` +
         `<span class="pick-name">${entry.crop.name}</span>` +
-        `<div class="pick-why">${entry.rec.verdict.toLowerCase()} · ${entry.rec.score}% fit</div>` +
+        `<div class="pick-why">${entry.rec.verdict} · rain ${entry.rec.rain} mm · ${entry.rec.score}% fit</div>` +
       `</span>` +
       `<span class="pick-score"><span class="num">${entry.rec.score}%</span>` +
         `<div class="bar"><div style="width:${entry.rec.score}%"></div></div></span>`;
@@ -328,8 +397,9 @@ function showPlan(index) {
     `<div class="fact"><span class="mark">·</span><span><b>Best months:</b> ${crop.bestMonths.map(monthName).join(", ")}.</span></div>` +
     `<div class="fact"><span class="mark">·</span><span>Planted today, you'd harvest around <b>${harvestDate(crop)}</b>.</span></div>`;
 
-  // Also pre-select this crop in the tracker
+  // Also pre-select this crop in the tracker and photo check
   document.getElementById("track-crop").value = crop.name;
+  syncPhotoCrop();
 }
 
 // Add up the crop's total days to estimate the harvest date.
@@ -422,6 +492,15 @@ document.getElementById("photo-btn").addEventListener("click", () => {
   document.getElementById("photo-input").click(); // opens the camera or photo picker
 });
 
+// which crop the photo belongs to (syncs with the planner/tracker choice)
+const photoCropSelect = document.getElementById("photo-crop");
+CROPS.forEach((crop) => {
+  const option = document.createElement("option");
+  option.value = crop.name;
+  option.textContent = crop.name;
+  photoCropSelect.appendChild(option);
+});
+
 document.getElementById("photo-input").addEventListener("change", (event) => {
   const file = event.target.files[0];
   if (!file) return;
@@ -432,24 +511,33 @@ document.getElementById("photo-input").addEventListener("change", (event) => {
   img.onload = () => {
     document.getElementById("photo-preview").classList.remove("hidden");
 
-    // 1. count the colours in the photo
+    // 1. count the colours in the LEAF area of the photo
     const analysis = analysePhoto(img);
-
-    // 2. draw simple colour bars so the farmer can see what we measured
     const bars = document.getElementById("photo-bars");
+
+    // 2. not enough plant in the photo? say so instead of guessing
+    if (analysis.leafPct < 15) {
+      bars.innerHTML = `<p class="muted small">We can't see enough plant in this photo (only ${analysis.leafPct}% leaf).
+        Try again with the leaf filling most of the frame, in good light.</p>`;
+      document.getElementById("photo-matches").innerHTML = "";
+      document.getElementById("photo-result").classList.remove("hidden");
+      return;
+    }
+
     bars.innerHTML =
       colourBar("Healthy green", analysis.greenPct, "#2e9e55") +
       colourBar("Yellowing", analysis.yellowPct, "#e0b03a") +
-      colourBar("Brown / dry", analysis.brownPct, "#a3703f");
+      colourBar("Brown / dry", analysis.brownPct, "#a3703f") +
+      colourBar("Dark spots", analysis.darkPct, "#4a3b2a");
 
-    // 3. which crop? (from the planner selection, or ask via the tracker dropdown)
-    const cropName = document.getElementById("track-crop").value || "Tomato";
+    // 3. use the crop chosen right here on this screen
+    const cropName = photoCropSelect.value;
 
     // 4. match against the problem dataset
     const matches = matchProblems(analysis, cropName);
     const box = document.getElementById("photo-matches");
     box.innerHTML =
-      `<p class="small muted">Checking as: <b>${cropName}</b> (change it in the Tracker tab)</p>` +
+      `<p class="small muted">Checking as: <b>${cropName}</b></p>` +
       matches.slice(0, 3).map((m) =>
         `<div class="match">
            <div class="match-head"><b>${m.problem.name}</b>
@@ -470,6 +558,11 @@ function colourBar(label, pct, colour) {
     <div class="colour-track"><div class="colour-fill" style="width:${pct}%; background:${colour}"></div></div>
     <span class="colour-pct">${pct}%</span>
   </div>`;
+}
+
+// keep the photo-check crop in sync when the farmer checks a different crop
+function syncPhotoCrop() {
+  photoCropSelect.value = document.getElementById("track-crop").value;
 }
 
 // ============ 7. PUBLIC PROBLEM BOARD ============
@@ -508,7 +601,9 @@ if (savedParish) {
   // returning user → fill in the farm card and load data
   const savedTown = localStorage.getItem("agrilink-town") || "";
   document.getElementById("farm-place").textContent = `${savedTown}, ${savedParish}`;
+  document.getElementById("how-it-works").classList.add("hidden"); // setup done
   loadFarmData(savedParish);
   renderCrops();
   renderTopPicks();
+  syncPhotoCrop();
 }

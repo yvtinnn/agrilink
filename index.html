@@ -90,12 +90,13 @@
             <b id="farm-place" class="farm-place">Not set yet</b>
           </div>
           <button id="change-farm" class="btn-ghost">Change</button>
+          <button id="replay-tutorial" class="btn-ghost">Tutorial</button>
         </div>
         <div id="farm-stats" class="stat-strip hidden"></div>
       </div>
 
-      <!-- about card -->
-      <div class="card soft">
+      <!-- about card (only shown before the farm is set up) -->
+      <div class="card soft" id="how-it-works">
         <h3>How it works</h3>
         <ol class="steps">
           <li><b>Tell us your location</b><span>parish and town — takes 10 seconds.</span></li>
@@ -187,6 +188,9 @@
           <input id="photo-input" type="file" accept="image/*" capture="environment" hidden />
         </div>
 
+        <label for="photo-crop">Which crop is this?</label>
+        <select id="photo-crop"></select>
+
         <div id="photo-preview" class="hidden">
           <img id="photo-img" alt="Uploaded plant photo" />
         </div>
@@ -196,7 +200,8 @@
         <h3>What we see</h3>
         <div id="photo-bars" class="colour-bars"></div>
         <div id="photo-matches" class="problem-matches"></div>
-        <p class="disclaimer">We're students, and this is a simple colour check — not a lab test.
+        <p class="disclaimer">We're high school students, and this is a simple colour check — not a lab test
+          (we used a little AI help to build it, but it's still just colours and rules).
           For anything serious, confirm with your local RADA extension officer.</p>
       </div>
 
@@ -241,8 +246,16 @@
         <label for="onboard-town">Town / Community</label>
         <input id="onboard-town" type="text" placeholder="e.g. Santa Cruz" autocomplete="address-level3" />
         <div id="onboard-error" class="error hidden"></div>
-        <button id="onboard-finish" class="btn-primary">Start Growing</button>
+        <button id="onboard-finish" class="btn-primary">Continue</button>
         <button id="onboard-skip" class="btn-text">Skip for now</button>
+      </div>
+      <div class="onboard-step" id="onboard-step-3">
+        <h2 id="tutorial-title"></h2>
+        <div id="tutorial-icon" class="tutorial-icon"></div>
+        <p id="tutorial-text" class="muted"></p>
+        <div class="tutorial-dots" id="tutorial-dots"></div>
+        <button id="tutorial-next" class="btn-primary">Next</button>
+        <button id="tutorial-skip" class="btn-text">Skip tutorial</button>
       </div>
     </div>
   </div>

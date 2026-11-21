@@ -15,6 +15,12 @@ const CROP_ICONS = {
   Callaloo: `<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 28V12" /><path d="M16 14C16 8 12 5 7 5c0 6 4 9 9 9z" fill="currentColor" fill-opacity=".2"/><path d="M16 18c0-5 4-8 9-8 0 6-4 9-9 8z" fill="currentColor" fill-opacity=".35"/></svg>`,
   Pumpkin: `<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="16" cy="19" rx="11" ry="8.5" fill="currentColor" fill-opacity=".15"/><path d="M11 11.5c-2 4-2 11 0 15M21 11.5c2 4 2 11 0 15M16 10v18" opacity=".7"/><path d="M16 10c0-3 1.5-5 4-6-1 3-1 5-2 6z" fill="currentColor" fill-opacity=".4"/></svg>`,
   "Sweet Potato": `<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="15" cy="20" rx="10" ry="6.5" transform="rotate(-18 15 20)" fill="currentColor" fill-opacity=".2"/><path d="M21 8c1.5-1 3-1.5 5-1.5-1.5 2-3 3-5 4z" fill="currentColor" fill-opacity=".4"/><path d="M19 10l2-2"/></svg>`,
+  Carrot: `<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 12 L22 24 C24 26 22 28 20 26 L8 14 Z" fill="currentColor" fill-opacity=".2"/><path d="M10 12 C9 9 9 6 11 3 M10 12 C12 10 15 9 18 9 M10 12 C8 11 5 11 3 12" stroke-width="2"/></svg>`,
+  Lettuce: `<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 27c-6 0-10-4-10-9 0-6 4-13 10-13s10 7 10 13c0 5-4 9-10 9z" fill="currentColor" fill-opacity=".15"/><path d="M16 27c-3 0-5-2-5-4 0-3 2-5 5-5s5 2 5 5c0 2-2 4-5 4z" fill="currentColor" fill-opacity=".25"/><path d="M10 12c1-3 3-5 6-5" opacity=".7"/></svg>`,
+  Onion: `<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 10c5 0 9 4 9 9 0 5-4 9-9 9s-9-4-9-9c0-5 4-9 9-9z" fill="currentColor" fill-opacity=".15"/><path d="M16 10v18" opacity=".6"/><path d="M16 10c0-3 0-5-2-7M16 10c1-2 3-4 5-4"/></svg>`,
+  "Sweet Pepper": `<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14c0-3 3-5 7-5s7 2 7 5c0 8-4 13-7 13s-7-5-7-13z" fill="currentColor" fill-opacity=".2"/><path d="M16 9c0-3 1-5 4-6-1 3-1 4-2 6z" fill="currentColor" fill-opacity=".4"/></svg>`,
+  Cucumber: `<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="16" cy="17" rx="6" ry="11" transform="rotate(12 16 17)" fill="currentColor" fill-opacity=".2"/><path d="M13 7c-1 6-1 13 1 19" opacity=".6"/><path d="M16 6c0-2 1-4 3-5"/></svg>`,
+  Beet: `<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 12c4 0 7 3 7 7 0 5-3 10-7 10s-7-5-7-10c0-4 3-7 7-7z" fill="currentColor" fill-opacity=".2"/><path d="M16 12V6M16 12c-2-2-5-3-7-2M16 12c2-2 5-3 7-2" stroke-width="2"/></svg>`,
 };
 
 // ---- Our crop database ---------------------------------------------
@@ -101,6 +107,74 @@ const CROPS = [
       { name: "Flowering",     days: 15,  tip: "Male flowers open first — that's normal." },
       { name: "Fruiting",      days: 35,  tip: "Put straw under fruit to prevent rot." },
       { name: "Harvest",       days: 15,  tip: "Ready when the stem is woody and hard." },
+    ],
+  },
+  {
+    name: "Carrot",
+    bestMonths: [9, 10, 11, 12, 1],
+    stages: [
+      { name: "Germination",   days: 10,  tip: "Carrot seeds are tiny — mix with sand to sow evenly." },
+      { name: "Seedling",      days: 25,  tip: "Thin to 5 cm apart — crowded carrots make no roots." },
+      { name: "Vegetative",    days: 40,  tip: "Keep the soil loose and weed-free; rocks fork the roots." },
+      { name: "Root Growth",   days: 30,  tip: "Hill soil over any shoulders poking out — green tops taste bitter." },
+      { name: "Harvest",       days: 15,  tip: "Pull when tops are 2 cm wide at the soil line." },
+    ],
+  },
+  {
+    name: "Lettuce",
+    bestMonths: [10, 11, 12, 1, 2],
+    stages: [
+      { name: "Germination",   days: 4,   tip: "Sow shallow — lettuce seed needs some light to sprout." },
+      { name: "Seedling",      days: 20,  tip: "Shade seedlings; full sun makes them bitter." },
+      { name: "Vegetative",    days: 25,  tip: "Water little and often — lettuce is mostly water." },
+      { name: "Heading",       days: 20,  tip: "Even moisture now prevents bitter, loose heads." },
+      { name: "Harvest",       days: 8,   tip: "Cut early morning and cool immediately." },
+    ],
+  },
+  {
+    name: "Onion",
+    bestMonths: [10, 11, 12],
+    stages: [
+      { name: "Germination",   days: 8,   tip: "Start in a nursery bed — onion seedlings are slow." },
+      { name: "Seedling",      days: 30,  tip: "Transplant when pencil-thick, 10 cm apart." },
+      { name: "Vegetative",    days: 45,  tip: "Onions hate weeds — their leaves can't shade them out." },
+      { name: "Bulbing",       days: 30,  tip: "Bulbing is triggered by day length — don't panic if growth stalls." },
+      { name: "Harvest",       days: 15,  tip: "Wait until the tops fall over on their own, then cure in the sun." },
+    ],
+  },
+  {
+    name: "Sweet Pepper",
+    bestMonths: [2, 3, 4, 8, 9],
+    stages: [
+      { name: "Germination",   days: 10,  tip: "Same as scotch bonnet — warm soil, be patient." },
+      { name: "Seedling",      days: 30,  tip: "Transplant when 15 cm tall, 45 cm apart." },
+      { name: "Vegetative",    days: 35,  tip: "Stake early — fruits get heavy and snap branches." },
+      { name: "Flowering",     days: 20,  tip: "Pick the FIRST few fruits green to push more flowering." },
+      { name: "Fruiting",      days: 30,  tip: "Red peppers are just ripe green ones — price differs, so plan." },
+      { name: "Harvest",       days: 25,  tip: "Pick every 3-4 days and plants keep producing." },
+    ],
+  },
+  {
+    name: "Cucumber",
+    bestMonths: [2, 3, 4, 9, 10],
+    stages: [
+      { name: "Germination",   days: 5,   tip: "Plant on hills like pumpkin, 2 seeds per hole." },
+      { name: "Seedling",      days: 12,  tip: "Thin to the stronger seedling per hill." },
+      { name: "Vining",        days: 25,  tip: "Trellising keeps fruit straight and clean." },
+      { name: "Flowering",     days: 12,  tip: "Pick a few male flowers if plants are all vine, no fruit." },
+      { name: "Fruiting",      days: 20,  tip: "Cucumbers grow fast — check plants every 2 days." },
+      { name: "Harvest",       days: 25,  tip: "Pick young; overgrown cucumbers turn the plant off." },
+    ],
+  },
+  {
+    name: "Beet",
+    bestMonths: [10, 11, 12, 1],
+    stages: [
+      { name: "Germination",   days: 7,   tip: "Each 'seed' is a cluster — thin to one plant per spot." },
+      { name: "Seedling",      days: 20,  tip: "Thinnings are edible baby beets and greens — nothing wasted." },
+      { name: "Vegetative",    days: 30,  tip: "Keep the soil loose; beets swell better in soft ground." },
+      { name: "Root Growth",   days: 30,  tip: "Boron shortage makes black spots inside — a pinch of borax helps." },
+      { name: "Harvest",       days: 12,  tip: "Twist the tops off when pulling — cutting makes them 'bleed'." },
     ],
   },
   {

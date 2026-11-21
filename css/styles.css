@@ -370,7 +370,8 @@ select:focus, input:focus { outline: 2px solid var(--green-500); border-color: v
 .steps span { font-size: 13.5px; color: var(--muted); }
 
 /* ---------- Your farm card ---------- */
-.farm-row { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.farm-row { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.farm-row div:first-child { flex: 1; min-width: 0; }
 .farm-label {
   display: block;
   font-size: 11px;
@@ -425,6 +426,21 @@ select:focus, input:focus { outline: 2px solid var(--green-500); border-color: v
   cursor: pointer;
   width: 100%;
 }
+.tutorial-icon {
+  width: 76px; height: 76px;
+  margin: 6px auto 10px;
+  border-radius: 20px;
+  background: var(--green-100);
+  color: var(--green-700);
+  display: flex; align-items: center; justify-content: center;
+}
+.tutorial-icon svg { width: 40px; height: 40px; }
+.tutorial-dots { display: flex; justify-content: center; gap: 6px; margin: 4px 0 2px; }
+.tutorial-dots .dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: #cfe0d1;
+}
+.tutorial-dots .dot.on { background: var(--green-700); width: 18px; border-radius: 999px; }
 
 /* ---------- Upload box ---------- */
 .upload-box {
