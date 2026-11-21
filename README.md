@@ -27,7 +27,7 @@ Double-click **`index.html`**. That's it — the whole app runs locally in your 
 
 ## 🚀 How we host it (for the team)
 
-**Easiest — Netlify Drop:**
+**Easiest — Netlify Drop (frontend only):**
 1. Go to https://app.netlify.com/drop
 2. Drag this whole `agrilink` folder onto the page
 3. Netlify gives you a public link in ~10 seconds. Done.
@@ -36,6 +36,29 @@ Double-click **`index.html`**. That's it — the whole app runs locally in your 
 1. Repo → *Settings → Pages*
 2. Source: *Deploy from a branch*, branch `main`, folder `/ (root)` → Save
 3. Live at `https://yvtinnn.github.io/agrilink/` in about a minute
+
+## 🖥 Running the FastAPI backend (full app + API)
+
+The frontend works standalone, but the backend adds a real API layer:
+
+```bash
+pip install -r backend/requirements.txt
+uvicorn backend.main:app --reload
+```
+
+Then open **http://localhost:8000** — the same app, now served by FastAPI, with:
+
+| Endpoint | What it returns |
+|---|---|
+| `GET /api/parishes` | all 14 parishes with coordinates |
+| `GET /api/farm-data/{parish}` | live forecast + 10-year climate history |
+| `GET /api/crops` | crop database with planting windows and growth stages |
+| `GET /api/recommend/{parish}?crop=Corn` | full scored planting recommendation |
+| `/docs` | automatic interactive API documentation |
+
+When the frontend is served by the backend, it automatically uses these API
+calls instead of calling Open-Meteo directly. Opened as a plain file, it still
+works — it falls back to calling Open-Meteo from the browser.
 
 ---
 
@@ -50,6 +73,8 @@ AgriLink combines three signals, shown transparently with every recommendation:
 3. **Live forecast** — the next 7 days of rain and temperature from [Open-Meteo](https://open-meteo.com)
 
 Each fact is shown as a simple +/- contribution to a confidence score. No black box.
+The same scoring rules exist in two places that agree with each other:
+`js/planner.js` (browser) and `backend/recommend.py` (FastAPI server).
 If the APIs are unreachable (offline farm, no signal), the app falls back to sensible
 sample values so it never breaks.
 
@@ -57,14 +82,18 @@ sample values so it never breaks.
 
 ```
 agrilink/
-├── index.html          ← the whole app (open this!)
-├── css/styles.css      ← the AgriLink look
-├── js/planner.js       ← crop database + planting advice + growth roadmap
-├── js/app.js           ← glue: navigation, location, weather, climate, screens
-├── manifest.json       ← makes it installable as an app
-├── service-worker.js   ← makes it work offline
-├── icons/              ← app icons
-└── docs/               ← flow chart & design documents
+├── index.html            ← the whole app (open this!)
+├── css/styles.css        ← the AgriLink look
+├── js/planner.js         ← crop database + planting advice + growth roadmap
+├── js/app.js             ← glue: navigation, location, weather, climate, screens
+├── backend/main.py       ← FastAPI server (serves the app + JSON API)
+├── backend/crops.py      ← crop database (server-side copy)
+├── backend/recommend.py  ← scoring rules (server-side copy)
+├── backend/requirements.txt
+├── manifest.json         ← makes it installable as an app
+├── service-worker.js     ← makes it work offline
+├── icons/                ← app icons
+└── docs/                 ← flow chart & design documents
 ```
 
 ## 🛠 Built with
