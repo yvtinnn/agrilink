@@ -9,7 +9,7 @@
   <link rel="manifest" href="manifest.json" />
   <link rel="icon" href="icons/icon-192.png" />
   <link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
-  <link rel="stylesheet" href="css/styles.css?v=13" />
+  <link rel="stylesheet" href="css/styles.css?v=14" />
 </head>
 <body>
 
@@ -22,7 +22,12 @@
         <p>Plant smarter. Harvest more.</p>
       </div>
     </div>
-    <div id="weather-chip" class="weather-chip" title="Live weather for your location">Weather loading…</div>
+    <button id="btn-settings" class="icon-btn" aria-label="Settings" title="Settings">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="3"/>
+        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h.08a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h.08a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v.08a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+      </svg>
+    </button>
   </header>
 
   <main>
@@ -65,7 +70,6 @@
           <b id="tip-text">Loading tip…</b>
         </div>
       </div>
-    </section>
 
       <!-- about card (only shown before the farm is set up) -->
       <div class="card soft" id="how-it-works">
@@ -224,6 +228,41 @@
       </div>
     </section>
 
+    <!-- =====================================================
+         SETTINGS — location, tutorial, data, about
+    ====================================================== -->
+    <section id="screen-settings" class="screen">
+        <div class="card">
+          <h2>Settings</h2>
+          <p class="muted">Everything stays on this phone — no account, no cloud, no cost.</p>
+        </div>
+        <div class="card">
+          <span class="label">My location</span>
+          <div class="setting-row">
+            <div><b id="settings-place">Not set yet</b><p class="muted small" id="settings-parish">Weather and picks use your parish.</p></div>
+            <button id="settings-change" class="btn-ghost">Change</button>
+          </div>
+        </div>
+        <div class="card">
+          <span class="label">Learn</span>
+          <div class="setting-row">
+            <div><b>The 3-slide tour</b><p class="muted small">A quick walk through every screen.</p></div>
+            <button id="settings-tutorial" class="btn-ghost">Replay</button>
+          </div>
+        </div>
+        <div class="card">
+          <span class="label">My data</span>
+          <div class="setting-row">
+            <div><b>Clear everything</b><p class="muted small">Erases your location, tracker and messages from this phone.</p></div>
+            <button id="settings-clear" class="btn-ghost danger">Clear</button>
+          </div>
+        </div>
+        <div class="card">
+          <span class="label">About</span>
+          <p class="muted">AgriLink · v1.0 — built by students for Jamaican farmers. Works offline once installed on your phone. Free, no account, forever.</p>
+        </div>
+      </section>
+
   </main>
 
   <!-- ===== Onboarding (first launch only) ===== -->
@@ -281,9 +320,9 @@
     </button>
   </nav>
 
-  <script src="js/planner.js?v=12"></script>
-  <script src="js/community.js?v=12"></script>
-  <script src="js/problems.js?v=12"></script>
-  <script src="js/app.js?v=12"></script>
+  <script src="js/planner.js?v=16"></script>
+  <script src="js/community.js?v=16"></script>
+  <script src="js/problems.js?v=16"></script>
+  <script src="js/app.js?v=16"></script>
 </body>
 </html>

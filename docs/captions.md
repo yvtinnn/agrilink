@@ -20,3 +20,4 @@ Live screenshots of each screen (Home, Planner, Tracker, Community) can be added
 - `screenshot-crop-planner-screen.png` — *Planner screen showing the recommended planting window for a selected crop.*
 - `screenshot-growth-tracker-screen.png` — *Tracker screen showing the dated growth-stage roadmap.*
 - `screenshot-community-chat-screen.png` — *Community screen showing the farmer chat feed.*
+| `screenshot-settings-screen.png` | **Settings** — location, replay the tutorial, clear your data (needs two taps), and app info. Everything stays on the phone. |

@@ -174,8 +174,8 @@ function showScreen(id) {
 
 // ============ 3. WEATHER & CLIMATE HISTORY ============
 async function loadFarmData(parishName) {
-  const chip = document.getElementById("weather-chip");
-  chip.textContent = "Loading local data…";
+  const chip = document.getElementById("weather-chip"); // may be null — status now lives in the hero
+  if (chip) chip.textContent = "Loading local data…";
 
   // --- Preferred path: our own FastAPI backend (same origin) ---
   try {
@@ -350,7 +350,8 @@ function renderSeasonChips() {
 
 // One line of live status in the top bar.
 function updateWeatherChip(hasWeather, hasClimate) {
-  const chip = document.getElementById("weather-chip");
+  const chip = document.getElementById("weather-chip"); // may be null — status now lives in the hero
+  if (!chip) return;
   if (!hasWeather) { chip.textContent = "Offline — sample data"; return; }
   const climateLabel = hasClimate ? `${currentClimate.years}-yr climate` : "climate offline";
   chip.textContent = currentWeather.live ? `Live data · ${climateLabel}` : `Sample data · ${climateLabel}`;
@@ -726,8 +727,53 @@ document.querySelectorAll("#board-filter button").forEach((btn) => {
   btn.addEventListener("click", () => setBoardFilter(btn.dataset.filter));
 });
 
+// ============ SETTINGS ============
+document.getElementById("btn-settings").addEventListener("click", () => {
+  const parish = localStorage.getItem("agrilink-parish") || "Not set yet";
+  const town = localStorage.getItem("agrilink-town") || "";
+  document.getElementById("settings-place").textContent = town ? `${town}, ${parish}` : parish;
+  document.getElementById("settings-parish").textContent =
+    parish === "Not set yet" ? "Weather and picks use your parish." : "Weather, picks and the board use this.";
+  showScreen("screen-settings");
+});
+
+// "Change" in settings re-opens onboarding exactly like the Home button
+document.getElementById("settings-change").addEventListener("click", () => {
+  onboardParish.value = localStorage.getItem("agrilink-parish") || "";
+  document.getElementById("onboard-town").value = localStorage.getItem("agrilink-town") || "";
+  document.getElementById("onboard-step-1").classList.remove("active");
+  document.getElementById("onboard-step-2").classList.remove("active");
+  document.getElementById("onboard-step-3").classList.remove("active");
+  document.getElementById("onboard-step-2").classList.add("active");
+  document.getElementById("onboarding").classList.remove("hidden");
+});
+
+// "Replay" in settings re-runs the tutorial
+document.getElementById("settings-tutorial").addEventListener("click", () => {
+  pendingParish = localStorage.getItem("agrilink-parish") || "";
+  pendingTown = localStorage.getItem("agrilink-town") || "";
+  showTutorialStep(0);
+  document.getElementById("onboarding").classList.remove("hidden");
+});
+
+// "Clear" needs two taps — nobody wipes their farm by accident
+let clearArmed = false;
+document.getElementById("settings-clear").addEventListener("click", (event) => {
+  const btn = event.currentTarget;
+  if (!clearArmed) {
+    clearArmed = true;
+    btn.textContent = "Tap again to confirm";
+    setTimeout(() => { clearArmed = false; btn.textContent = "Clear"; }, 3000);
+    return;
+  }
+  Object.keys(localStorage)
+    .filter((key) => key.startsWith("agrilink"))
+    .forEach((key) => localStorage.removeItem(key));
+  location.reload();
+});
+
 // ============ START THE APP ============
-document.body.dataset.screen = "screen-home"; // sets the initial mood light
+document.body.dataset.screen = "screen-home";
 renderChat();
 renderReports();
 renderTipOfDay();
