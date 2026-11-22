@@ -1457,29 +1457,47 @@ if (savedParish) {
 
 // ---- keep hosted-site banners off the tab bar (Netlify Drop deploys) ----
 // The "Powered by Netlify" / cookie banner is injected at the bottom of the
-// page and sits on top of the tab buttons. Any fixed banner we don't own gets
-// lifted above the tab bar so both stay visible.
+// page and covers the tab buttons. Any bottom-anchored overlay we don't own
+// that overlaps the tab bar gets lifted above it, whatever it's called.
 (function liftHostBanners() {
-  const OWN = new Set(["toast", "tabbar", "onboarding"]);
+  function isOurs(el) {
+    return el.closest && el.closest(".tabbar, .toast, .onboarding, .chat-feed, #onboarding");
+  }
   function lift() {
-    for (const el of document.body.children) {
-      if (el.tagName === "SCRIPT" || el.tagName === "STYLE" || el.tagName === "LINK") continue;
-      if (OWN.has(el.id) || OWN.has(el.className)) continue;
+    const tabbar = document.querySelector(".tabbar");
+    if (!tabbar) return;
+    const barRect = tabbar.getBoundingClientRect();
+    const vh = window.innerHeight;
+    // every element (banners can be wrapped or renamed by the host)
+    for (const el of document.body.querySelectorAll("body, body *")) {
+      if (el === document.body || isOurs(el)) continue;
       const cs = getComputedStyle(el);
-      if (cs.position !== "fixed" || cs.display === "none") continue;
-      const tag = (el.id + " " + el.className).toLowerCase();
-      const isHostUI = tag.includes("netlify") || tag.includes("cookie") || tag.includes("consent") || tag.includes("gdpr");
-      const nearBottom = parseFloat(cs.bottom) < 20;
-      if (isHostUI && nearBottom && !el.dataset.agrilinkLifted) {
+      if (cs.position !== "fixed" || cs.display === "none" || cs.visibility === "hidden") continue;
+      const rect = el.getBoundingClientRect();
+      // only small-ish bottom-anchored overlays: banners, not full-screen modals
+      const bottomAnchored = rect.bottom >= vh - 30;
+      const overlapsBar = rect.bottom > barRect.top && rect.top < barRect.bottom;
+      const isBannerSize = rect.height < vh * 0.6 && rect.height > 12 && rect.width > 80;
+      if (bottomAnchored && overlapsBar && isBannerSize && !el.dataset.agrilinkLifted) {
         el.dataset.agrilinkLifted = "1";
-        el.style.bottom = "calc(92px + env(safe-area-inset-bottom))";
+        el.style.bottom = "calc(96px + env(safe-area-inset-bottom))";
+        el.style.top = "auto";
       }
     }
   }
   lift();
+  // hosts inject their banner later, or style it after inserting: watch for
+  // both, throttled so page changes never cause a scan storm
+  let timer = null;
+  const schedule = () => {
+    if (timer) return;
+    timer = setTimeout(() => { timer = null; lift(); }, 300);
+  };
   if ("MutationObserver" in window) {
-    new MutationObserver(lift).observe(document.body, { childList: true, subtree: false });
+    new MutationObserver(schedule).observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ["style", "class"] });
   }
+  window.addEventListener("load", lift);
+  window.addEventListener("resize", lift);
 })();
 
 // Register the service worker so the app opens on a phone with no signal.
