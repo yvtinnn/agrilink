@@ -101,14 +101,6 @@ function animateValue(el, to, duration = 700, format = (n) => String(n)) {
   setTimeout(() => { if (token === animSeq) finish(); }, duration + 120);
 }
 
-// --- time-of-day greeting on the hero card ---
-function renderGreeting() {
-  const h = new Date().getHours();
-  const word = h < 12 ? "Good morning" : h < 18 ? "Good afternoon" : "Good evening";
-  const el = document.getElementById("hero-greeting");
-  if (el) el.textContent = `${word} · Your farm`;
-}
-
 // --- forecast skeleton: static blocks while weather loads ---
 function renderForecastSkeleton() {
   const strip = document.getElementById("forecast-strip");
@@ -120,8 +112,8 @@ function renderForecastSkeleton() {
     col.className = "rain-col";
     col.innerHTML =
       `<span class="rc-day"></span>` +
-      `<span class="skeleton" style="width:26px;height:30px;margin:0 auto"></span>` +
-      `<span class="skeleton" style="width:26px;height:9px;margin:4px auto 0"></span>`;
+      `<span class="rc-plot"><span class="skeleton" style="width:22px;height:30px"></span></span>` +
+      `<span class="skeleton" style="width:22px;height:9px;justify-self:center"></span>`;
     strip.appendChild(col);
   }
 }
@@ -156,7 +148,7 @@ document.getElementById("onboard-finish").addEventListener("click", () => {
 
   // keep it simple: we really just need a parish + town
   if (!pendingParish || !pendingTown) {
-    errorBox.textContent = "Just pick your parish and type your town, that's all we need.";
+    errorBox.textContent = "Choose a parish and enter your town.";
     errorBox.classList.remove("hidden");
     return;
   }
@@ -172,17 +164,17 @@ const TUTORIAL_SLIDES = [
   {
     title: "Know when to plant",
     icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21V9"/><path d="M12 9C12 5 9 3 4 3c0 5 3 8 8 6z" fill="currentColor" fill-opacity=".15"/><path d="M12 13c0-4 3-6 8-6 0 5-3 8-8 6z" fill="currentColor" fill-opacity=".3"/></svg>`,
-    text: "The Planner ranks the best crops for your parish right now, using live weather and 10 years of rainfall history. It even warns you before heavy rain hits.",
+    text: "The Planner ranks crops for your parish using this month's planting window, ten years of rainfall and the week's forecast. It also warns you before heavy rain.",
   },
   {
-    title: "Never miss a stage",
+    title: "Follow every stage",
     icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20h18"/><path d="M4 16l4-6 4 3 5-8"/></svg>`,
-    text: "Pick your planting date and the Tracker builds a dated roadmap: germination, flowering, harvest, with a progress bar so you always know how far along you are.",
+    text: "Enter a planting date and the Tracker builds a dated roadmap from germination to harvest. A progress bar shows where the crop is now.",
   },
   {
-    title: "Check sick plants in seconds",
+    title: "Check a sick plant",
     icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 16l4-5 3 3 4-6 5 8"/><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="9" cy="9" r="1.6"/></svg>`,
-    text: "The camera button in the middle of the bar analyses a photo of a sick plant against our dataset of common crop problems, right on your phone. You can also report problems so your whole parish can watch out.",
+    text: "The scan button opens the photo check. It compares a leaf photo with common crop problems on this phone. You can report the result to the parish board.",
   },
 ];
 let tutorialIndex = 0;
@@ -398,7 +390,7 @@ async function loadFarmData(parishName) {
 function updateOfflineBadge() {
   const el = document.getElementById("offline-note");
   if (!el) return;
-  el.textContent = navigator.onLine ? "" : "You're offline, showing saved data. Everything still works.";
+  el.textContent = navigator.onLine ? "" : "Offline. Showing the last forecast saved on this phone.";
   el.classList.toggle("hidden", navigator.onLine);
 }
 window.addEventListener("online", updateOfflineBadge);
@@ -412,22 +404,25 @@ function renderHeroCondition() {
       const cached = loadCachedFarmData();
       if (cached) {
         const age = Math.round((Date.now() - cached.at) / 3600000);
-        flag.textContent = age > 0 ? `Saved · ${age}h ago` : "Saved";
+        flag.textContent = age > 0 ? `Saved ${age}h ago` : "Saved just now";
+        flag.className = "hero-status saved";
       } else {
         flag.textContent = "Offline"; // no cache either, honest sample data
+        flag.className = "hero-status offline";
       }
     } else {
       flag.textContent = "Live forecast";
+      flag.className = "hero-status live";
     }
   }
   if (!currentWeather.live) {
-    el.innerHTML = `No live forecast: advice below uses <b>your parish's climate history</b>.`;
+    el.innerHTML = `No live forecast. This advice uses <b>your parish's rainfall history</b>.`;
     return;
   }
   const rain7 = currentWeather.rain7;
-  if (rain7 < 10)      el.innerHTML = `Dry week ahead: <b>plan to irrigate</b> if you plant now.`;
-  else if (rain7 < 40) el.innerHTML = `A few showers around: <b>good week to plant</b>.`;
-  else                 el.innerHTML = `Wet week ahead: <b>mind drainage</b> before planting.`;
+  if (rain7 < 10)      el.innerHTML = `Dry week ahead. <b>Plan to irrigate</b> if you plant now.`;
+  else if (rain7 < 40) el.innerHTML = `A few showers this week. <b>Good week to plant.</b>`;
+  else                 el.innerHTML = `Wet week ahead. <b>Check drainage</b> before planting.`;
 }
 
 // 7-day rain chart: one bar per day, height = rainfall.
@@ -461,11 +456,10 @@ function renderForecastStrip() {
     const h = day.rain <= 0 ? 3 : Math.round(6 + Math.min(day.rain, MAX_MM) / MAX_MM * 48);
 
     const col = document.createElement("div");
-    col.className = "rain-col";
+    col.className = "rain-col" + (plantable ? " plantable" : "");
     col.innerHTML =
-      `<span class="${plantable ? "rc-dot" : "rc-nodot"}"></span>` +
       `<span class="rc-day">${i === 0 ? "Today" : dayNames[date.getDay()]}</span>` +
-      `<span class="rc-bar ${level}" style="height:${h}px"></span>` +
+      `<span class="rc-plot"><span class="rc-bar ${level}" style="height:${h}px"></span></span>` +
       `<span class="rc-mm ${mmCls}">${day.rain} mm</span>`;
     strip.appendChild(col);
   });
@@ -493,7 +487,7 @@ function renderSeasonChips() {
   const inSeason = CROPS.filter((c) => c.bestMonths.includes(month));
   box.innerHTML = "";
   if (!inSeason.length) {
-    box.innerHTML = `<p class="muted small">Nothing is in season this month, check the top picks above for what's closest.</p>`;
+    box.innerHTML = `<p class="muted small">Nothing is in season this month. The picks above are the closest fit.</p>`;
     return;
   }
   inSeason.forEach((crop) => {
@@ -555,7 +549,7 @@ function checkRainAlert() {
 
   if (heavyDays.length) {
     document.getElementById("rain-alert-text").textContent =
-      `${heavyDays.join(", ")} expected. Hold off planting and spraying until it passes; good time for mulching instead.`;
+      `${heavyDays.join(", ")}. Hold planting and spraying until it passes. Mulch instead.`;
     banner.classList.remove("hidden");
     // badge the Planner tab so farmers notice even from another screen
     const plannerTab = document.querySelector('.tab[data-screen="screen-planner"]');
@@ -572,12 +566,19 @@ function pickReasons(crop, rec) {
   const reasons = [];
   const month = new Date().getMonth() + 1;
   if (crop.bestMonths.includes(month)) reasons.push("in season");
-  if (rec.climateRain >= 15 && rec.climateRain <= 250) reasons.push("steady moisture history");
-  else if (rec.climateRain < 15) reasons.push("historically dry month");
-  else reasons.push("historically wet month");
-  if (rec.rain >= 5 && rec.rain <= 80) reasons.push("rain in the forecast");
-  else if (rec.rain < 5) reasons.push("dry week, plan to irrigate");
+  if (rec.climateRain >= 15 && rec.climateRain <= 250) reasons.push("rainfall near normal");
+  else if (rec.climateRain < 15) reasons.push("dry month on record");
+  else reasons.push("wet month on record");
+  if (rec.rain >= 5 && rec.rain <= 80) reasons.push("rain this week");
+  else if (rec.rain < 5) reasons.push("dry week ahead");
   return reasons.slice(0, 2);
+}
+
+// The verdict in one or two words, for the compact picks list.
+function shortVerdict(rec) {
+  if (rec.score >= 70) return "Good window";
+  if (rec.score >= 50) return "Tight window";
+  return "Wait";
 }
 
 // TOP PICKS: score every crop for this parish and show the best 3.
@@ -606,7 +607,7 @@ function renderTopPicks() {
         `<span class="pick-name">${entry.crop.name}</span>` +
         `<div class="pick-why">${reasons.join(" · ")} · harvest around ${harvestDate(entry.crop).replace(/,.*/, "")}</div>` +
       `</span>` +
-      `<span class="pick-score"><span class="num">${entry.rec.score}%</span></span>`;
+      `<span class="pick-score ${entry.rec.cls}">${shortVerdict(entry.rec)}</span>`;
     row.addEventListener("click", () => {
       showScreen("screen-planner");
       showPlan(entry.index);
@@ -676,7 +677,7 @@ function renderCrops(filterText) {
     return matchesText && matchesType;
   });
   if (!visible.length) {
-    grid.innerHTML = `<p class="muted small">No crop called "${filterText}", try lettuce, okra, corn…</p>`;
+    grid.innerHTML = `<p class="muted small">No crop called "${filterText}". Try lettuce, okra or corn.</p>`;
     return;
   }
 
@@ -689,11 +690,40 @@ function renderCrops(filterText) {
       `<span class="icon">${CROP_ICONS[crop.name]}</span>` +
       `<span style="flex:1;min-width:0">` +
         `<span class="crop-name" style="display:block">${crop.name}</span>` +
-        monthStripHTML(crop.bestMonths, "small") +
+        `<span class="crop-window">${cropWindowText(crop.bestMonths)}</span>` +
       `</span>`;
     tile.addEventListener("click", () => showPlan(index));
     grid.appendChild(tile);
   });
+}
+
+// Turn [1,2,8,9,10] into "Plant Jan–Feb, Aug–Oct".
+function cropWindowText(months) {
+  if (months.length >= 12) return "Plant all year";
+  const set = [...new Set(months)].sort((a, b) => a - b);
+  const ranges = [];
+  let start = set[0], prev = set[0];
+  for (let i = 1; i < set.length; i++) {
+    if (set[i] === prev + 1) { prev = set[i]; continue; }
+    ranges.push([start, prev]);
+    start = prev = set[i];
+  }
+  ranges.push([start, prev]);
+
+  // Dec + Jan is one continuous window, not two.
+  if (ranges.length > 1 && ranges[0][0] === 1 && ranges[ranges.length - 1][1] === 12) {
+    const first = ranges.shift();
+    const last = ranges.pop();
+    ranges.push([last[0], first[1] + 12]);
+  }
+
+  const abbr = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const label = ranges.map(([a, b]) => {
+    const from = abbr[((a - 1) % 12 + 12) % 12];
+    const to = abbr[((b - 1) % 12 + 12) % 12];
+    return a === b ? from : `${from}–${to}`;
+  }).join(", ");
+  return `Plant ${label}`;
 }
 
 document.getElementById("crop-search").addEventListener("input", (event) => {
@@ -710,7 +740,9 @@ function showPlan(index) {
   const rec = recommendCrop(crop, currentWeather, currentClimate);
 
   document.getElementById("plan-result").classList.remove("hidden");
-  document.getElementById("plan-title").textContent = `${crop.name}: Planting Advice`;
+  document.getElementById("plan-title").textContent = crop.name;
+  document.getElementById("plan-parish").textContent =
+    localStorage.getItem("agrilink-parish") || "your parish";
   document.getElementById("plan-verdict").textContent = rec.verdict;
   document.getElementById("plan-verdict").className = "verdict " + rec.cls;
 
@@ -724,7 +756,7 @@ function showPlan(index) {
   document.getElementById("plan-months").innerHTML = monthStripHTML(crop.bestMonths);
   document.getElementById("confidence-bar").style.width = rec.score + "%";
   document.getElementById("confidence-label").textContent =
-    `Confidence ${rec.score}%, season + parish climate history + 7-day forecast.`;
+    `Score ${rec.score} of 100. Season, parish rainfall history and this week's forecast.`;
 
   document.getElementById("plan-details").innerHTML =
     rec.facts.map((f) =>
@@ -753,10 +785,10 @@ document.getElementById("share-plan").addEventListener("click", async () => {
   const place = `${localStorage.getItem("agrilink-town") || ""}, ${localStorage.getItem("agrilink-parish") || ""}`.replace(/^, /, "");
   const text =
     `AgriLink plan, ${place}\n` +
-    `${crop.name}: ${rec.verdict} (${rec.score}% confidence)\n` +
+    `${crop.name}: ${rec.verdict} (score ${rec.score}/100)\n` +
     `Best months: ${crop.bestMonths.map(monthName).join(", ")}\n` +
-    `Planted now → harvest around ${harvestDate(crop)}\n` +
-    `Rain this week: ${rec.rain} mm · Temp: ${rec.temp}°C`;
+    `Planted now, harvest around ${harvestDate(crop)}\n` +
+    `Rain this week: ${rec.rain} mm. Temp: ${rec.temp}°C`;
 
   if (navigator.share) {
     try { await navigator.share({ title: "AgriLink plan", text }); } catch { /* user cancelled */ }
@@ -998,6 +1030,10 @@ CROPS.forEach((crop) => {
   photoCropSelect.appendChild(option);
 });
 
+// a crop the farmer chose for photos wins over the planner/tracker choice
+const savedPhotoCrop = localStorage.getItem("agrilink-photo-crop");
+if (savedPhotoCrop) photoCropSelect.value = savedPhotoCrop;
+
 document.getElementById("photo-input").addEventListener("change", (event) => {
   const file = event.target.files[0];
   if (!file) return;
@@ -1015,10 +1051,11 @@ document.getElementById("photo-input").addEventListener("change", (event) => {
 
     // 2. not enough plant in the photo? say so instead of guessing
     if (analysis.leafPct < 15) {
-      bars.innerHTML = `<p class="muted small">We can't see enough plant in this photo (only ${analysis.leafPct}% leaf).
-        Try again with the leaf filling most of the frame, in good light.</p>`;
+      bars.innerHTML = `<p class="muted small">Not enough leaf in this photo (${analysis.leafPct}% of the frame).
+        Fill the frame with the leaf and use good light.</p>`;
       document.getElementById("photo-matches").innerHTML = "";
       document.getElementById("photo-result").classList.remove("hidden");
+      document.getElementById("photo-result").scrollIntoView({ behavior: "smooth", block: "start" });
       return;
     }
 
@@ -1037,11 +1074,17 @@ document.getElementById("photo-input").addEventListener("change", (event) => {
     showToast("Now choose which crop this is");
 
     document.getElementById("photo-result").classList.remove("hidden");
+    document.getElementById("photo-result").scrollIntoView({ behavior: "smooth", block: "start" });
+    saveLastScan(img, analysis); // the scan stays on screen next visit
   };
 });
 
 // the colour analysis of the current photo (null = no photo yet)
 let lastPhotoAnalysis = null;
+
+// the farmer's crop choice for photos is remembered and respected:
+// opening a plan no longer overwrites it (it only seeds the default)
+let photoCropUserChosen = !!localStorage.getItem("agrilink-photo-crop");
 
 // match the last analysis against the currently chosen crop and render
 function runPhotoMatch() {
@@ -1052,7 +1095,7 @@ function runPhotoMatch() {
   window.lastPhotoCheck = { cropName, matches, leafPct: lastPhotoAnalysis.leafPct };
   const box = document.getElementById("photo-matches");
   box.innerHTML =
-    `<p class="small muted">Checking as: <b>${cropName}</b></p>` +
+    `<p class="small muted">Checked as <b>${cropName}</b></p>` +
     matches.slice(0, 3).map((m) =>
       `<div class="match">
          <div class="match-head"><b>${m.problem.name}</b>
@@ -1067,11 +1110,51 @@ function runPhotoMatch() {
 
 // changing the crop after a photo check re-runs the match instantly
 photoCropSelect.addEventListener("change", () => {
+  photoCropUserChosen = true; // the farmer decided; remember it
+  try { localStorage.setItem("agrilink-photo-crop", photoCropSelect.value); } catch { /* full storage */ }
   if (lastPhotoAnalysis) {
     runPhotoMatch();
     showToast(`Re-checked as ${photoCropSelect.value}`);
   }
 });
+
+// ---- the last scan stays on the screen (photo + analysis, on this phone) ----
+function saveLastScan(img, analysis) {
+  try {
+    // shrink to a 256px square thumbnail first: small enough for localStorage
+    const size = 256;
+    const canvas = document.createElement("canvas");
+    canvas.width = size;
+    canvas.height = size;
+    const ctx = canvas.getContext("2d");
+    const scale = Math.max(size / img.width, size / img.height);
+    const w = img.width * scale, h = img.height * scale;
+    ctx.drawImage(img, (size - w) / 2, (size - h) / 2, w, h);
+    localStorage.setItem("agrilink-photo-last", JSON.stringify({
+      img: canvas.toDataURL("image/jpeg", 0.7),
+      analysis,
+      at: Date.now(),
+    }));
+  } catch { /* storage full: the app still works, it just forgets the photo */ }
+}
+
+function restoreLastScan() {
+  let last;
+  try { last = JSON.parse(localStorage.getItem("agrilink-photo-last")); } catch { return; }
+  if (!last || !last.analysis) return;
+  lastPhotoAnalysis = last.analysis;
+  document.getElementById("photo-img").src = last.img;
+  document.getElementById("photo-preview").classList.remove("hidden");
+  if (lastPhotoAnalysis.leafPct >= 15) {
+    document.getElementById("photo-bars").innerHTML =
+      colourBar("Healthy green", lastPhotoAnalysis.greenPct, "#2e9e55") +
+      colourBar("Yellowing", lastPhotoAnalysis.yellowPct, "#e0b03a") +
+      colourBar("Brown / dry", lastPhotoAnalysis.brownPct, "#a3703f") +
+      colourBar("Dark spots", lastPhotoAnalysis.darkPct, "#4a3b2a");
+    runPhotoMatch();
+    document.getElementById("photo-result").classList.remove("hidden");
+  }
+}
 
 // PHOTO CHECK -> PROBLEM BOARD: one tap files what the photo found.
 document.getElementById("photo-report").addEventListener("click", () => {
@@ -1093,7 +1176,9 @@ function colourBar(label, pct, colour) {
 }
 
 // keep the photo-check crop in sync when the farmer checks a different crop
+// (only until they pick one themselves on the photo screen)
 function syncPhotoCrop() {
+  if (photoCropUserChosen) return;
   photoCropSelect.value = document.getElementById("track-crop").value;
 }
 
@@ -1183,15 +1268,15 @@ renderTypeChips();
 renderMyCrops();
 renderSavedCrops();
 renderTipOfDay();
-renderGreeting();
 renderForecastSkeleton();
 updateOfflineBadge();
 
 document.getElementById("crop-search").placeholder = `Search ${CROPS.length} crops…`;
 document.getElementById("settings-units").textContent = getUnit() === "f" ? "°F / °C" : "°C / °F";
+restoreLastScan(); // the last plant photo and result stay on the scan screen
 
-// re-render temps + greeting when the day flips over
-setInterval(() => { renderGreeting(); if (currentWeather) renderForecastStrip(); }, 60 * 60 * 1000);
+// refresh the forecast strip when the day flips over
+setInterval(() => { if (currentWeather) renderForecastStrip(); }, 60 * 60 * 1000);
 
 const savedParish = localStorage.getItem("agrilink-parish");
 if (savedParish) {
