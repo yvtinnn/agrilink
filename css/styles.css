@@ -162,16 +162,12 @@ b, strong { font-weight: 600; }
   gap: 12px;
   padding: 10px 16px;
   background: var(--paper);
-  border-bottom: 1px solid var(--line-2);
+  border-bottom: 1px solid var(--line);
 }
 .logo { display: flex; align-items: center; gap: 10px; min-width: 0; }
 .logo-badge {
   width: 40px; height: 40px; flex: none;
   object-fit: contain;
-  background: #FFFFFF;
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  padding: 2px;
 }
 .logo-text { min-width: 0; }
 .logo h1 {
@@ -212,16 +208,10 @@ main { max-width: 640px; margin: 0 auto; padding: 16px 16px 28px; }
   to   { opacity: 1; transform: none; }
 }
 
-/* ---------- cards ---------- */
-.card {
-  background: var(--card);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  padding: 18px;
-  margin-bottom: 12px;
-}
-.card.soft { background: var(--paper-2); }
-.card-head { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+/* ---------- sections: open editorial, no boxes ---------- */
+.card { padding: 0 0 30px; }
+.card.soft { background: none; }
+.card-head { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
 .head-rule { flex: 1; height: 1px; background: var(--line); }
 
 /* ---------- home hero: the week's verdict ---------- */
@@ -583,9 +573,10 @@ select option { color: var(--ink); background: var(--card); }
 /* ---------- plan result: the crop packet ---------- */
 .packet {
   position: relative;
-  border: 1px solid var(--line-2);
+  border: 0;
   border-top: 4px solid var(--green);
-  background: var(--card);
+  padding-top: 14px;
+  background: none;
 }
 .packet-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 8px; }
 .packet-code {
@@ -649,11 +640,11 @@ select option { color: var(--ink); background: var(--card); }
 .alert-banner {
   display: flex; flex-direction: column; gap: 3px;
   margin-bottom: 12px;
-  padding: 11px 13px;
-  border: 1px solid var(--amber);
+  padding: 11px 0 11px 13px;
+  border: 0;
   border-left: 4px solid var(--amber);
-  border-radius: var(--radius-sm);
-  background: var(--amber-wash);
+  border-radius: 0;
+  background: none;
 }
 .alert-banner b {
   font-family: "Barlow Condensed", "Barlow", sans-serif;
@@ -717,10 +708,7 @@ select option { color: var(--ink); background: var(--card); }
 .upload-box {
   display: flex; flex-direction: column; align-items: center; gap: 12px;
   margin-top: 14px;
-  padding: 24px 16px;
-  border: 2px dashed var(--line-2);
-  border-radius: var(--radius-lg);
-  background: var(--paper-2);
+  padding: 8px 0 0;
   color: var(--ink-2);
   text-align: center;
 }
@@ -845,9 +833,10 @@ select option { color: var(--ink); background: var(--card); }
 .report:first-child { border-top: 1px solid var(--line); }
 .report.mine {
   margin: 6px 0;
-  padding: 12px;
-  border: 1px solid var(--green);
-  border-radius: var(--radius);
+  padding: 6px 12px 12px 14px;
+  border: 0;
+  border-left: 3px solid var(--green);
+  border-radius: 0;
   background: var(--green-wash);
 }
 .report-top { font-size: 14.5px; line-height: 1.4; }
@@ -871,8 +860,8 @@ select option { color: var(--ink); background: var(--card); }
   position: fixed; left: 0; right: 0; bottom: 0; z-index: 30;
   display: flex; align-items: flex-end; justify-content: space-around; gap: 2px;
   padding: 8px 8px calc(8px + env(safe-area-inset-bottom));
-  background: var(--card);
-  border-top: 1px solid var(--line-2);
+  background: var(--paper);
+  border-top: 1px solid var(--line);
 }
 .tab {
   position: relative;
@@ -1112,7 +1101,7 @@ body[data-screen="screen-photo"] .scan-label { color: var(--green); }
 /* ---------- small phones ---------- */
 @media (max-width: 420px) {
   main { padding: 14px 12px 26px; }
-  .card { padding: 16px 14px; }
+  .card { padding-bottom: 24px; }
   .logo p { display: none; }
   .place-pill { max-width: 34vw; font-size: 12px; }
   .hero-verdict { font-size: 26px; }
@@ -1163,12 +1152,12 @@ body[data-screen="screen-photo"] .scan-label { color: var(--green); }
   .screen.active {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 16px;
+    gap: 36px;
     align-items: start;
   }
   .screen.active > .card,
   .screen.active > .alert-banner,
-  .screen.active > #timeline-output { margin-bottom: 0; }
+  .screen.active > #timeline-output { margin-bottom: 0; padding-bottom: 0; }
 
   #screen-home.active > .hero,
   #screen-home.active > #how-it-works,
