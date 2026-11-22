@@ -238,21 +238,11 @@ function matchProblems(analysis, cropName) {
 }
 
 // ---- Public problem board --------------------------------------------
-// Local mode: reports saved on this phone with demo seeds.
+// Local mode: reports saved on this phone, starting empty.
 // Live mode (Firebase configured in js/firebase-config.js): every phone's
 // reports land on the shared board, newest first.
-const SEED_REPORTS = [
-  { crop: "Callaloo", problem: "Army worm / caterpillar damage", parish: "St. Elizabeth", note: "Small green worms eating holes in most of the field.", when: "2 days ago" },
-  { crop: "Tomato", problem: "Water stress (drought)", parish: "Clarendon", note: "Bottom leaves drying out even though we water twice a week.", when: "2 days ago" },
-  { crop: "Corn", problem: "Nitrogen deficiency", parish: "St. Mary", note: "Yellow starting from bottom leaves on the hillside plot.", when: "1 day ago" },
-  { crop: "Pumpkin", problem: "Powdery mildew", parish: "Manchester", note: "White dust appearing on the big leaves.", when: "8 hours ago" },
-];
-
 function loadReports() {
-  const saved = localStorage.getItem("agrilink-reports");
-  if (saved) return JSON.parse(saved);
-  localStorage.setItem("agrilink-reports", JSON.stringify(SEED_REPORTS));
-  return SEED_REPORTS;
+  try { return JSON.parse(localStorage.getItem("agrilink-reports")) || []; } catch { return []; }
 }
 
 function saveReports(reports) {

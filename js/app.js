@@ -10,23 +10,105 @@
    7. Public problem board
 ============================================================ */
 
-// ---- The 14 parishes of Jamaica with rough map coordinates ----
+// ---- Locations across the Caribbean, grouped by country ----
+// Jamaica keeps its plain parish names; other countries add the country
+// in brackets so every name stays unique (both here and in the backend).
 const PARISHES = [
-  { name: "Kingston",           lat: 17.97, lon: -76.78 },
-  { name: "St. Andrew",         lat: 18.02, lon: -76.75 },
-  { name: "St. Catherine",      lat: 17.99, lon: -77.06 },
-  { name: "Clarendon",          lat: 17.78, lon: -77.37 },
-  { name: "Manchester",         lat: 18.04, lon: -77.44 },
-  { name: "St. Elizabeth",      lat: 18.07, lon: -77.68 },
-  { name: "Westmoreland",       lat: 18.18, lon: -78.14 },
-  { name: "Hanover",            lat: 18.36, lon: -78.12 },
-  { name: "St. James",          lat: 18.35, lon: -77.90 },
-  { name: "Trelawny",           lat: 18.35, lon: -77.55 },
-  { name: "St. Ann",            lat: 18.29, lon: -77.20 },
-  { name: "St. Mary",           lat: 18.19, lon: -76.93 },
-  { name: "Portland",           lat: 18.10, lon: -76.60 },
-  { name: "St. Thomas",         lat: 17.88, lon: -76.42 },
+  // Jamaica (the 14 parishes)
+  { name: "Kingston",           lat: 17.98, lon: -76.79, country: "Jamaica" }, // Halfway Tree: the old point sat in the harbour, so rain came back marine
+  { name: "St. Andrew",         lat: 18.02, lon: -76.75, country: "Jamaica" },
+  { name: "St. Catherine",      lat: 17.99, lon: -77.06, country: "Jamaica" },
+  { name: "Clarendon",          lat: 17.78, lon: -77.37, country: "Jamaica" },
+  { name: "Manchester",         lat: 18.04, lon: -77.44, country: "Jamaica" },
+  { name: "St. Elizabeth",      lat: 18.07, lon: -77.68, country: "Jamaica" },
+  { name: "Westmoreland",       lat: 18.18, lon: -78.14, country: "Jamaica" },
+  { name: "Hanover",            lat: 18.36, lon: -78.12, country: "Jamaica" },
+  { name: "St. James",          lat: 18.35, lon: -77.90, country: "Jamaica" },
+  { name: "Trelawny",           lat: 18.35, lon: -77.55, country: "Jamaica" },
+  { name: "St. Ann",            lat: 18.29, lon: -77.20, country: "Jamaica" },
+  { name: "St. Mary",           lat: 18.19, lon: -76.93, country: "Jamaica" },
+  { name: "Portland",           lat: 18.10, lon: -76.60, country: "Jamaica" },
+  { name: "St. Thomas",         lat: 17.88, lon: -76.42, country: "Jamaica" },
+  // Barbados
+  { name: "St. Michael (Barbados)",     lat: 13.11, lon: -59.60, country: "Barbados" },
+  { name: "Christ Church (Barbados)",   lat: 13.07, lon: -59.55, country: "Barbados" },
+  { name: "St. James (Barbados)",       lat: 13.09, lon: -59.65, country: "Barbados" },
+  { name: "St. Peter (Barbados)",       lat: 13.16, lon: -59.65, country: "Barbados" },
+  { name: "St. Lucy (Barbados)",        lat: 13.28, lon: -59.64, country: "Barbados" },
+  { name: "St. Andrew (Barbados)",      lat: 13.24, lon: -59.59, country: "Barbados" },
+  { name: "St. Thomas (Barbados)",      lat: 13.17, lon: -59.59, country: "Barbados" },
+  { name: "St. George (Barbados)",      lat: 13.14, lon: -59.56, country: "Barbados" },
+  { name: "St. Philip (Barbados)",      lat: 13.16, lon: -59.50, country: "Barbados" },
+  { name: "St. Joseph (Barbados)",      lat: 13.21, lon: -59.56, country: "Barbados" },
+  { name: "St. John (Barbados)",        lat: 13.19, lon: -59.52, country: "Barbados" },
+  // Trinidad & Tobago
+  { name: "Port of Spain (Trinidad)",   lat: 10.65, lon: -61.50, country: "Trinidad & Tobago" },
+  { name: "San Fernando (Trinidad)",    lat: 10.28, lon: -61.47, country: "Trinidad & Tobago" },
+  { name: "Chaguanas (Trinidad)",       lat: 10.52, lon: -61.41, country: "Trinidad & Tobago" },
+  { name: "Arima (Trinidad)",           lat: 10.64, lon: -61.28, country: "Trinidad & Tobago" },
+  { name: "Couva (Trinidad)",           lat: 10.42, lon: -61.44, country: "Trinidad & Tobago" },
+  { name: "Princes Town (Trinidad)",    lat: 10.27, lon: -61.37, country: "Trinidad & Tobago" },
+  { name: "Sangre Grande (Trinidad)",   lat: 10.59, lon: -61.13, country: "Trinidad & Tobago" },
+  { name: "Penal (Trinidad)",           lat: 10.16, lon: -61.46, country: "Trinidad & Tobago" },
+  { name: "Scarborough (Tobago)",       lat: 11.19, lon: -60.74, country: "Trinidad & Tobago" },
+  // Guyana
+  { name: "Georgetown (Guyana)",        lat: 6.80, lon: -58.16, country: "Guyana" },
+  { name: "New Amsterdam (Guyana)",     lat: 6.25, lon: -57.51, country: "Guyana" },
+  { name: "Linden (Guyana)",            lat: 6.00, lon: -58.31, country: "Guyana" },
+  { name: "Bartica (Guyana)",           lat: 6.40, lon: -58.62, country: "Guyana" },
+  // Belize
+  { name: "Belize City (Belize)",       lat: 17.50, lon: -88.20, country: "Belize" },
+  { name: "Belmopan (Belize)",          lat: 17.25, lon: -88.77, country: "Belize" },
+  { name: "Corozal (Belize)",           lat: 18.39, lon: -88.39, country: "Belize" },
+  { name: "Orange Walk (Belize)",       lat: 18.27, lon: -88.56, country: "Belize" },
+  { name: "Dangriga (Belize)",          lat: 16.97, lon: -88.23, country: "Belize" },
+  { name: "Punta Gorda (Belize)",       lat: 15.81, lon: -88.75, country: "Belize" },
+  // Haiti
+  { name: "Port-au-Prince (Haiti)",     lat: 18.54, lon: -72.34, country: "Haiti" },
+  { name: "Cap-Haïtien (Haiti)",        lat: 19.76, lon: -72.20, country: "Haiti" },
+  { name: "Les Cayes (Haiti)",          lat: 18.19, lon: -73.74, country: "Haiti" },
+  { name: "Gonaïves (Haiti)",           lat: 19.45, lon: -72.69, country: "Haiti" },
+  // Dominican Republic
+  { name: "Santo Domingo (Dominican Republic)", lat: 18.49, lon: -69.93, country: "Dominican Republic" },
+  { name: "Santiago (Dominican Republic)",      lat: 19.45, lon: -70.70, country: "Dominican Republic" },
+  { name: "La Vega (Dominican Republic)",       lat: 19.22, lon: -70.53, country: "Dominican Republic" },
+  { name: "San Cristóbal (Dominican Republic)", lat: 18.42, lon: -70.11, country: "Dominican Republic" },
+  { name: "Punta Cana (Dominican Republic)",    lat: 18.58, lon: -68.41, country: "Dominican Republic" },
+  // St. Lucia
+  { name: "Castries (St. Lucia)",       lat: 14.01, lon: -60.99, country: "St. Lucia" },
+  { name: "Soufrière (St. Lucia)",      lat: 13.86, lon: -61.06, country: "St. Lucia" },
+  { name: "Vieux Fort (St. Lucia)",     lat: 13.72, lon: -60.95, country: "St. Lucia" },
+  { name: "Gros Islet (St. Lucia)",     lat: 14.09, lon: -60.94, country: "St. Lucia" },
+  { name: "Dennery (St. Lucia)",        lat: 13.90, lon: -60.92, country: "St. Lucia" },
+  // Grenada
+  { name: "St. George's (Grenada)",     lat: 12.05, lon: -61.75, country: "Grenada" },
+  { name: "Grenville (Grenada)",        lat: 12.11, lon: -61.63, country: "Grenada" },
+  { name: "Sauteurs (Grenada)",         lat: 12.19, lon: -61.60, country: "Grenada" },
+  { name: "Hillsborough (Grenada)",     lat: 12.47, lon: -61.68, country: "Grenada" },
+  // St. Vincent & the Grenadines
+  { name: "Kingstown (St. Vincent)",    lat: 13.16, lon: -61.22, country: "St. Vincent & the Grenadines" },
+  { name: "Calliaqua (St. Vincent)",    lat: 13.15, lon: -61.18, country: "St. Vincent & the Grenadines" },
+  { name: "Barrouallie (St. Vincent)",  lat: 13.25, lon: -61.26, country: "St. Vincent & the Grenadines" },
+  { name: "Chateaubelair (St. Vincent)",lat: 13.28, lon: -61.25, country: "St. Vincent & the Grenadines" },
+  { name: "Clifton (St. Vincent)",      lat: 12.61, lon: -61.43, country: "St. Vincent & the Grenadines" },
+  // Antigua & Barbuda
+  { name: "St. John's (Antigua)",       lat: 17.12, lon: -61.85, country: "Antigua & Barbuda" },
+  { name: "All Saints (Antigua)",       lat: 17.09, lon: -61.79, country: "Antigua & Barbuda" },
+  { name: "Codrington (Barbuda)",       lat: 17.64, lon: -61.79, country: "Antigua & Barbuda" },
+  // Dominica
+  { name: "Roseau (Dominica)",          lat: 15.30, lon: -61.39, country: "Dominica" },
+  { name: "Portsmouth (Dominica)",      lat: 15.57, lon: -61.46, country: "Dominica" },
+  { name: "Marigot (Dominica)",         lat: 15.57, lon: -61.29, country: "Dominica" },
+  // St. Kitts & Nevis
+  { name: "Basseterre (St. Kitts)",     lat: 17.30, lon: -62.72, country: "St. Kitts & Nevis" },
+  { name: "Charlestown (Nevis)",        lat: 17.19, lon: -62.64, country: "St. Kitts & Nevis" },
+  // Bahamas
+  { name: "Nassau (Bahamas)",           lat: 25.06, lon: -77.35, country: "Bahamas" },
+  { name: "Freeport (Bahamas)",         lat: 26.53, lon: -78.70, country: "Bahamas" },
 ];
+
+// Countries, in dropdown order (Jamaica first: the home base).
+const COUNTRIES = [...new Set(PARISHES.map((p) => p.country))];
 
 let currentWeather = null; // live 7-day forecast
 let currentClimate = null; // 10-year average for the coming month
@@ -119,13 +201,42 @@ function renderForecastSkeleton() {
 }
 
 // ============ 1. ONBOARDING (first launch only) ============
+const onboardCountry = document.getElementById("onboard-country");
 const onboardParish = document.getElementById("onboard-parish");
-PARISHES.forEach((p) => {
+
+// fill the country dropdown, then the location dropdown from that country
+COUNTRIES.forEach((country) => {
   const option = document.createElement("option");
-  option.value = p.name;
-  option.textContent = p.name;
-  onboardParish.appendChild(option);
+  option.value = country;
+  option.textContent = country;
+  onboardCountry.appendChild(option);
 });
+
+function fillParishOptions(country) {
+  onboardParish.innerHTML = "";
+  const placeholder = document.createElement("option");
+  placeholder.value = "";
+  placeholder.textContent = country === "Jamaica" ? "Choose your parish" : `Choose your area in ${country}`;
+  onboardParish.appendChild(placeholder);
+  PARISHES.filter((p) => p.country === country).forEach((p) => {
+    const option = document.createElement("option");
+    option.value = p.name;
+    option.textContent = p.name;
+    onboardParish.appendChild(option);
+  });
+}
+onboardCountry.addEventListener("change", () => fillParishOptions(onboardCountry.value));
+fillParishOptions(onboardCountry.value);
+
+// when re-opening onboarding for a returning farmer, show their saved country
+function restoreOnboardCountry() {
+  const saved = localStorage.getItem("agrilink-country") || "Jamaica";
+  if (COUNTRIES.includes(saved)) {
+    onboardCountry.value = saved;
+    fillParishOptions(saved);
+    onboardParish.value = "";
+  }
+}
 
 // show onboarding if the farmer hasn't set a location yet
 if (!localStorage.getItem("agrilink-parish")) {
@@ -139,17 +250,18 @@ document.getElementById("onboard-next").addEventListener("click", () => {
 });
 
 // temporary spot for the location while the tutorial is showing
-let pendingParish = "", pendingTown = "", pendingName = "";
+let pendingParish = "", pendingCountry = "", pendingTown = "", pendingName = "";
 
 document.getElementById("onboard-finish").addEventListener("click", () => {
   pendingParish = onboardParish.value;
+  pendingCountry = onboardCountry.value;
   pendingTown = document.getElementById("onboard-town").value.trim();
   pendingName = document.getElementById("onboard-name").value.trim();
   const errorBox = document.getElementById("onboard-error");
 
-  // keep it simple: name, parish, town. The name is what shows in the chat.
+  // keep it simple: name, country, parish, town. The name is what shows in the chat.
   if (!pendingName || !pendingParish || !pendingTown) {
-    errorBox.textContent = "Type your name, choose a parish and enter your town.";
+    errorBox.textContent = "Type your name, choose a country and parish, and enter your town.";
     errorBox.classList.remove("hidden");
     return;
   }
@@ -215,6 +327,7 @@ document.getElementById("tutorial-skip").addEventListener("click", () => {
 // Replay button on the Home card
 document.getElementById("replay-tutorial").addEventListener("click", () => {
   pendingParish = localStorage.getItem("agrilink-parish") || "";
+  pendingCountry = localStorage.getItem("agrilink-country") || "Jamaica";
   pendingTown = localStorage.getItem("agrilink-town") || "";
   pendingName = localStorage.getItem("agrilink-name") || "";
   showTutorialStep(0);
@@ -224,7 +337,10 @@ document.getElementById("replay-tutorial").addEventListener("click", () => {
 // shared by the tutorial's Start button and the "Change" button on Home
 function finishOnboarding(parish, town) {
   if (parish && town) {
+    // remember the country that owns this parish (defaults to Jamaica)
+    const country = pendingCountry || (PARISHES.find((p) => p.name === parish) || {}).country || "Jamaica";
     localStorage.setItem("agrilink-parish", parish);
+    localStorage.setItem("agrilink-country", country);
     localStorage.setItem("agrilink-town", town);
     // remember the farmer's name too: it signs their chat messages
     if (pendingName) localStorage.setItem("agrilink-name", pendingName);
@@ -240,6 +356,7 @@ function finishOnboarding(parish, town) {
 
 // "Change" button on the Home card re-opens onboarding
 document.getElementById("change-farm").addEventListener("click", () => {
+  restoreOnboardCountry();
   onboardParish.value = localStorage.getItem("agrilink-parish") || "";
   document.getElementById("onboard-town").value = localStorage.getItem("agrilink-town") || "";
   document.getElementById("onboard-name").value = localStorage.getItem("agrilink-name") || "";
@@ -1386,6 +1503,7 @@ document.getElementById("btn-settings").addEventListener("click", () => {
 
 // "Change" in settings re-opens onboarding exactly like the Home button
 document.getElementById("settings-change").addEventListener("click", () => {
+  restoreOnboardCountry();
   onboardParish.value = localStorage.getItem("agrilink-parish") || "";
   document.getElementById("onboard-town").value = localStorage.getItem("agrilink-town") || "";
   document.getElementById("onboard-name").value = localStorage.getItem("agrilink-name") || "";

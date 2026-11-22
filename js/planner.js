@@ -333,7 +333,7 @@ function recommendCrop(crop, weather, climate) {
   // 1. Seasonal window
   if (crop.bestMonths.includes(month)) {
     score += 40;
-    facts.push({ mark: "+", cls: "good", text: `<b>${monthName(month)}</b> is historically a strong month to plant ${crop.name.toLowerCase()} in Jamaica.` });
+    facts.push({ mark: "+", cls: "good", text: `<b>${monthName(month)}</b> is a strong planting month for ${crop.name.toLowerCase()} here.` });
   } else {
     let next = 0;
     for (let i = 1; i <= 12; i++) {
@@ -341,24 +341,24 @@ function recommendCrop(crop, weather, climate) {
       if (crop.bestMonths.includes(m)) { next = i; break; }
     }
     const nextName = monthName((((month + next - 1) % 12) + 1));
-    facts.push({ mark: "!", cls: "warn", text: `The usual window for ${crop.name.toLowerCase()} opens in <b>${nextName}</b> (about ${next} month${next > 1 ? "s" : ""} away).` });
+    facts.push({ mark: "!", cls: "warn", text: `The next planting window for ${crop.name.toLowerCase()} opens in <b>${nextName}</b>, about ${next} month${next > 1 ? "s" : ""} away.` });
   }
 
   // 2. Climate history for this parish (10-year average)
   const climateRain = climate ? climate.rain : 60;
   const climateLabel = climate
-    ? `10-year average for your parish in ${monthName(month)}: <b>${climateRain} mm</b>`
-    : `10-year average unavailable, using typical values.`;
+    ? `Ten-year average for ${monthName(month)} in your parish: <b>${climateRain} mm</b>`
+    : `Ten-year average unavailable, using typical values.`;
 
   if (climateRain < 15) {
     score -= 10;
-    facts.push({ mark: "-", cls: "bad", text: `${climateLabel}, historically a dry month. Irrigation or careful timing needed.` });
+    facts.push({ mark: "-", cls: "bad", text: `${climateLabel}. The month is usually dry, so plan to irrigate.` });
   } else if (climateRain > 250) {
     score -= 10;
-    facts.push({ mark: "-", cls: "bad", text: `${climateLabel}, historically very wet. Waterlogging and fungal risk.` });
+    facts.push({ mark: "-", cls: "bad", text: `${climateLabel}. The month is usually wet; drainage matters.` });
   } else {
     score += 10;
-    facts.push({ mark: "+", cls: "good", text: `${climateLabel}, comfortable moisture levels for establishment.` });
+    facts.push({ mark: "+", cls: "good", text: `${climateLabel}. Moisture is usually workable.` });
   }
 
   // 3. Live 7-day forecast
@@ -367,29 +367,29 @@ function recommendCrop(crop, weather, climate) {
 
   if (rain < 5) {
     score -= 15;
-    facts.push({ mark: "-", cls: "bad", text: `Live forecast: only <b>${rain} mm</b> rain this week. Plan to irrigate or wait for showers.` });
+    facts.push({ mark: "-", cls: "bad", text: `Only <b>${rain} mm</b> of rain forecast this week. Irrigate or wait for showers.` });
   } else if (rain > 80) {
     score -= 20;
-    facts.push({ mark: "-", cls: "bad", text: `Live forecast: heavy rain this week (<b>${rain} mm</b>). Risk of waterlogging, strong drainage needed.` });
+    facts.push({ mark: "-", cls: "bad", text: `<b>${rain} mm</b> of rain forecast this week. Check drainage before planting.` });
   } else {
     score += 15;
-    facts.push({ mark: "+", cls: "good", text: `Live forecast: <b>${rain} mm</b> rain this week, good moisture for germination.` });
+    facts.push({ mark: "+", cls: "good", text: `<b>${rain} mm</b> of rain forecast this week. Enough to start seed.` });
   }
 
   if (temp < 18 || temp > 33) {
     score -= 10;
-    facts.push({ mark: "-", cls: "bad", text: `Temperatures around <b>${temp}°C</b> are outside the usual comfort zone for this crop.` });
+    facts.push({ mark: "-", cls: "bad", text: `<b>${temp}°C</b> is outside this crop's usual range.` });
   } else {
     score += 5;
-    facts.push({ mark: "+", cls: "good", text: `Temperatures around <b>${temp}°C</b> are in the normal growing range.` });
+    facts.push({ mark: "+", cls: "good", text: `<b>${temp}°C</b> is in the normal growing range.` });
   }
 
   score = Math.max(10, Math.min(95, Math.round(score)));
 
   let verdict, cls;
   if (score >= 70)      { verdict = "Good planting window"; cls = "good"; }
-  else if (score >= 50) { verdict = "Tight window, plan carefully"; cls = "warn"; }
-  else                  { verdict = "Hold off for now"; cls = "bad"; }
+  else if (score >= 50) { verdict = "Tight window, watch the rain"; cls = "warn"; }
+  else                  { verdict = "Wait for a better window"; cls = "bad"; }
 
   return { score, verdict, cls, facts, rain, temp, month, climateRain };
 }

@@ -258,8 +258,8 @@
         <h2>Problem board</h2>
         <p class="muted">Problems reported by farmers this week.</p>
         <div class="seg" id="board-filter">
-          <button class="on" data-filter="all">All parishes</button>
-          <button data-filter="mine">My parish</button>
+          <button class="on" data-filter="all">All areas</button>
+          <button data-filter="mine">My area</button>
         </div>
         <div id="report-feed" class="report-feed"></div>
       </div>
@@ -332,8 +332,10 @@
         <h2>Where do you farm?</h2>
         <label for="onboard-name">Your name</label>
         <input id="onboard-name" type="text" placeholder="e.g. Miss Pauline" autocomplete="name" />
-        <label for="onboard-parish">Parish</label>
-        <select id="onboard-parish"><option value="">Choose your parish</option></select>
+        <label for="onboard-country">Country</label>
+        <select id="onboard-country"></select>
+        <label for="onboard-parish">Parish / area</label>
+        <select id="onboard-parish"></select>
         <label for="onboard-town">Town / community</label>
         <input id="onboard-town" type="text" placeholder="e.g. Santa Cruz" autocomplete="address-level3" />
         <div id="onboard-error" class="error hidden"></div>

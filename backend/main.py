@@ -22,9 +22,13 @@ from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from starlette.middleware.base import BaseHTTPMiddleware
 
-# ---- Parish coordinates (the 14 parishes of Jamaica) ----
+# ---- Locations across the Caribbean (same list as js/app.js) ----
+# Jamaica keeps its plain parish names; other countries add the country in
+# brackets so every key stays unique. Kingston sits on land at Halfway Tree:
+# the old point fell in Kingston Harbour and returned marine rainfall.
 PARISHES = {
-    "Kingston":      (17.97, -76.78),
+    # Jamaica (the 14 parishes)
+    "Kingston":      (17.98, -76.79),
     "St. Andrew":    (18.02, -76.75),
     "St. Catherine": (17.99, -77.06),
     "Clarendon":     (17.78, -77.37),
@@ -38,6 +42,82 @@ PARISHES = {
     "St. Mary":      (18.19, -76.93),
     "Portland":      (18.10, -76.60),
     "St. Thomas":    (17.88, -76.42),
+    # Barbados
+    "St. Michael (Barbados)":    (13.11, -59.60),
+    "Christ Church (Barbados)":  (13.07, -59.55),
+    "St. James (Barbados)":      (13.09, -59.65),
+    "St. Peter (Barbados)":      (13.16, -59.65),
+    "St. Lucy (Barbados)":       (13.28, -59.64),
+    "St. Andrew (Barbados)":     (13.24, -59.59),
+    "St. Thomas (Barbados)":     (13.17, -59.59),
+    "St. George (Barbados)":     (13.14, -59.56),
+    "St. Philip (Barbados)":     (13.16, -59.50),
+    "St. Joseph (Barbados)":     (13.21, -59.56),
+    "St. John (Barbados)":       (13.19, -59.52),
+    # Trinidad & Tobago
+    "Port of Spain (Trinidad)":  (10.65, -61.50),
+    "San Fernando (Trinidad)":   (10.28, -61.47),
+    "Chaguanas (Trinidad)":      (10.52, -61.41),
+    "Arima (Trinidad)":          (10.64, -61.28),
+    "Couva (Trinidad)":          (10.42, -61.44),
+    "Princes Town (Trinidad)":   (10.27, -61.37),
+    "Sangre Grande (Trinidad)":  (10.59, -61.13),
+    "Penal (Trinidad)":          (10.16, -61.46),
+    "Scarborough (Tobago)":      (11.19, -60.74),
+    # Guyana
+    "Georgetown (Guyana)":       (6.80, -58.16),
+    "New Amsterdam (Guyana)":    (6.25, -57.51),
+    "Linden (Guyana)":           (6.00, -58.31),
+    "Bartica (Guyana)":          (6.40, -58.62),
+    # Belize
+    "Belize City (Belize)":      (17.50, -88.20),
+    "Belmopan (Belize)":         (17.25, -88.77),
+    "Corozal (Belize)":          (18.39, -88.39),
+    "Orange Walk (Belize)":      (18.27, -88.56),
+    "Dangriga (Belize)":         (16.97, -88.23),
+    "Punta Gorda (Belize)":      (15.81, -88.75),
+    # Haiti
+    "Port-au-Prince (Haiti)":    (18.54, -72.34),
+    "Cap-Haïtien (Haiti)":       (19.76, -72.20),
+    "Les Cayes (Haiti)":         (18.19, -73.74),
+    "Gonaïves (Haiti)":          (19.45, -72.69),
+    # Dominican Republic
+    "Santo Domingo (Dominican Republic)": (18.49, -69.93),
+    "Santiago (Dominican Republic)":      (19.45, -70.70),
+    "La Vega (Dominican Republic)":       (19.22, -70.53),
+    "San Cristóbal (Dominican Republic)": (18.42, -70.11),
+    "Punta Cana (Dominican Republic)":    (18.58, -68.41),
+    # St. Lucia
+    "Castries (St. Lucia)":      (14.01, -60.99),
+    "Soufrière (St. Lucia)":     (13.86, -61.06),
+    "Vieux Fort (St. Lucia)":    (13.72, -60.95),
+    "Gros Islet (St. Lucia)":    (14.09, -60.94),
+    "Dennery (St. Lucia)":       (13.90, -60.92),
+    # Grenada
+    "St. George's (Grenada)":    (12.05, -61.75),
+    "Grenville (Grenada)":       (12.11, -61.63),
+    "Sauteurs (Grenada)":        (12.19, -61.60),
+    "Hillsborough (Grenada)":    (12.47, -61.68),
+    # St. Vincent & the Grenadines
+    "Kingstown (St. Vincent)":   (13.16, -61.22),
+    "Calliaqua (St. Vincent)":   (13.15, -61.18),
+    "Barrouallie (St. Vincent)": (13.25, -61.26),
+    "Chateaubelair (St. Vincent)": (13.28, -61.25),
+    "Clifton (St. Vincent)":     (12.61, -61.43),
+    # Antigua & Barbuda
+    "St. John's (Antigua)":      (17.12, -61.85),
+    "All Saints (Antigua)":      (17.09, -61.79),
+    "Codrington (Barbuda)":      (17.64, -61.79),
+    # Dominica
+    "Roseau (Dominica)":         (15.30, -61.39),
+    "Portsmouth (Dominica)":     (15.57, -61.46),
+    "Marigot (Dominica)":        (15.57, -61.29),
+    # St. Kitts & Nevis
+    "Basseterre (St. Kitts)":    (17.30, -62.72),
+    "Charlestown (Nevis)":       (17.19, -62.64),
+    # Bahamas
+    "Nassau (Bahamas)":          (25.06, -77.35),
+    "Freeport (Bahamas)":        (26.53, -78.70),
 }
 
 MONTH_NAMES = ["January", "February", "March", "April", "May", "June", "July",

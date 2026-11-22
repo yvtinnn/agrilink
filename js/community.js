@@ -6,7 +6,7 @@
      js/firebase-config.js). Every phone with the app sees the same
      chat, live, as messages arrive.
    LOCAL mode (default until a config is pasted): messages stay on
-     this phone and demo farmers keep the feed alive.
+     this phone and the feed starts empty.
 ============================================================ */
 
 // ---- live mode: Firebase Realtime Database ---------------------------
