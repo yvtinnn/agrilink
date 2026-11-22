@@ -19,8 +19,11 @@ let LIVE_REPORTS = null; // problem-board reports from Firebase, newest first
 (function initCommunity() {
   try {
     const cfg = typeof FIREBASE_CONFIG === "undefined" ? null : FIREBASE_CONFIG;
-    const configured = cfg && cfg.apiKey && !String(cfg.apiKey).startsWith("PASTE")
-      && !String(cfg.databaseURL || "").includes("YOUR_PROJECT");
+    // the Realtime Database needs a real databaseURL + projectId; apiKey is
+    // only required if you later add Auth or Firestore
+    const configured = cfg && cfg.databaseURL
+      && !String(cfg.databaseURL).includes("YOUR_PROJECT")
+      && cfg.projectId && !String(cfg.projectId).includes("YOUR_PROJECT");
     if (typeof firebase !== "undefined" && configured) {
       firebase.initializeApp(cfg);
       const db = firebase.database();
@@ -125,6 +128,11 @@ function renderChat() {
   const myName = localStorage.getItem("agrilink-name") || "";
 
   feed.innerHTML = "";
+  // live database still empty: invite the first message
+  if (!posts.length) {
+    feed.innerHTML = `<p class="muted small" style="padding:12px 0">No messages yet. Say hello and tell us what you're growing.</p>`;
+    return;
+  }
   for (const post of posts) {
     const div = document.createElement("div");
     const isMine = post.name === myName && myName !== "";
