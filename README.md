@@ -6,7 +6,7 @@ A planting almanac for Jamaican farmers. It gives a planting window for your par
 
 - **Planner.** Ranks crops for the current month using each crop's planting window, ten years of parish rainfall from Open-Meteo's ERA5 archive, and the next seven days of rain and temperature. Heavy rain days are flagged before they arrive.
 - **Weather predictor.** Every forecast day shows its rain chance in percent, and a one-line prediction says what is coming and when to plant around it.
-- **Tracker.** Takes a crop and planting date, then builds a calendar of growth stages with a progress bar and harvest countdown. Roadmaps are saved on the phone.
+- **Tracker.** Takes a crop and planting date, then builds a calendar of growth stages with a progress bar and harvest countdown. Roadmaps are saved on the phone. Each stage can be ticked off as it really happens, with one-day-earlier / one-day-later buttons when reality runs ahead or behind the plan; the progress estimate follows the ticks.
 - **Photo check.** Shrinks a leaf photo to 160×160, builds a colour-pattern feature vector (green, yellow, brown, dark spots, white powder), and scores it against a 14-problem dataset with an on-device nearest-pattern model. The photo never leaves the phone.
 - **Community.** A farmer chat, a problem board filtered by parish, and a sample market price table. With Firebase configured the chat and board are live and shared between phones; without it everything stays local (demo messages keep the feed alive).
 

@@ -880,64 +880,195 @@ CROPS.forEach((crop) => {
 // default the planting date to today
 document.getElementById("track-date").value = new Date().toISOString().slice(0, 10);
 
+// How far along is the journey? The farmer's log of what REALLY happened
+// wins over the predicted calendar: the last stage they ticked anchors the
+// estimate, and how far into that stage the log date falls fills the rest.
+function trackProgress(crop, plantingDate, roadmap, log, today) {
+  const totalDays = Math.round((roadmap[roadmap.length - 1].date - plantingDate) / 86400000);
+  const daysToHarvest = Math.max(0, Math.round((roadmap[roadmap.length - 1].date - today) / 86400000));
+  const logged = roadmap.filter((s) => log[s.name]);
+
+  if (!logged.length) {
+    // nothing ticked yet: estimate from the planting date alone
+    const daysIn = Math.round((today - plantingDate) / 86400000);
+    return {
+      percent: Math.min(100, Math.max(0, Math.round((daysIn / totalDays) * 100))),
+      stageName: (roadmap.find((s) => s.date >= today) || { name: "harvest" }).name.toLowerCase(),
+      done: daysIn >= totalDays,
+      notStarted: daysIn < 0,
+      daysToHarvest,
+      loggedCount: 0,
+    };
+  }
+
+  // the last ticked stage anchors the estimate
+  const last = logged[logged.length - 1];
+  const logDate = new Date(log[last.name].date + "T12:00:00");
+  const stageStartMs = last.date - last.days * 86400000; // stage start = end date minus its length
+  const startDays = Math.round((stageStartMs - plantingDate) / 86400000);
+  const into = Math.round((logDate - stageStartMs) / 86400000);
+  const frac = Math.min(1, Math.max(0, into / Math.max(1, last.days)));
+  const percent = Math.min(100, Math.round(((startDays + frac) / totalDays) * 100));
+
+  // current stage: the first stage after the last one they ticked
+  const nextStage = roadmap[roadmap.indexOf(last) + 1];
+  return {
+    percent,
+    stageName: nextStage ? nextStage.name.toLowerCase() : "harvest",
+    done: percent >= 100,
+    notStarted: false,
+    daysToHarvest,
+    loggedCount: logged.length,
+  };
+}
+
+// turn a stage log entry into its calendar date
+function logDate(logEntry) {
+  return new Date(logEntry.date + "T12:00:00");
+}
+
+function isoOf(date) {
+  return date.toISOString().slice(0, 10);
+}
+
+// write one track's changes back into storage (the log lives on it)
+function persistTrack(track) {
+  const tracks = loadTracks();
+  const index = tracks.findIndex((t) => t.id === track.id);
+  if (index >= 0) tracks[index] = track;
+  saveTracks(tracks);
+}
+
+// rebuild the roadmap view + every summary that depends on it
+function rebuildTracker() {
+  document.getElementById("build-timeline").click();
+  renderSavedCrops();
+  renderMyCrops();
+}
+
 document.getElementById("build-timeline").addEventListener("click", () => {
   const cropName = trackCropSelect.value;
   const crop = CROPS.find((c) => c.name === cropName);
   const plantingDate = new Date(document.getElementById("track-date").value + "T12:00:00");
+  const dateISO = document.getElementById("track-date").value;
+
+  // find (or create) the saved track. The log of what really happened
+  // lives on it, so the tracker and "My crops" always agree.
+  const tracks = loadTracks();
+  let track = tracks.find((t) => t.crop === cropName && t.date === dateISO);
+  if (!track) {
+    track = { id: Date.now(), crop: cropName, date: dateISO };
+    tracks.unshift(track);
+    saveTracks(tracks);
+  }
+  const log = track.log || {};
 
   const roadmap = buildRoadmap(crop, plantingDate);
   const today = new Date();
 
   document.getElementById("timeline-output").classList.remove("hidden");
 
-  // how far through the journey are we? (both measured in days)
-  const totalDays = (roadmap[roadmap.length - 1].date - plantingDate) / (1000 * 60 * 60 * 24);
-  const daysIn = Math.max(0, (today - plantingDate) / (1000 * 60 * 60 * 24));
-  const percent = Math.min(100, Math.round((daysIn / totalDays) * 1000) / 10);
+  // progress: real log first, calendar estimate as the fallback
+  const progress = trackProgress(crop, plantingDate, roadmap, log, today);
+  const totalDays = Math.round((roadmap[roadmap.length - 1].date - plantingDate) / 86400000);
+  const daysIn = Math.max(0, Math.round((today - plantingDate) / 86400000));
 
   // progress ring (like a fitness ring), smooth sweep to the right spot
   const RING = 2 * Math.PI * 52; // matches r=52 in the SVG
   const ringFill = document.getElementById("ring-fill");
-  ringFill.style.strokeDashoffset = RING * (1 - percent / 100);
-  ringFill.style.opacity = percent > 0 ? "1" : "0"; // a round cap would otherwise draw a dot at zero
-  animateValue(document.getElementById("ring-num"), Math.round(percent));
+  ringFill.style.strokeDashoffset = RING * (1 - progress.percent / 100);
+  ringFill.style.opacity = progress.percent > 0 ? "1" : "0"; // a round cap would otherwise draw a dot at zero
+  animateValue(document.getElementById("ring-num"), Math.round(progress.percent));
 
-  const stageNow = roadmap.find((s) => s.date >= today);
-  const stageName = stageNow ? stageNow.name : "all done";
   document.getElementById("progress-text").textContent =
-    daysIn <= 0 ? "Roadmap ready: plant on your chosen date." :
-    `Currently in the ${stageName.toLowerCase()} stage.`;
+    progress.done ? "Harvest time, the journey is done." :
+    progress.notStarted ? "Roadmap ready: plant on your chosen date." :
+    `Currently in the ${progress.stageName} stage.`;
   document.getElementById("progress-sub").textContent =
-    daysIn <= 0 ? `${crop.name} · ${roadmap.length} stages ahead of you.` :
-    `${Math.round(daysIn)} of ${Math.round(totalDays)} days since planting · ${crop.name}`;
+    progress.loggedCount > 0
+      ? `${progress.loggedCount} of ${roadmap.length} stages logged · ${crop.name}`
+      : daysIn <= 0 ? `${crop.name} · ${roadmap.length} stages ahead of you.`
+      : `${daysIn} of ${totalDays} days since planting · ${crop.name}`;
 
   const timeline = document.getElementById("timeline");
   timeline.innerHTML = "";
 
-  roadmap.forEach((stage) => {
-    const div = document.createElement("div");
-    const isDone = stage.date < today;
-    const isCurrent = !isDone && stage === roadmap.find((s) => s.date >= today);
+  roadmap.forEach((stage, index) => {
+    const actual = log[stage.name];
+    const isLogged = !!actual;
+    const predictedPast = stage.date < today;
+    const isCurrent = !isLogged && index === roadmap.indexOf(
+      roadmap.filter((s) => !log[s.name])[0]
+    );
 
-    div.className = "stage" + (isDone ? " done" : "") + (isCurrent ? " current" : "");
+    const div = document.createElement("div");
+    div.className = "stage" + (isLogged || predictedPast ? " done" : "") + (isCurrent ? " current" : "");
 
     const dateStr = stage.date.toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" });
     div.innerHTML =
       `<b>${stage.name}</b> · <span class="date">${dateStr}</span>` +
       `<div class="tip">${stage.tip}</div>`;
+
+    // the log row: what really happened, with the one-day nudges the user
+    // asked for. Tick, then correct it if reality ran early or late.
+    const logRow = document.createElement("div");
+    logRow.className = "stage-log";
+    if (isLogged) {
+      const shift = Math.round((logDate(actual) - stage.date) / 86400000);
+      const shiftNote = shift === 0 ? "" :
+        ` · <span class="log-shift">${Math.abs(shift)} day${Math.abs(shift) > 1 ? "s" : ""} ${shift < 0 ? "early" : "late"} vs plan</span>`;
+      logRow.innerHTML =
+        `<span class="log-date">✓ done ${logDate(actual).toLocaleDateString(undefined, { day: "numeric", month: "short" })}${shiftNote}</span>`;
+      logRow.appendChild(logBtn("-1 day", () => shiftLog(track, stage, -1)));
+      logRow.appendChild(logBtn("+1 day", () => shiftLog(track, stage, +1)));
+      logRow.appendChild(logBtn("Undo", () => {
+        delete track.log[stage.name];
+        persistTrack(track);
+        rebuildTracker();
+        showToast(`${stage.name} unmarked`);
+      }));
+    } else {
+      logRow.appendChild(logBtn("Mark done", () => {
+        track.log = track.log || {};
+        track.log[stage.name] = { date: isoOf(today) };
+        persistTrack(track);
+        rebuildTracker();
+        showToast(`${stage.name} marked done today`);
+      }, true));
+    }
+    div.appendChild(logRow);
     timeline.appendChild(div);
   });
 
-  // remember this roadmap in "My crops" (same crop + date updates in place)
-  const dateISO = document.getElementById("track-date").value;
-  const tracks = loadTracks();
-  if (!tracks.some((t) => t.crop === cropName && t.date === dateISO)) {
-    tracks.unshift({ id: Date.now(), crop: cropName, date: dateISO });
-    saveTracks(tracks);
-  }
   renderSavedCrops();
   renderMyCrops();
 });
+
+// one small pill button for the stage log row
+function logBtn(label, onClick, primary) {
+  const btn = document.createElement("button");
+  btn.type = "button";
+  btn.className = "log-btn" + (primary ? " tick" : "");
+  btn.textContent = label;
+  btn.addEventListener("click", (event) => {
+    event.stopPropagation();
+    onClick();
+  });
+  return btn;
+}
+
+// move a logged stage one day earlier or later, the real life happened
+function shiftLog(track, stage, days) {
+  track.log = track.log || {};
+  const entry = track.log[stage.name];
+  if (!entry) return;
+  const d = logDate(entry);
+  d.setDate(d.getDate() + days);
+  entry.date = isoOf(d);
+  persistTrack(track);
+  rebuildTracker();
+  showToast(`${stage.name} logged ${Math.abs(days)} day${Math.abs(days) > 1 ? "s" : ""} ${days < 0 ? "earlier" : "later"}`);
+}
 
 // ---- My crops: every built roadmap is saved on this phone ------------
 function loadTracks() {
@@ -948,24 +1079,14 @@ function saveTracks(list) {
 }
 
 // One saved track → everything the UI needs (progress, stage, countdown).
+// Uses the farmer's real log when there is one, the calendar otherwise.
 function trackSummary(track) {
   const crop = CROPS.find((c) => c.name === track.crop);
   if (!crop) return null;
   const plantingDate = new Date(track.date + "T12:00:00");
   const roadmap = buildRoadmap(crop, plantingDate);
-  const today = new Date();
-  const totalDays = Math.round((roadmap[roadmap.length - 1].date - plantingDate) / 86400000);
-  const daysIn = Math.round((today - plantingDate) / 86400000);
-  const percent = Math.max(0, Math.min(100, Math.round((daysIn / totalDays) * 100)));
-  const stageNow = roadmap.find((s) => s.date >= today);
-  return {
-    crop,
-    percent,
-    stageName: stageNow ? stageNow.name.toLowerCase() : "harvested",
-    daysToHarvest: Math.max(0, totalDays - Math.max(0, daysIn)),
-    done: daysIn >= totalDays,
-    notStarted: daysIn < 0,
-  };
+  const summary = trackProgress(crop, plantingDate, roadmap, track.log || {}, new Date());
+  return { crop, ...summary };
 }
 
 // Home card: one compact row per tracked crop.
