@@ -4,7 +4,7 @@
    so it opens even when the farm has no signal.
 ============================================================ */
 
-const CACHE_NAME = "agrilink-v23";
+const CACHE_NAME = "agrilink-v24";
 const FILES_TO_CACHE = [
   "./",
   "./index.html",

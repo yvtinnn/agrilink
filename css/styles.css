@@ -413,6 +413,12 @@ select, input[type="text"], input[type="date"] {
   font-size: 16px;
 }
 select:focus, input:focus { outline: 2px solid var(--focus); outline-offset: 1px; border-color: transparent; }
+select.nudge { animation: select-nudge 1.8s ease; }
+@keyframes select-nudge {
+  0%   { border-color: var(--green); box-shadow: 0 0 0 3px var(--green-wash); }
+  65%  { border-color: var(--green); box-shadow: 0 0 0 3px var(--green-wash); }
+  100% { border-color: var(--line-2); box-shadow: none; }
+}
 select option { color: var(--ink); background: var(--card); }
 ::placeholder { color: var(--ink-3); }
 

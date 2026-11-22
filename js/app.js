@@ -976,9 +976,12 @@ function openTrack(track) {
   window.scrollTo({ top: 0 });
 }
 
-// ============ PHOTO CHECK FAB (bottom-left button) ============
+// ============ PHOTO CHECK FAB (bottom-centre scan button) ============
+// Scan → photo screen → file/camera picker opens immediately.
+// If the picker is cancelled, the farmer simply lands on the photo screen.
 document.getElementById("photo-fab").addEventListener("click", () => {
   showScreen("screen-photo");
+  document.getElementById("photo-btn").click(); // same tap also opens the picker
 });
 
 // ============ 6. PHOTO CHECK ============
@@ -1008,6 +1011,7 @@ document.getElementById("photo-input").addEventListener("change", (event) => {
     // 1. count the colours in the LEAF area of the photo
     const analysis = analysePhoto(img);
     const bars = document.getElementById("photo-bars");
+    lastPhotoAnalysis = analysis; // kept so changing the crop re-runs the match
 
     // 2. not enough plant in the photo? say so instead of guessing
     if (analysis.leafPct < 15) {
@@ -1024,27 +1028,49 @@ document.getElementById("photo-input").addEventListener("change", (event) => {
       colourBar("Brown / dry", analysis.brownPct, "#a3703f") +
       colourBar("Dark spots", analysis.darkPct, "#4a3b2a");
 
-    // 3. use the crop chosen right here on this screen
-    const cropName = photoCropSelect.value;
+    // 3. match against the problem dataset, then walk the farmer
+    //    to the crop chooser — the match re-runs if they change it
+    runPhotoMatch();
+    photoCropSelect.focus();
+    photoCropSelect.classList.add("nudge");
+    setTimeout(() => photoCropSelect.classList.remove("nudge"), 1800);
+    showToast("Now choose which crop this is");
 
-    // 4. match against the problem dataset
-    const matches = matchProblems(analysis, cropName);
-    window.lastPhotoCheck = { cropName, matches, leafPct: analysis.leafPct };
-    const box = document.getElementById("photo-matches");
-    box.innerHTML =
-      `<p class="small muted">Checking as: <b>${cropName}</b></p>` +
-      matches.slice(0, 3).map((m) =>
-        `<div class="match">
-           <div class="match-head"><b>${m.problem.name}</b>
-             <span class="match-score">${m.score}% match</span></div>
-           <div class="small muted"><b>Looks like:</b> ${m.problem.looksLike}</div>
-           <div class="small"><b>What to do:</b> ${m.problem.fix}</div>
-         </div>`
-      ).join("");
-
-    document.getElementById("photo-report").classList.toggle("hidden", !matches.length || matches[0].problem.name === "Healthy plant");
     document.getElementById("photo-result").classList.remove("hidden");
   };
+});
+
+// the colour analysis of the current photo (null = no photo yet)
+let lastPhotoAnalysis = null;
+
+// match the last analysis against the currently chosen crop and render
+function runPhotoMatch() {
+  if (!lastPhotoAnalysis || lastPhotoAnalysis.leafPct < 15) return;
+  const cropName = photoCropSelect.value; // the crop chosen right here on this screen
+
+  const matches = matchProblems(lastPhotoAnalysis, cropName);
+  window.lastPhotoCheck = { cropName, matches, leafPct: lastPhotoAnalysis.leafPct };
+  const box = document.getElementById("photo-matches");
+  box.innerHTML =
+    `<p class="small muted">Checking as: <b>${cropName}</b></p>` +
+    matches.slice(0, 3).map((m) =>
+      `<div class="match">
+         <div class="match-head"><b>${m.problem.name}</b>
+           <span class="match-score">${m.score}% match</span></div>
+         <div class="small muted"><b>Looks like:</b> ${m.problem.looksLike}</div>
+         <div class="small"><b>What to do:</b> ${m.problem.fix}</div>
+       </div>`
+    ).join("");
+
+  document.getElementById("photo-report").classList.toggle("hidden", !matches.length || matches[0].problem.name === "Healthy plant");
+}
+
+// changing the crop after a photo check re-runs the match instantly
+photoCropSelect.addEventListener("change", () => {
+  if (lastPhotoAnalysis) {
+    runPhotoMatch();
+    showToast(`Re-checked as ${photoCropSelect.value}`);
+  }
 });
 
 // PHOTO CHECK -> PROBLEM BOARD: one tap files what the photo found.
