@@ -117,3 +117,53 @@ function sendMessage(name, text) {
   savePosts(posts);
   renderChat();
 }
+
+// ---- Market watch ----------------------------------------------------
+// Indicative wholesale prices (J$) at Coronation Market. The base prices
+// are realistic samples; a small deterministic wobble (seeded by the date)
+// makes them move a little day to day. Honestly labelled as sample data.
+const MARKET_SEED = [
+  { crop: "Tomato",        unit: "lb", price: 180 },
+  { crop: "Scotch Bonnet", unit: "lb", price: 250 },
+  { crop: "Sweet Pepper",  unit: "lb", price: 200 },
+  { crop: "Callaloo",      unit: "lb", price: 80  },
+  { crop: "Cabbage",       unit: "lb", price: 90  },
+  { crop: "Okra",          unit: "lb", price: 150 },
+  { crop: "Carrot",        unit: "lb", price: 130 },
+  { crop: "Onion",         unit: "lb", price: 140 },
+  { crop: "Sweet Potato",  unit: "lb", price: 90  },
+  { crop: "Pumpkin",       unit: "lb", price: 60  },
+];
+
+function renderMarket() {
+  const box = document.getElementById("market-list");
+  if (!box) return;
+
+  // a stable pseudo-random number from the day of the year — the board
+  // looks alive but doesn't jump around every time you open the app
+  const now = new Date();
+  const dayIndex = Math.floor((now - new Date(now.getFullYear(), 0, 0)) / 86400000);
+  const seeded = (i, salt) => {
+    const x = Math.sin(dayIndex * 12.9898 + i * 78.233 + salt * 3.7) * 43758.5453;
+    return x - Math.floor(x); // 0..1
+  };
+
+  box.innerHTML = "";
+  MARKET_SEED.forEach((item, i) => {
+    // ±8% drift from the base price, plus a week-over-week change
+    const price = Math.round(item.price * (1 + (seeded(i, 1) - 0.5) * 0.16));
+    const change = Math.round((seeded(i, 2) - 0.42) * 20); // -8..+12%
+    const dir = change > 0 ? "up" : change < 0 ? "down" : "flat";
+
+    const row = document.createElement("div");
+    row.className = "market-row";
+    row.innerHTML =
+      `<span class="market-crop">${item.crop}</span>` +
+      `<span class="market-unit">${item.unit}</span>` +
+      `<span class="market-price">J$ ${price}</span>` +
+      `<span class="market-change ${dir}">${change > 0 ? "▲" : change < 0 ? "▼" : "–"} ${Math.abs(change)}%</span>`;
+    box.appendChild(row);
+  });
+}
+
+renderMarket();

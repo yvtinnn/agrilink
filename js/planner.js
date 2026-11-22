@@ -21,6 +21,29 @@ const CROP_ICONS = {
   "Sweet Pepper": `<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14c0-3 3-5 7-5s7 2 7 5c0 8-4 13-7 13s-7-5-7-13z" fill="currentColor" fill-opacity=".2"/><path d="M16 9c0-3 1-5 4-6-1 3-1 4-2 6z" fill="currentColor" fill-opacity=".4"/></svg>`,
   Cucumber: `<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="16" cy="17" rx="6" ry="11" transform="rotate(12 16 17)" fill="currentColor" fill-opacity=".2"/><path d="M13 7c-1 6-1 13 1 19" opacity=".6"/><path d="M16 6c0-2 1-4 3-5"/></svg>`,
   Beet: `<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 12c4 0 7 3 7 7 0 5-3 10-7 10s-7-5-7-10c0-4 3-7 7-7z" fill="currentColor" fill-opacity=".2"/><path d="M16 12V6M16 12c-2-2-5-3-7-2M16 12c2-2 5-3 7-2" stroke-width="2"/></svg>`,
+  Cassava: `<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 28V10"/><path d="M16 12C16 6 12 4 8 4c0 6 4 8 8 8z" fill="currentColor" fill-opacity=".2"/><path d="M16 12c0-6 4-8 8-8 0 6-4 8-8 8z" fill="currentColor" fill-opacity=".35"/><path d="M16 20c-2 2-5 2-7 1M16 22c2 2 5 2 7 1"/></svg>`,
+  Yam: `<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 27c0-7 2-12 6-16"/><path d="M16 11c-3-4-3-8-1-10 3 1 4 4 4 7 0 2-1 3-3 3z" fill="currentColor" fill-opacity=".3"/><ellipse cx="19" cy="24" rx="6" ry="5" transform="rotate(-25 19 24)" fill="currentColor" fill-opacity=".2"/></svg>`,
+  Dasheen: `<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 28V14"/><path d="M16 16C16 8 10 4 5 4c0 8 5 12 11 12z" fill="currentColor" fill-opacity=".25"/><path d="M16 16c0-8 6-12 11-12 0 8-5 12-11 12z" fill="currentColor" fill-opacity=".4"/></svg>`,
+  Ginger: `<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M13 27c-1-3 0-6 2-8M19 27c1-3 0-6-2-8"/><path d="M16 19V8"/><path d="M16 10c-2-4-1-7 1-9 2 2 3 5 1 9z" fill="currentColor" fill-opacity=".3"/><path d="M16 14c-3 0-5-2-5-4 2-1 4 0 5 2M16 14c3 0 5-2 5-4-2-1-4 0-5 2"/></svg>`,
+  Scallion: `<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M11 28c0-2 .5-4 2-5M21 28c0-2-.5-4-2-5"/><path d="M13 23c-2-4-2-10-1-16"/><path d="M19 23c2-4 2-10 1-16"/><path d="M16 26c-1-6-1-14 0-21"/></svg>`,
+  Watermelon: `<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="16" cy="18" r="10" fill="currentColor" fill-opacity=".18"/><path d="M10 10c1 5 1 11 0 16M16 8c.5 6 .5 14 0 20M22 10c-1 5-1 11 0 16" opacity=".6"/><path d="M16 8c0-2 1-4 3-5"/></svg>`,
+  Pineapple: `<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="16" cy="20" rx="8" ry="9" fill="currentColor" fill-opacity=".2"/><path d="M12 14l8 12M20 14l-8 12M16 13v14" opacity=".55"/><path d="M16 12c-3-2-4-5-3-8 2 1 3 3 3 5M16 12c3-2 4-5 3-8-2 1-3 3-3 5M16 11c0-3 0-6-1-8M16 11c0-3 0-6 1-8"/></svg>`,
+  Papaya: `<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 29V6"/><path d="M16 12c-4 0-7-2-7-5 3-1 6 1 7 3M16 12c4 0 7-2 7-5-3-1-6 1-7 3" fill="currentColor" fill-opacity=".25"/><ellipse cx="12" cy="21" rx="4" ry="6" transform="rotate(-14 12 21)" fill="currentColor" fill-opacity=".3"/></svg>`,
+  Sorrel: `<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 28V8"/><path d="M16 12c-2-1-4-1-6 1 2 2 4 2 6 1z" fill="currentColor" fill-opacity=".3"/><path d="M16 18c2-1 4-1 6 1-2 2-4 2-6-1z" fill="currentColor" fill-opacity=".3"/><circle cx="11" cy="20" r="2" fill="currentColor" fill-opacity=".4"/><circle cx="21" cy="13" r="2" fill="currentColor" fill-opacity=".4"/></svg>`,
+  Banana: `<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 22c3 4 10 5 15 2 2-1 3-3 2-4-1 2-3 3-6 3-5 0-9-2-11-5z" fill="currentColor" fill-opacity=".25"/><path d="M10 20c-1-5 1-10 4-13"/><path d="M14 7c-2 1-4 0-5-1 1-2 3-2 5-1z" fill="currentColor" fill-opacity=".35"/></svg>`,
+};
+
+// ---- Crop categories (for the library filter chips) -----------------
+const CROP_TYPES = {
+  "Cabbage": "Greens", "Callaloo": "Greens", "Lettuce": "Greens",
+  "Tomato": "Fruit veg", "Scotch Bonnet": "Fruit veg", "Sweet Pepper": "Fruit veg",
+  "Okra": "Fruit veg", "Corn": "Fruit veg",
+  "Carrot": "Roots & tubers", "Beet": "Roots & tubers", "Onion": "Roots & tubers",
+  "Scallion": "Roots & tubers", "Sweet Potato": "Roots & tubers", "Cassava": "Roots & tubers",
+  "Yam": "Roots & tubers", "Dasheen": "Roots & tubers", "Ginger": "Roots & tubers",
+  "Pumpkin": "Vines & melons", "Cucumber": "Vines & melons", "Watermelon": "Vines & melons",
+  "Pineapple": "Tree & long crops", "Papaya": "Tree & long crops", "Banana": "Tree & long crops",
+  "Sorrel": "Tree & long crops",
 };
 
 // ---- Our crop database ---------------------------------------------
@@ -187,6 +210,111 @@ const CROPS = [
       { name: "Harvest",       days: 15,  tip: "Cure in the sun 3 days for sweeter taste." },
     ],
   },
+  {
+    name: "Cassava",
+    bestMonths: [3, 4, 5, 6, 7, 8],
+    stages: [
+      { name: "Establishment", days: 30,  tip: "Plant 25 cm stem cuttings flat ridges; keep moist." },
+      { name: "Vegetative",    days: 90,  tip: "Weed early — cassava grows slowly at first." },
+      { name: "Root Bulking",  days: 120, tip: "Hill soil around the stems; roots swell now." },
+      { name: "Maturity",      days: 60,  tip: "Leaves yellowing means roots are ready. Don't leave past 12 months." },
+      { name: "Harvest",       days: 30,  tip: "Pull carefully — cassava doesn't store in the ground forever." },
+    ],
+  },
+  {
+    name: "Yam",
+    bestMonths: [2, 3, 4],
+    stages: [
+      { name: "Sprouting",     days: 25,  tip: "Plant setts with the head up; mulch heavily." },
+      { name: "Vining",        days: 60,  tip: "Stakes 3 m tall — yam vines climb fast." },
+      { name: "Tuber Growth",  days: 120, tip: "One vine per stake; too many tubers stay small." },
+      { name: "Harvest",       days: 45,  tip: "Vines drying means tubers are ready. Dig gently, no bruising." },
+    ],
+  },
+  {
+    name: "Dasheen",
+    bestMonths: [4, 5, 6],
+    stages: [
+      { name: "Sprouting",     days: 20,  tip: "Plant corm heads 10 cm deep in wet soil." },
+      { name: "Vegetative",    days: 90,  tip: "Dasheen loves water — keep the soil always moist." },
+      { name: "Corm Growth",   days: 120, tip: "Remove suckers so the main corm grows big." },
+      { name: "Harvest",       days: 40,  tip: "Leaves drooping = ready. Cut leaves off before storage." },
+    ],
+  },
+  {
+    name: "Ginger",
+    bestMonths: [3, 4],
+    stages: [
+      { name: "Sprouting",     days: 30,  tip: "Plant rhizome pieces with an eye each, 5 cm deep." },
+      { name: "Vegetative",    days: 120, tip: "Partial shade is fine — ginger hates midday burn." },
+      { name: "Rhizome Growth",days: 90,  tip: "Hill soil over rhizomes peeking from the ground." },
+      { name: "Harvest",       days: 40,  tip: "Young ginger at 8 months is mild; mature at 10 is hot." },
+    ],
+  },
+  {
+    name: "Scallion",
+    bestMonths: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+    stages: [
+      { name: "Germination",   days: 6,   tip: "Sow in drills 1 cm deep — seeds are slow starters." },
+      { name: "Seedling",      days: 20,  tip: "Thin to 5 cm — they need air between stalks." },
+      { name: "Clumping",      days: 40,  tip: "Mound white soil around stems for longer white bulbs." },
+      { name: "Harvest",       days: 24,  tip: "Cut above the root — regrows for a second harvest." },
+    ],
+  },
+  {
+    name: "Watermelon",
+    bestMonths: [12, 1, 2, 3],
+    stages: [
+      { name: "Germination",   days: 5,   tip: "Plant on hills in warm soil; 3 seeds per hill." },
+      { name: "Vining",        days: 25,  tip: "Give each hill 2 m — vines run far." },
+      { name: "Flowering",     days: 15,  tip: "Bees do the pollinating — don't spray when they're active." },
+      { name: "Fruiting",      days: 25,  tip: "Put straw under fruit; turn once for even colour." },
+      { name: "Harvest",       days: 10,  tip: "Dry tendril nearest the fruit + dull skin = ripe." },
+    ],
+  },
+  {
+    name: "Pineapple",
+    bestMonths: [4, 5, 6, 7],
+    stages: [
+      { name: "Establishment", days: 60,  tip: "Twist off a crown, dry it 3 days, then plant." },
+      { name: "Vegetative",    days: 300, tip: "Little weeding needed — but never let it dry out." },
+      { name: "Fruiting",      days: 120, tip: "A red cone in the centre means fruit is forming." },
+      { name: "Harvest",       days: 30,  tip: "Gold skin + sweet smell at the base = pick." },
+    ],
+  },
+  {
+    name: "Papaya",
+    bestMonths: [3, 4, 5, 6],
+    stages: [
+      { name: "Germination",   days: 14,  tip: "Sow 3 seeds per hole; keep only the strongest." },
+      { name: "Seedling",      days: 60,  tip: "Space 2.5 m apart — papayas hate crowding." },
+      { name: "Vegetative",    days: 90,  tip: "Watch for ringspot virus — remove sick plants fast." },
+      { name: "Flowering",     days: 30,  tip: "Only hermaphrodite females fruit well — cull males." },
+      { name: "Fruiting",      days: 90,  tip: "Wind breaks are a must — papaya trunks snap easily." },
+      { name: "Harvest",       days: 30,  tip: "Two yellow stripes = pick; it ripens off the tree." },
+    ],
+  },
+  {
+    name: "Sorrel",
+    bestMonths: [9, 10],
+    stages: [
+      { name: "Germination",   days: 5,   tip: "Plant in September — it's a short-day crop." },
+      { name: "Vegetative",    days: 45,  tip: "Bushy plants mean more calyces — don't crowd." },
+      { name: "Flowering",     days: 40,  tip: "Tiny yellow flowers appear before the red calyces." },
+      { name: "Harvest",       days: 20,  tip: "Pick the fat red calyces every few days — they dry out fast." },
+    ],
+  },
+  {
+    name: "Banana",
+    bestMonths: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+    stages: [
+      { name: "Establishment", days: 60,  tip: "Plant sword suckers 3 m apart; water the first weeks." },
+      { name: "Pseudostem Growth", days: 120, tip: "Remove excess suckers — keep 3 per mat." },
+      { name: "Bunching",      days: 60,  tip: "Bag the bunch against insects and wind scarring." },
+      { name: "Fruit Filling", days: 60,  tip: "Propping poles stop the bunch snapping the stem." },
+      { name: "Harvest",       days: 30,  tip: "Fingers round and full — cut the whole bunch, hang to ripen." },
+    ],
+  },
 ];
 
 // ---- Planting recommendation ---------------------------------------
@@ -235,7 +363,7 @@ function recommendCrop(crop, weather, climate) {
 
   // 3. Live 7-day forecast
   const rain = weather ? weather.rain7 : climateRain / 4;
-  const temp = weather ? weather.temp : 27;
+  const temp = weather ? Math.round(weather.temp) : 27;
 
   if (rain < 5) {
     score -= 15;
@@ -259,9 +387,9 @@ function recommendCrop(crop, weather, climate) {
   score = Math.max(10, Math.min(95, Math.round(score)));
 
   let verdict, cls;
-  if (score >= 70)      { verdict = "Great time to plant"; cls = "good"; }
-  else if (score >= 50) { verdict = "Possible — plan carefully"; cls = "warn"; }
-  else                  { verdict = "Better to wait"; cls = "bad"; }
+  if (score >= 70)      { verdict = "Good planting window"; cls = "good"; }
+  else if (score >= 50) { verdict = "Tight window — plan carefully"; cls = "warn"; }
+  else                  { verdict = "Hold off for now"; cls = "bad"; }
 
   return { score, verdict, cls, facts, rain, temp, month, climateRain };
 }
@@ -269,6 +397,19 @@ function recommendCrop(crop, weather, climate) {
 function monthName(m) {
   return ["January","February","March","April","May","June","July",
           "August","September","October","November","December"][m - 1];
+}
+
+// ---- 12-month planting strip ---------------------------------------
+// Twelve cells, Jan to Dec. A crop's best months are filled green;
+// the current month carries a ring so you can read the year at a glance.
+function monthStripHTML(bestMonths, extra) {
+  const now = new Date().getMonth() + 1;
+  const letters = ["J","F","M","A","M","J","J","A","S","O","N","D"];
+  return `<div class="month-strip ${extra || ""}">` + letters.map((L, i) => {
+    const m = i + 1;
+    const cls = (bestMonths.includes(m) ? "best" : "") + (m === now ? " now" : "");
+    return `<span class="m-cell ${cls}" title="${monthName(m)}">${L}</span>`;
+  }).join("") + `</div>`;
 }
 
 // ---- Growth roadmap builder -----------------------------------------

@@ -3,13 +3,23 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>AgriLink — Plant smarter. Harvest more.</title>
-  <meta name="description" content="AgriLink helps farmers pick the best planting time, track crop growth, and check crop problems using real weather and 10-year climate history." />
-  <meta name="theme-color" content="#14532d" />
+  <title>AgriLink — a planting almanac for Jamaica</title>
+  <meta name="description" content="AgriLink is a planting almanac: best planting weeks from live weather and 10-year rainfall history, a growth tracker, and an offline photo check for crop problems." />
+  <meta name="theme-color" content="#F5F2E9" />
   <link rel="manifest" href="manifest.json" />
   <link rel="icon" href="icons/icon-192.png" />
   <link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
-  <link rel="stylesheet" href="css/styles.css?v=14" />
+  <link rel="preload" href="assets/fonts/barlow-400.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="preload" href="assets/fonts/barlow-condensed-700.woff2" as="font" type="font/woff2" crossorigin />
+  <script>
+    // set the saved theme before first paint so there is no light flash
+    try {
+      if (localStorage.getItem("agrilink-theme") === "dark") {
+        document.documentElement.classList.add("theme-dark");
+      }
+    } catch (e) {}
+  </script>
+  <link rel="stylesheet" href="css/styles.css?v=22" />
 </head>
 <body>
 
@@ -17,50 +27,52 @@
   <header class="topbar">
     <div class="logo">
       <img src="assets/logo-mark.png" alt="AgriLink logo" class="logo-badge" />
-      <div>
+      <div class="logo-text">
         <h1>Agri<span>Link</span></h1>
-        <p>Plant smarter. Harvest more.</p>
+        <p>A planting almanac for Jamaica</p>
       </div>
     </div>
-    <button id="btn-settings" class="icon-btn" aria-label="Settings" title="Settings">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="12" cy="12" r="3"/>
-        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h.08a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h.08a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v.08a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
-      </svg>
-    </button>
+    <div class="topbar-right">
+      <span id="farm-place" class="place-pill" title="Your location">Not set yet</span>
+      <button id="btn-settings" class="icon-btn" aria-label="Settings" title="Settings">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h.08a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h.08a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v.08a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+        </svg>
+      </button>
+    </div>
   </header>
 
   <main>
 
     <!-- =========================================================
-         SCREEN 1: HOME — your farm hero (weather-app style)
+         SCREEN 1: HOME — today's field briefing
     ========================================================== -->
     <section id="screen-home" class="screen active">
 
-      <!-- your farm hero: big temp, place, forecast — no boxes, the sky IS the card -->
-      <div class="card" id="farm-hero">
-        <span class="label">Your farm</span>
-        <div class="hero-place" id="farm-place">Not set yet</div>
-        <div class="hero-row">
-          <div class="hero-temp"><span id="hero-temp">–</span><small>celsius · live</small></div>
-          <div class="farm-actions">
-            <button id="change-farm" class="btn-ghost">Change</button>
-            <button id="replay-tutorial" class="btn-ghost">Tutorial</button>
-          </div>
+      <div class="card hero">
+        <div class="hero-top">
+          <span class="label" id="hero-greeting">Your farm</span>
+          <span class="hero-flag">This week</span>
         </div>
-        <div class="hero-condition" id="hero-condition"></div>
-        <p id="offline-note" class="small muted hidden" style="margin-top:6px"></p>
+        <p class="hero-verdict" id="hero-condition">Set your location to see this week's planting advice.</p>
+        <div class="farm-actions">
+          <button id="change-farm" class="btn-ghost">Change location</button>
+          <button id="replay-tutorial" class="btn-ghost">How it works</button>
+        </div>
+        <p id="offline-note" class="small muted hidden"></p>
         <div id="farm-stats" class="stat-strip hidden"></div>
       </div>
 
-      <!-- 7-day forecast strip -->
       <div class="card">
-        <span class="label">Next 7 days</span>
+        <div class="card-head">
+          <span class="label">Next 7 days</span>
+          <span class="head-rule"></span>
+        </div>
         <div id="forecast-strip" class="forecast-strip muted">Loading forecast…</div>
         <div id="plant-days" class="plant-days hidden"></div>
       </div>
 
-      <!-- tip of the day -->
       <div class="card tip-card">
         <div class="tip-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 0 0-4 10.5c.7.6 1 1.5 1 2.5h6c0-1 .3-1.9 1-2.5A6 6 0 0 0 12 3z"/></svg>
@@ -71,8 +83,20 @@
         </div>
       </div>
 
-      <!-- about card (only shown before the farm is set up) -->
+      <div class="card hidden" id="my-crops-card">
+        <div class="card-head">
+          <span class="label">My crops</span>
+          <span class="head-rule"></span>
+        </div>
+        <h3>Your growing crops</h3>
+        <div id="my-crops" class="my-crops"></div>
+      </div>
+
       <div class="card soft" id="how-it-works">
+        <div class="card-head">
+          <span class="label">Start here</span>
+          <span class="head-rule"></span>
+        </div>
         <h3>How it works</h3>
         <ol class="steps">
           <li><b>Tell us your location</b><span>parish and town — takes 10 seconds.</span></li>
@@ -89,20 +113,27 @@
     ========================================================== -->
     <section id="screen-planner" class="screen">
 
-      <!-- rain alert (shown when heavy rain is coming) -->
       <div id="rain-alert" class="alert-banner hidden">
         <b>Heavy rain coming</b>
         <span id="rain-alert-text"></span>
       </div>
 
-      <div class="card">
+      <div class="card picks-card">
+        <div class="card-head">
+          <span class="label">Planner</span>
+          <span class="head-rule"></span>
+        </div>
         <h2>What should I plant right now?</h2>
         <p class="muted">Our top picks for <b id="picks-parish">your parish</b>, best first — based on the season,
           10 years of rainfall history, and the 7-day forecast.</p>
         <div id="top-picks" class="top-picks"></div>
       </div>
 
-      <div class="card">
+      <div class="card library-card">
+        <div class="card-head">
+          <span class="label">Crop library</span>
+          <span class="head-rule"></span>
+        </div>
         <h2>Check any crop</h2>
         <p class="muted">Pick a crop to see its full planting advice.</p>
 
@@ -110,24 +141,32 @@
         <div id="season-chips" class="season-chips"></div>
 
         <label for="crop-search">All crops</label>
+        <div id="crop-type-chips" class="type-chips"></div>
         <div class="search-wrap">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
-          <input id="crop-search" type="text" placeholder="Search 14 crops…" />
+          <input id="crop-search" type="text" placeholder="Search crops…" />
         </div>
         <div id="crop-grid" class="crop-list"></div>
       </div>
 
-      <!-- recommendation appears here when a crop is picked -->
-      <div id="plan-result" class="card hidden">
+      <div id="plan-result" class="card packet hidden">
+        <div class="packet-top">
+          <span class="label">Planting advice</span>
+          <span class="packet-code">AL · PARISH PACKET</span>
+        </div>
         <h3 id="plan-title"></h3>
         <div id="plan-verdict" class="verdict"></div>
+        <div id="plan-months"></div>
         <div id="plan-stats" class="stat-strip"></div>
         <div class="confidence">
           <div id="confidence-bar" class="confidence-bar"></div>
         </div>
         <p id="confidence-label" class="muted small"></p>
         <div id="plan-details" class="plan-details"></div>
-        <button id="share-plan" class="btn-secondary">Copy plan to share (WhatsApp)</button>
+        <div class="packet-actions">
+          <button id="share-plan" class="btn-secondary">Copy plan to share (WhatsApp)</button>
+          <button id="track-this" class="btn-secondary">Track this crop</button>
+        </div>
       </div>
     </section>
 
@@ -135,8 +174,22 @@
          SCREEN 3: TRACKER — growth lifecycle roadmap
     ========================================================== -->
     <section id="screen-tracker" class="screen">
-      <div class="card">
-        <h2>Growth Lifecycle Tracker</h2>
+      <div id="saved-crops" class="card hidden">
+        <div class="card-head">
+          <span class="label">Saved roadmaps</span>
+          <span class="head-rule"></span>
+        </div>
+        <h2>My growing crops</h2>
+        <p class="muted">Every roadmap you build is saved here — tap one to reopen it.</p>
+        <div id="saved-list" class="saved-list"></div>
+      </div>
+
+      <div class="card tracker-setup">
+        <div class="card-head">
+          <span class="label">Tracker</span>
+          <span class="head-rule"></span>
+        </div>
+        <h2>Growth lifecycle tracker</h2>
         <p class="muted">Pick a crop and the day you planted. We build your growth roadmap with real dates.</p>
 
         <label for="track-crop">Crop</label>
@@ -145,13 +198,16 @@
         <label for="track-date">Planting date</label>
         <input id="track-date" type="date" />
 
-        <button id="build-timeline" class="btn-primary">Build My Roadmap</button>
+        <button id="build-timeline" class="btn-primary">Build my roadmap</button>
       </div>
 
       <div id="timeline-output" class="hidden">
-        <div class="card">
-          <span class="label">Journey to harvest</span>
-          <div class="progress-wrap" style="margin-top:10px">
+        <div class="card progress-card">
+          <div class="card-head">
+            <span class="label">Journey to harvest</span>
+            <span class="head-rule"></span>
+          </div>
+          <div class="progress-wrap">
             <svg class="ring" viewBox="0 0 120 120" aria-hidden="true">
               <circle class="ring-bg" cx="60" cy="60" r="52"/>
               <circle class="ring-fill" id="ring-fill" cx="60" cy="60" r="52"/>
@@ -171,14 +227,18 @@
          SCREEN 4: PHOTO CHECK — analyse a plant photo + problem board
     ========================================================== -->
     <section id="screen-photo" class="screen">
-      <div class="card">
-        <h2>Crop Photo Check</h2>
+      <div class="card photo-setup">
+        <div class="card-head">
+          <span class="label">Photo check</span>
+          <span class="head-rule"></span>
+        </div>
+        <h2>Crop photo check</h2>
         <p class="muted">Take or upload a photo of the sick plant. We compare its colours with our
           dataset of common crop problems. <b>Works on your phone, no internet needed.</b></p>
 
         <div class="upload-box">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 16l4-5 3 3 4-6 5 8"/><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="9" cy="9" r="1.6"/></svg>
-          <button id="photo-btn" class="btn-primary" type="button">Choose a Plant Photo</button>
+          <button id="photo-btn" class="btn-primary" type="button">Choose a plant photo</button>
           <span class="upload-hint">JPG or PNG — stays on your phone, nothing is uploaded</span>
           <input id="photo-input" type="file" accept="image/*" capture="environment" hidden />
         </div>
@@ -192,9 +252,14 @@
       </div>
 
       <div id="photo-result" class="card hidden">
+        <div class="card-head">
+          <span class="label">What we see</span>
+          <span class="head-rule"></span>
+        </div>
         <h3>What we see</h3>
         <div id="photo-bars" class="colour-bars"></div>
         <div id="photo-matches" class="problem-matches"></div>
+        <button id="photo-report" class="btn-secondary hidden">Report this finding to the Problem Board</button>
         <p class="disclaimer">We're high school students, and this is a simple colour check — not a lab test
           (we used a little AI help to build it, but it's still just colours and rules).
           For anything serious, confirm with your local RADA extension officer.</p>
@@ -206,7 +271,11 @@
     ========================================================== -->
     <section id="screen-community" class="screen">
       <div class="card chat-card">
-        <h2>Farmer Community</h2>
+        <div class="card-head">
+          <span class="label">Community</span>
+          <span class="head-rule"></span>
+        </div>
+        <h2>Farmer community</h2>
         <p class="muted small">Ask questions and share what works in your area. Be kind — every farm is different.</p>
         <div id="chat-feed" class="chat-feed"></div>
         <form id="chat-form" class="chat-form">
@@ -216,9 +285,23 @@
         </form>
       </div>
 
-      <!-- public problem board (read-only) -->
-      <div class="card">
-        <h2>Problem Board</h2>
+      <div class="card market-card">
+        <div class="card-head">
+          <span class="label">Market watch</span>
+          <span class="head-rule"></span>
+        </div>
+        <h2>Market watch</h2>
+        <p class="muted">Indicative wholesale prices at Coronation Market this week — use them as a guide before you sell.</p>
+        <div id="market-list" class="market-list"></div>
+        <p class="muted small">Sample prices for this demo — always confirm at the market.</p>
+      </div>
+
+      <div class="card board-card">
+        <div class="card-head">
+          <span class="label">Problem board</span>
+          <span class="head-rule"></span>
+        </div>
+        <h2>Problem board</h2>
         <p class="muted">What farmers are dealing with right now — reported from the field.</p>
         <div class="seg" id="board-filter">
           <button class="on" data-filter="all">All parishes</button>
@@ -232,36 +315,54 @@
          SETTINGS — location, tutorial, data, about
     ====================================================== -->
     <section id="screen-settings" class="screen">
-        <div class="card">
-          <h2>Settings</h2>
-          <p class="muted">Everything stays on this phone — no account, no cloud, no cost.</p>
+      <div class="card settings-intro">
+        <div class="card-head">
+          <span class="label">Settings</span>
+          <span class="head-rule"></span>
         </div>
-        <div class="card">
-          <span class="label">My location</span>
-          <div class="setting-row">
-            <div><b id="settings-place">Not set yet</b><p class="muted small" id="settings-parish">Weather and picks use your parish.</p></div>
-            <button id="settings-change" class="btn-ghost">Change</button>
-          </div>
+        <h2>Settings</h2>
+        <p class="muted">Everything stays on this phone — no account, no cloud, no cost.</p>
+      </div>
+      <div class="card">
+        <span class="label">My location</span>
+        <div class="setting-row">
+          <div><b id="settings-place">Not set yet</b><p class="muted small" id="settings-parish">Weather and picks use your parish.</p></div>
+          <button id="settings-change" class="btn-ghost">Change</button>
         </div>
-        <div class="card">
-          <span class="label">Learn</span>
-          <div class="setting-row">
-            <div><b>The 3-slide tour</b><p class="muted small">A quick walk through every screen.</p></div>
-            <button id="settings-tutorial" class="btn-ghost">Replay</button>
-          </div>
+      </div>
+      <div class="card">
+        <span class="label">Learn</span>
+        <div class="setting-row">
+          <div><b>The 3-slide tour</b><p class="muted small">A quick walk through every screen.</p></div>
+          <button id="settings-tutorial" class="btn-ghost">Replay</button>
         </div>
-        <div class="card">
-          <span class="label">My data</span>
-          <div class="setting-row">
-            <div><b>Clear everything</b><p class="muted small">Erases your location, tracker and messages from this phone.</p></div>
-            <button id="settings-clear" class="btn-ghost danger">Clear</button>
-          </div>
+      </div>
+      <div class="card">
+        <span class="label">Appearance</span>
+        <div class="setting-row">
+          <div><b>Night &amp; daylight</b><p class="muted small">Switch between the two themes.</p></div>
+          <button id="settings-theme" class="btn-ghost">Dark</button>
         </div>
-        <div class="card">
-          <span class="label">About</span>
-          <p class="muted">AgriLink · v1.0 — built by students for Jamaican farmers. Works offline once installed on your phone. Free, no account, forever.</p>
+      </div>
+      <div class="card">
+        <span class="label">Units</span>
+        <div class="setting-row">
+          <div><b>Temperature</b><p class="muted small">Applies everywhere in the app.</p></div>
+          <button id="settings-units" class="btn-ghost">°C / °F</button>
         </div>
-      </section>
+      </div>
+      <div class="card">
+        <span class="label">My data</span>
+        <div class="setting-row">
+          <div><b>Clear everything</b><p class="muted small">Erases your location, tracker and messages from this phone.</p></div>
+          <button id="settings-clear" class="btn-ghost danger">Clear</button>
+        </div>
+      </div>
+      <div class="card">
+        <span class="label">About</span>
+        <p class="muted">AgriLink · v1.0 — built by students for Jamaican farmers. Works offline once installed on your phone. Free, no account, forever.</p>
+      </div>
+    </section>
 
   </main>
 
@@ -270,22 +371,25 @@
     <div class="onboard-card">
       <div class="onboard-step active" id="onboard-step-1">
         <img src="assets/logo-mark.png" alt="" class="onboard-logo" />
+        <span class="label">AgriLink · Jamaica</span>
         <h2>Welcome to AgriLink</h2>
         <p class="muted">Plant at the right time, track your crop, and check plant problems — all free.</p>
         <p class="muted small">Setting up takes about 30 seconds. We just need to know where you farm.</p>
         <button id="onboard-next" class="btn-primary">Let's go</button>
       </div>
       <div class="onboard-step" id="onboard-step-2">
+        <span class="label">Step 1 of 2</span>
         <h2>Where do you farm?</h2>
         <label for="onboard-parish">Parish</label>
         <select id="onboard-parish"><option value="">Choose your parish</option></select>
-        <label for="onboard-town">Town / Community</label>
+        <label for="onboard-town">Town / community</label>
         <input id="onboard-town" type="text" placeholder="e.g. Santa Cruz" autocomplete="address-level3" />
         <div id="onboard-error" class="error hidden"></div>
         <button id="onboard-finish" class="btn-primary">Continue</button>
         <button id="onboard-skip" class="btn-text">Skip for now</button>
       </div>
       <div class="onboard-step" id="onboard-step-3">
+        <span class="label">Quick tour</span>
         <h2 id="tutorial-title"></h2>
         <div id="tutorial-icon" class="tutorial-icon"></div>
         <p id="tutorial-text" class="muted"></p>
@@ -296,19 +400,22 @@
     </div>
   </div>
 
-  <!-- ===== Bottom tab bar + photo check button ===== -->
-  <button id="photo-fab" class="photo-fab" aria-label="Crop Photo Check" title="Crop Photo Check">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 16l4-5 3 3 4-6 5 8"/><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="9" cy="9" r="1.6"/></svg>
-  </button>
-
+  <!-- ===== Bottom tab bar, camera in the centre ===== -->
   <nav class="tabbar">
     <button class="tab active" data-screen="screen-home">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg>
       <span>Home</span>
     </button>
     <button class="tab" data-screen="screen-planner">
+      <span class="alert-dot"></span>
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21V9"/><path d="M12 9C12 5 9 3 4 3c0 5 3 8 8 6z" fill="currentColor" fill-opacity=".15"/><path d="M12 13c0-4 3-6 8-6 0 5-3 8-8 6z" fill="currentColor" fill-opacity=".3"/></svg>
       <span>Planner</span>
+    </button>
+    <button id="photo-fab" class="scan" aria-label="Crop photo check" title="Crop photo check">
+      <span class="scan-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 16l4-5 3 3 4-6 5 8"/><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="9" cy="9" r="1.6"/></svg>
+      </span>
+      <span class="scan-label">Scan</span>
     </button>
     <button class="tab" data-screen="screen-tracker">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20h18"/><path d="M4 16l4-6 4 3 5-8"/></svg>
@@ -320,9 +427,9 @@
     </button>
   </nav>
 
-  <script src="js/planner.js?v=16"></script>
-  <script src="js/community.js?v=16"></script>
-  <script src="js/problems.js?v=16"></script>
-  <script src="js/app.js?v=16"></script>
+  <script src="js/planner.js?v=22"></script>
+  <script src="js/community.js?v=22"></script>
+  <script src="js/problems.js?v=22"></script>
+  <script src="js/app.js?v=22"></script>
 </body>
 </html>

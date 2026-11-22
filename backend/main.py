@@ -12,11 +12,15 @@
 
 from pathlib import Path
 from datetime import datetime
+import time
+from collections import defaultdict, deque
 
 import httpx
-from fastapi import FastAPI, HTTPException, Query
+from fastapi import FastAPI, HTTPException, Query, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
+from starlette.middleware.base import BaseHTTPMiddleware
 
 # ---- Parish coordinates (the 14 parishes of Jamaica) ----
 PARISHES = {
@@ -53,6 +57,63 @@ app.add_middleware(
 client = httpx.AsyncClient(timeout=15)
 
 
+# ---- rate limiting (dependency-free, per-IP sliding window) ----------
+# /api/farm-data and /api/recommend each trigger ~11 upstream Open-Meteo
+# calls, so they're capped hard; cheap local-data endpoints get a wide cap.
+RATE_RULES = [
+    ("/api/farm-data", 10, 60),   # 10 requests / minute / IP
+    ("/api/recommend", 10, 60),   # 10 requests / minute / IP
+    ("/api/",           60, 60),   # everything else on the API
+]
+
+
+class RateLimitMiddleware(BaseHTTPMiddleware):
+    def __init__(self, app):
+        super().__init__(app)
+        self.hits = defaultdict(deque)  # {(ip, rule): deque[timestamps]}
+
+    async def dispatch(self, request: Request, call_next):
+        path = request.url.path
+        rule = next(((r, limit, secs) for r, limit, secs in RATE_RULES if path.startswith(r)), None)
+        if rule is None:
+            return await call_next(request)  # static frontend — never blocked
+
+        _, limit, window = rule
+        ip = request.client.host if request.client else "unknown"
+        key = (ip, rule[0])
+        now = time.monotonic()
+
+        hits = self.hits[key]
+        while hits and hits[0] <= now - window:
+            hits.popleft()  # slide the window
+
+        if len(hits) >= limit:
+            retry_after = max(1, int(hits[0] + window - now))
+            return JSONResponse(
+                {"detail": f"Too many requests — try again in {retry_after}s."},
+                status_code=429,
+                headers={"Retry-After": str(retry_after)},
+            )
+
+        hits.append(now)
+        remaining = limit - len(hits)
+        response = await call_next(request)
+        response.headers["X-RateLimit-Limit"] = str(limit)
+        response.headers["X-RateLimit-Remaining"] = str(max(0, remaining))
+        response.headers["X-RateLimit-Reset"] = str(int(window))
+        return response
+
+
+app.add_middleware(RateLimitMiddleware)
+
+
+# ---- upstream cache: one fetch per parish per 10 minutes max ---------
+# farm-data costs ~11 Open-Meteo calls; the cache means heavy traffic
+# never translates into heavy upstream usage (and farmers get instant loads).
+FARM_CACHE = {}
+FARM_CACHE_TTL = 600  # seconds
+
+
 # ---- helpers ---------------------------------------------------------
 
 def get_coords(parish: str) -> tuple[float, float]:
@@ -76,6 +137,11 @@ async def farm_data(parish: str):
     lat, lon = get_coords(parish)
     now = datetime.now()
     month_index = now.month - 1
+
+    # serve from the 10-minute cache when we have it
+    cached = FARM_CACHE.get(parish)
+    if cached and time.monotonic() - cached[0] < FARM_CACHE_TTL:
+        return cached[1]
 
     # --- live forecast (next 7 days) ---
     forecast_url = (
@@ -121,11 +187,13 @@ async def farm_data(parish: str):
             "years_used": len(climate_years),
         }
 
-    return {
+    result = {
         "parish": parish,
         "forecast": {"temp": temp, "rain_7d": rain7, "rain_3d": [round(p) for p in daily["precipitation_sum"][:3]], "daily": daily_list, "live": True},
         "climate": climate,
     }
+    FARM_CACHE[parish] = (time.monotonic(), result)
+    return result
 
 
 @app.get("/api/crops")

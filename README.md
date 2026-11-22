@@ -2,10 +2,13 @@
 
 AgriLink helps smallholder and local farmers fight climate unpredictability with:
 - **Predictive Crop Planning** — the best time to plant, built from a live 7-day forecast **and 10 years of rainfall history for your exact parish**
-- **Growth Lifecycle Tracking** — a dated roadmap from seed to harvest for every crop
+- **My Crops** — every growth roadmap you build is saved on the phone, with a progress bar and harvest countdown on the Home screen
+- **Growth Lifecycle Tracking** — a dated roadmap from seed to harvest for every crop, saved and re-openable
 - **Crop Photo Check** — a photo of a sick plant is analysed against our dataset of 14 common crop problems (runs fully on the phone, no upload needed)
-- **Farmer Community** — a peer chat with parish tags, plus a read-only Problem Board of what farmers near you are dealing with
-- **7-day forecast strip + rain alerts** — day-by-day rain and temperature, with a warning before heavy rain days
+- **Farmer Community** — a peer chat with parish tags, a read-only Problem Board of what farmers near you are dealing with, and a **Market Watch** price board
+- **7-day forecast strip + rain alerts** — day-by-day rain, temperature, wind and humidity, with a warning before heavy rain days
+- **Offline weather memory** — the last real forecast is saved on the phone, so a farm with no signal still sees the last known numbers (clearly labelled "Saved")
+- **Crop library filters** — browse by type: greens, fruit veg, roots & tubers, vines & melons, tree & long crops
 - **In-season row** — the Planner shows every crop whose planting window is open this month
 
 **Free for everyone. No paywall. No account needed. Built by high school students.**
