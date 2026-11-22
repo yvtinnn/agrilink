@@ -1,5 +1,5 @@
 # ============================================================
-# problems.py — our dataset of common crop problems (server-side
+# problems.py, our dataset of common crop problems (server-side
 # copy of js/problems.js so the API can serve it too).
 # ============================================================
 

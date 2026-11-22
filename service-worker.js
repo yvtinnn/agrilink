@@ -1,10 +1,10 @@
 /* ============================================================
-   service-worker.js — makes AgriLink work offline.
+   service-worker.js, makes AgriLink work offline.
    Once the app is installed, everything it needs is cached,
    so it opens even when the farm has no signal.
 ============================================================ */
 
-const CACHE_NAME = "agrilink-v24";
+const CACHE_NAME = "agrilink-v25";
 const FILES_TO_CACHE = [
   "./",
   "./index.html",

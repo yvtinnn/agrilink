@@ -1,5 +1,5 @@
 # ============================================================
-# recommend.py — the planting scoring rules (server-side copy of
+# recommend.py, the planting scoring rules (server-side copy of
 # the logic in js/planner.js so both agree with each other).
 # ============================================================
 
@@ -13,9 +13,9 @@ def recommend_crop(crop: dict, forecast: dict, climate: dict | None) -> dict:
     """Score how good right now is for planting this crop.
 
     Three transparent signals:
-      1. season  — is it one of the crop's best months?
-      2. climate — 10-year average rainfall for this month, this parish
-      3. forecast— live 7-day rain and temperature
+      1. season , is it one of the crop's best months?
+      2. climate, 10-year average rainfall for this month, this parish
+      3. forecast live 7-day rain and temperature
     """
     month = datetime.now().month
     score = 35
@@ -37,16 +37,16 @@ def recommend_crop(crop: dict, forecast: dict, climate: dict | None) -> dict:
     # ---- 2. parish climate history ----
     climate_rain = climate["avg_rain"] if climate else 60
     climate_label = (f"10-year average for this parish in {MONTH_NAMES[month - 1]}: {climate_rain} mm"
-                     if climate else "10-year average unavailable — using typical values.")
+                     if climate else "10-year average unavailable, using typical values.")
     if climate_rain < 15:
         score -= 10
-        facts.append({"mark": "-", "cls": "bad", "text": climate_label + " — historically dry. Irrigation needed."})
+        facts.append({"mark": "-", "cls": "bad", "text": climate_label + ", historically dry. Irrigation needed."})
     elif climate_rain > 250:
         score -= 10
-        facts.append({"mark": "-", "cls": "bad", "text": climate_label + " — historically very wet. Waterlogging risk."})
+        facts.append({"mark": "-", "cls": "bad", "text": climate_label + ", historically very wet. Waterlogging risk."})
     else:
         score += 10
-        facts.append({"mark": "+", "cls": "good", "text": climate_label + " — comfortable moisture."})
+        facts.append({"mark": "+", "cls": "good", "text": climate_label + ", comfortable moisture."})
 
     # ---- 3. live forecast ----
     rain = forecast["rain_7d"]
@@ -58,11 +58,11 @@ def recommend_crop(crop: dict, forecast: dict, climate: dict | None) -> dict:
     elif rain > 80:
         score -= 20
         facts.append({"mark": "-", "cls": "bad",
-                      "text": f"Live forecast: heavy rain this week ({rain} mm). Waterlogging risk — drainage needed."})
+                      "text": f"Live forecast: heavy rain this week ({rain} mm). Waterlogging risk, drainage needed."})
     else:
         score += 15
         facts.append({"mark": "+", "cls": "good",
-                      "text": f"Live forecast: {rain} mm rain this week — good moisture for germination."})
+                      "text": f"Live forecast: {rain} mm rain this week, good moisture for germination."})
 
     if temp < 18 or temp > 33:
         score -= 10
@@ -77,7 +77,7 @@ def recommend_crop(crop: dict, forecast: dict, climate: dict | None) -> dict:
     if score >= 70:
         verdict, cls = "Great time to plant", "good"
     elif score >= 50:
-        verdict, cls = "Possible — plan carefully", "warn"
+        verdict, cls = "Possible, plan carefully", "warn"
     else:
         verdict, cls = "Better to wait", "bad"
 

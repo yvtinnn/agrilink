@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>AgriLink — a planting almanac for Jamaica</title>
+  <title>AgriLink: a planting almanac for Jamaica</title>
   <meta name="description" content="AgriLink is a planting almanac: best planting weeks from live weather and 10-year rainfall history, a growth tracker, and an offline photo check for crop problems." />
   <meta name="theme-color" content="#F5F2E9" />
   <link rel="manifest" href="manifest.json" />
@@ -46,7 +46,7 @@
   <main>
 
     <!-- =========================================================
-         SCREEN 1: HOME — today's field briefing
+         SCREEN 1: HOME, today's field briefing
     ========================================================== -->
     <section id="screen-home" class="screen active">
 
@@ -99,17 +99,17 @@
         </div>
         <h3>How it works</h3>
         <ol class="steps">
-          <li><b>Tell us your location</b><span>parish and town — takes 10 seconds.</span></li>
+          <li><b>Tell us your location</b><span>parish and town, takes 10 seconds.</span></li>
           <li><b>We analyse the data</b><span>live forecast + 10 years of rainfall history for your parish.</span></li>
           <li><b>You get clear advice</b><span>when to plant, what to expect, and every growth date.</span></li>
           <li><b>Check crop problems</b><span>take a photo of a sick plant and we compare it with our problem dataset.</span></li>
         </ol>
-        <p class="muted foot">Free for everyone — no paywall, no account. Built with farmers, for farmers.</p>
+        <p class="muted foot">Free for everyone, no paywall, no account. Built with farmers, for farmers.</p>
       </div>
     </section>
 
     <!-- =========================================================
-         SCREEN 2: PLANNER — the best time to plant
+         SCREEN 2: PLANNER, the best time to plant
     ========================================================== -->
     <section id="screen-planner" class="screen">
 
@@ -124,7 +124,7 @@
           <span class="head-rule"></span>
         </div>
         <h2>What should I plant right now?</h2>
-        <p class="muted">Our top picks for <b id="picks-parish">your parish</b>, best first — based on the season,
+        <p class="muted">Our top picks for <b id="picks-parish">your parish</b>, best first, based on the season,
           10 years of rainfall history, and the 7-day forecast.</p>
         <div id="top-picks" class="top-picks"></div>
       </div>
@@ -171,7 +171,7 @@
     </section>
 
     <!-- =========================================================
-         SCREEN 3: TRACKER — growth lifecycle roadmap
+         SCREEN 3: TRACKER, growth lifecycle roadmap
     ========================================================== -->
     <section id="screen-tracker" class="screen">
       <div id="saved-crops" class="card hidden">
@@ -180,7 +180,7 @@
           <span class="head-rule"></span>
         </div>
         <h2>My growing crops</h2>
-        <p class="muted">Every roadmap you build is saved here — tap one to reopen it.</p>
+        <p class="muted">Every roadmap you build is saved here, tap one to reopen it.</p>
         <div id="saved-list" class="saved-list"></div>
       </div>
 
@@ -224,7 +224,7 @@
     </section>
 
     <!-- =========================================================
-         SCREEN 4: PHOTO CHECK — analyse a plant photo + problem board
+         SCREEN 4: PHOTO CHECK, analyse a plant photo + problem board
     ========================================================== -->
     <section id="screen-photo" class="screen">
       <div class="card photo-setup">
@@ -239,7 +239,7 @@
         <div class="upload-box">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 16l4-5 3 3 4-6 5 8"/><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="9" cy="9" r="1.6"/></svg>
           <button id="photo-btn" class="btn-primary" type="button">Choose a plant photo</button>
-          <span class="upload-hint">JPG or PNG — stays on your phone, nothing is uploaded</span>
+          <span class="upload-hint">JPG or PNG, stays on your phone, nothing is uploaded</span>
           <input id="photo-input" type="file" accept="image/*" capture="environment" hidden />
         </div>
 
@@ -260,14 +260,14 @@
         <div id="photo-bars" class="colour-bars"></div>
         <div id="photo-matches" class="problem-matches"></div>
         <button id="photo-report" class="btn-secondary hidden">Report this finding to the Problem Board</button>
-        <p class="disclaimer">We're high school students, and this is a simple colour check — not a lab test
+        <p class="disclaimer">We're high school students, and this is a simple colour check, not a lab test
           (we used a little AI help to build it, but it's still just colours and rules).
           For anything serious, confirm with your local RADA extension officer.</p>
       </div>
     </section>
 
     <!-- =========================================================
-         SCREEN 5: COMMUNITY — farmer chat + problem board
+         SCREEN 5: COMMUNITY, farmer chat + problem board
     ========================================================== -->
     <section id="screen-community" class="screen">
       <div class="card chat-card">
@@ -276,7 +276,7 @@
           <span class="head-rule"></span>
         </div>
         <h2>Farmer community</h2>
-        <p class="muted small">Ask questions and share what works in your area. Be kind — every farm is different.</p>
+        <p class="muted small">Ask questions and share what works in your area. Be kind, every farm is different.</p>
         <div id="chat-feed" class="chat-feed"></div>
         <form id="chat-form" class="chat-form">
           <input id="chat-name" type="text" placeholder="Name" />
@@ -291,9 +291,9 @@
           <span class="head-rule"></span>
         </div>
         <h2>Market watch</h2>
-        <p class="muted">Indicative wholesale prices at Coronation Market this week — use them as a guide before you sell.</p>
+        <p class="muted">Indicative wholesale prices at Coronation Market this week, use them as a guide before you sell.</p>
         <div id="market-list" class="market-list"></div>
-        <p class="muted small">Sample prices for this demo — always confirm at the market.</p>
+        <p class="muted small">Sample prices for this demo, always confirm at the market.</p>
       </div>
 
       <div class="card board-card">
@@ -302,7 +302,7 @@
           <span class="head-rule"></span>
         </div>
         <h2>Problem board</h2>
-        <p class="muted">What farmers are dealing with right now — reported from the field.</p>
+        <p class="muted">What farmers are dealing with right now, reported from the field.</p>
         <div class="seg" id="board-filter">
           <button class="on" data-filter="all">All parishes</button>
           <button data-filter="mine">My parish</button>
@@ -312,7 +312,7 @@
     </section>
 
     <!-- =====================================================
-         SETTINGS — location, tutorial, data, about
+         SETTINGS, location, tutorial, data, about
     ====================================================== -->
     <section id="screen-settings" class="screen">
       <div class="card settings-intro">
@@ -321,7 +321,7 @@
           <span class="head-rule"></span>
         </div>
         <h2>Settings</h2>
-        <p class="muted">Everything stays on this phone — no account, no cloud, no cost.</p>
+        <p class="muted">Everything stays on this phone, no account, no cloud, no cost.</p>
       </div>
       <div class="card">
         <span class="label">My location</span>
@@ -360,7 +360,7 @@
       </div>
       <div class="card">
         <span class="label">About</span>
-        <p class="muted">AgriLink · v1.0 — built by students for Jamaican farmers. Works offline once installed on your phone. Free, no account, forever.</p>
+        <p class="muted">AgriLink · v1.0: built by students for Jamaican farmers. Works offline once installed on your phone. Free, no account, forever.</p>
       </div>
     </section>
 
@@ -373,7 +373,7 @@
         <img src="assets/logo-mark.png" alt="" class="onboard-logo" />
         <span class="label">AgriLink · Jamaica</span>
         <h2>Welcome to AgriLink</h2>
-        <p class="muted">Plant at the right time, track your crop, and check plant problems — all free.</p>
+        <p class="muted">Plant at the right time, track your crop, and check plant problems. All free.</p>
         <p class="muted small">Setting up takes about 30 seconds. We just need to know where you farm.</p>
         <button id="onboard-next" class="btn-primary">Let's go</button>
       </div>

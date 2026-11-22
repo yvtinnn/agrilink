@@ -1,5 +1,5 @@
 /* ============================================================
-   problems.js — two things live here:
+   problems.js, two things live here:
 
    1. PROBLEMS: our dataset of common crop problems in Jamaica.
       Each one lists what it looks like on a leaf and how the
@@ -10,7 +10,7 @@
    2. The photo analyser: a simple, honest colour check.
       It counts healthy-green / yellow / brown pixels and finds
       the problems whose "pattern" best matches. It is NOT a
-      lab test — the app says so right on the results card.
+      lab test, the app says so right on the results card.
 
    3. The public problem board: farmers report problems they
       see; reports are saved in the browser so the board grows.
@@ -109,7 +109,7 @@ function analysePhoto(img) {
     } else if (bright < 70) {
       leaf++; darkSpots++;                              // dark patches (lesions / fungus)
     } else if (r > 60 && r > g && g > b && r - g > 20) {
-      leaf++; brown++;                                  // brown / dry — soil lands here, NOT yellow
+      leaf++; brown++;                                  // brown / dry, soil lands here, NOT yellow
     } else if (r > 100 && g > 100 && b < g * 0.8 && r < g * 1.2) {
       leaf++; yellow++;                                 // yellowing (bright, low blue)
     }
@@ -239,6 +239,6 @@ function renderReports() {
     feed.appendChild(card);
   }
   if (!shown) {
-    feed.innerHTML = `<p class="muted small">No reports from ${myParish || "your parish"} yet — that's either great news, or you'll be the first to spot something.</p>`;
+    feed.innerHTML = `<p class="muted small">No reports from ${myParish || "your parish"} yet, that's either great news, or you'll be the first to spot something.</p>`;
   }
 }

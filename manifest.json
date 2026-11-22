@@ -1,7 +1,7 @@
 {
-  "name": "AgriLink — Smart Farming, Together",
+  "name": "AgriLink: Smart Farming, Together",
   "short_name": "AgriLink",
-  "description": "Crop planting advice and growth tracking powered by live weather and 10-year climate history — free for everyone.",
+  "description": "Crop planting advice and growth tracking powered by live weather and 10-year climate history, free for everyone.",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#F5F2E9",

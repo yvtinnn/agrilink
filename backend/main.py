@@ -1,5 +1,5 @@
 # ============================================================
-# AgriLink backend — FastAPI.
+# AgriLink backend, FastAPI.
 # One command runs the whole app:
 #     uvicorn backend.main:app --reload
 # then open http://localhost:8000
@@ -76,7 +76,7 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         path = request.url.path
         rule = next(((r, limit, secs) for r, limit, secs in RATE_RULES if path.startswith(r)), None)
         if rule is None:
-            return await call_next(request)  # static frontend — never blocked
+            return await call_next(request)  # static frontend, never blocked
 
         _, limit, window = rule
         ip = request.client.host if request.client else "unknown"
@@ -90,7 +90,7 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         if len(hits) >= limit:
             retry_after = max(1, int(hits[0] + window - now))
             return JSONResponse(
-                {"detail": f"Too many requests — try again in {retry_after}s."},
+                {"detail": f"Too many requests, try again in {retry_after}s."},
                 status_code=429,
                 headers={"Retry-After": str(retry_after)},
             )

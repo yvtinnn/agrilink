@@ -1,5 +1,5 @@
 /* ============================================================
-   community.js — the peer-to-peer farmer chat.
+   community.js, the peer-to-peer farmer chat.
    Messages from other farmers are saved in the browser
    (localStorage) so the conversation keeps growing.
 ============================================================ */
@@ -83,7 +83,7 @@ function renderChat() {
 
     bubble.append(who, text, when);
 
-    // "Helpful" reaction — thanks a farmer for good advice.
+    // "Helpful" reaction, thanks a farmer for good advice.
     // The button lives inside MY view only (it's a local demo app).
     const helpful = document.createElement("button");
     helpful.type = "button";
@@ -139,7 +139,7 @@ function renderMarket() {
   const box = document.getElementById("market-list");
   if (!box) return;
 
-  // a stable pseudo-random number from the day of the year — the board
+  // a stable pseudo-random number from the day of the year, the board
   // looks alive but doesn't jump around every time you open the app
   const now = new Date();
   const dayIndex = Math.floor((now - new Date(now.getFullYear(), 0, 0)) / 86400000);
@@ -161,7 +161,7 @@ function renderMarket() {
       `<span class="market-crop">${item.crop}</span>` +
       `<span class="market-unit">${item.unit}</span>` +
       `<span class="market-price">J$ ${price}</span>` +
-      `<span class="market-change ${dir}">${change > 0 ? "▲" : change < 0 ? "▼" : "–"} ${Math.abs(change)}%</span>`;
+      `<span class="market-change ${dir}">${change > 0 ? "▲" : change < 0 ? "▼" : "0"} ${Math.abs(change)}%</span>`;
     box.appendChild(row);
   });
 }
