@@ -1291,6 +1291,33 @@ if (savedParish) {
   syncPhotoCrop();
 }
 
+// ---- keep hosted-site banners off the tab bar (Netlify Drop deploys) ----
+// The "Powered by Netlify" / cookie banner is injected at the bottom of the
+// page and sits on top of the tab buttons. Any fixed banner we don't own gets
+// lifted above the tab bar so both stay visible.
+(function liftHostBanners() {
+  const OWN = new Set(["toast", "tabbar", "onboarding"]);
+  function lift() {
+    for (const el of document.body.children) {
+      if (el.tagName === "SCRIPT" || el.tagName === "STYLE" || el.tagName === "LINK") continue;
+      if (OWN.has(el.id) || OWN.has(el.className)) continue;
+      const cs = getComputedStyle(el);
+      if (cs.position !== "fixed" || cs.display === "none") continue;
+      const tag = (el.id + " " + el.className).toLowerCase();
+      const isHostUI = tag.includes("netlify") || tag.includes("cookie") || tag.includes("consent") || tag.includes("gdpr");
+      const nearBottom = parseFloat(cs.bottom) < 20;
+      if (isHostUI && nearBottom && !el.dataset.agrilinkLifted) {
+        el.dataset.agrilinkLifted = "1";
+        el.style.bottom = "calc(92px + env(safe-area-inset-bottom))";
+      }
+    }
+  }
+  lift();
+  if ("MutationObserver" in window) {
+    new MutationObserver(lift).observe(document.body, { childList: true, subtree: false });
+  }
+})();
+
 // Register the service worker so the app opens on a phone with no signal.
 // (file:// previews simply skip this, there is nothing to register there.)
 if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
