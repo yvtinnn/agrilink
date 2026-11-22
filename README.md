@@ -4,24 +4,18 @@ A simple web app that helps Caribbean farmers decide **when to plant**. It works
 
 **Live app:** https://timely-marshmallow-9054ac.netlify.app
 
-## How to access and run the code
+## How to get it
 
-**You need:**
-- A web browser (you already have one) — https://www.google.com/chrome
-- **Python 3.11+** (only for the backend) — download: https://www.python.org/downloads/
+Open the link in Chrome on your Android phone:
 
-**Step 1 — Get the code.** Download it from GitHub: click the green **Code** button → **Download ZIP**, unzip it. (Or with Git: `git clone https://github.com/yvtinnn/agrilink.git`)
+**https://timely-marshmallow-9054ac.netlify.app**
 
-**Step 2 — Run it, easiest way:** double-click `index.html`. The whole app opens in your browser. No install needed.
+**To install it on an Android phone (Chrome):**
+1. Open the link above in Chrome.
+2. Tap the **⋮** menu (top right) → **Add to Home screen** (or tap **Install AgriLink** if it appears).
+3. Tap **Install**. The app now sits on your home screen and works offline.
 
-**Step 3 — Run it with the backend (optional, Python):**
-```bash
-pip install -r backend/requirements.txt
-uvicorn backend.main:app --reload
-```
-Then open `http://localhost:8000` in your browser.
-
-That's it — 3 steps.
+The code can also be downloaded from this repo: click the green **Code** button → **Download ZIP**.
 
 ## How to use it
 
