@@ -1,140 +1,96 @@
-# 🌱 AgriLink, Plant smarter. Harvest more.
+# AgriLink
 
-AgriLink helps smallholder and local farmers fight climate unpredictability with:
-- **Predictive Crop Planning**, the best time to plant, built from a live 7-day forecast **and 10 years of rainfall history for your exact parish**
-- **My Crops**, every growth roadmap you build is saved on the phone, with a progress bar and harvest countdown on the Home screen
-- **Growth Lifecycle Tracking**, a dated roadmap from seed to harvest for every crop, saved and re-openable
-- **Crop Photo Check**, a photo of a sick plant is analysed against our dataset of 14 common crop problems (runs fully on the phone, no upload needed)
-- **Farmer Community**, a peer chat with parish tags, a read-only Problem Board of what farmers near you are dealing with, and a **Market Watch** price board
-- **7-day forecast strip + rain alerts**, day-by-day rain, temperature, wind and humidity, with a warning before heavy rain days
-- **Offline weather memory**, the last real forecast is saved on the phone, so a farm with no signal still sees the last known numbers (clearly labelled "Saved")
-- **Crop library filters**, browse by type: greens, fruit veg, roots & tubers, vines & melons, tree & long crops
-- **In-season row**, the Planner shows every crop whose planting window is open this month
+A planting almanac for Jamaican farmers. It gives a planting window for your parish, a dated growth roadmap, and an offline leaf check. It runs as a web app and installs on Android.
 
-**Free for everyone. No paywall. No account needed. Built by high school students.**
+## What it does
 
----
+- **Planner.** Ranks crops for the current month using each crop's planting window, ten years of parish rainfall from Open-Meteo's ERA5 archive, and the next seven days of rain and temperature. Heavy rain days are flagged before they arrive.
+- **Weather predictor.** Every forecast day shows its rain chance in percent, and a one-line prediction says what is coming and when to plant around it.
+- **Tracker.** Takes a crop and planting date, then builds a calendar of growth stages with a progress bar and harvest countdown. Roadmaps are saved on the phone.
+- **Photo check.** Shrinks a leaf photo to 160×160, builds a colour-pattern feature vector (green, yellow, brown, dark spots, white powder), and scores it against a 14-problem dataset with an on-device nearest-pattern model. The photo never leaves the phone.
+- **Community.** A local message board, a problem board filtered by parish, and a sample market price table.
+- **Offline.** The last real forecast is cached, so the app still opens without signal and says when the data is old.
 
-## ▶️ How to open AgriLink (for judges)
+## Open it
 
-### Option 1, Just open the link
-If you received a link to this app (e.g. hosted on Netlify or GitHub Pages), simply **click it**.
-It works in any browser, on any phone or computer, with nothing to install.
+- **Hosted:** open the link in any browser.
+- **Local:** double-click `index.html`.
+- **Install on Android:** open the hosted link in Chrome, then use *Install AgriLink* or *Add to Home screen*. The service worker caches the app for offline use.
 
-### Option 2, Open from the folder
-Double-click **`index.html`**. That's it, the whole app runs locally in your browser.
+## Run the backend
 
-### Option 3, Install it as a real app (Android, one tap)
-1. Open the hosted link in **Chrome on Android**
-2. Tap the **"Install AgriLink"** banner at the bottom of the screen (or ⋮ menu → *Add to Home screen*)
-3. AgriLink appears on your home screen with its own icon and opens full-screen, like any Play Store app.
-   It even works **offline** once installed, perfect for farms with weak signal.
-
----
-
-## 🚀 How we host it (for the team)
-
-**Easiest, Netlify Drop (frontend only):**
-1. Go to https://app.netlify.com/drop
-2. Drag this whole `agrilink` folder onto the page
-3. Netlify gives you a public link in ~10 seconds. Done.
-
-**Alternative, GitHub Pages (already a GitHub repo):**
-1. Repo → *Settings → Pages*
-2. Source: *Deploy from a branch*, branch `main`, folder `/ (root)` → Save
-3. Live at `https://yvtinnn.github.io/agrilink/` in about a minute
-
-## 🖥 Running the FastAPI backend (full app + API)
-
-The frontend works standalone, but the backend adds a real API layer:
+The frontend works on its own. The FastAPI backend adds an API layer and serves the same app.
 
 ```bash
 pip install -r backend/requirements.txt
 uvicorn backend.main:app --reload
 ```
 
-Then open **http://localhost:8000**, the same app, now served by FastAPI, with:
+Then open `http://localhost:8000`.
 
-| Endpoint | What it returns |
+| Endpoint | Returns |
 |---|---|
 | `GET /api/parishes` | all 14 parishes with coordinates |
-| `GET /api/farm-data/{parish}` | live forecast + 10-year climate history |
+| `GET /api/farm-data/{parish}` | live forecast and ten-year climate history |
 | `GET /api/crops` | crop database with planting windows and growth stages |
-| `GET /api/recommend/{parish}?crop=Corn` | full scored planting recommendation |
-| `GET /api/problems` | the crop-problem dataset used by the photo checker |
-| `/docs` | automatic interactive API documentation |
+| `GET /api/recommend/{parish}?crop=Corn` | scored planting recommendation |
+| `GET /api/problems` | crop-problem dataset used by the photo checker |
+| `/docs` | interactive API documentation |
 
-When the frontend is served by the backend, it automatically uses these API
-calls instead of calling Open-Meteo directly. Opened as a plain file, it still
-works, it falls back to calling Open-Meteo from the browser.
+When the app is served by the backend it uses these endpoints. Opened as a file, it calls Open-Meteo directly from the browser.
 
----
+## How the prediction works
 
-## 🧠 How the prediction works
+Three signals go into each score:
 
-AgriLink combines three signals, shown transparently with every recommendation:
+1. **Season.** The months when each crop usually grows well in Jamaica.
+2. **Climate history.** The ten-year average rainfall for the coming month, for the farmer's parish.
+3. **Live forecast.** Rain and temperature for the next seven days.
 
-1. **Season**, which months each crop historically does best in Jamaica
-2. **Climate history**, the 10-year average rainfall for the *coming month*, fetched for
-   the farmer's exact parish from [Open-Meteo's ERA5 archive](https://open-meteo.com/en/docs/historical-weather-api)
-   (so St. Elizabeth is judged by St. Elizabeth's history, not the island average)
-3. **Live forecast**, the next 7 days of rain and temperature from [Open-Meteo](https://open-meteo.com)
+Each signal is shown as a plus or minus in the plan, so the score is readable. The same rules live in `js/planner.js` and `backend/recommend.py`.
 
-Each fact is shown as a simple +/- contribution to a confidence score. No black box.
-The same scoring rules exist in two places that agree with each other:
-`js/planner.js` (browser) and `backend/recommend.py` (FastAPI server).
-If the APIs are unreachable (offline farm, no signal), the app falls back to sensible
-sample values so it never breaks.
+If Open-Meteo is unreachable, the app uses the last saved forecast and labels it as saved. If there is no saved forecast, it falls back to sample values and says so.
 
-## 🔎 How the photo check works
+## How the photo check works
 
-Honest and simple, no machine learning, so anyone can understand it:
+1. The browser shrinks the photo to 160×160.
+2. Each pixel is sorted into healthy green, yellowing, brown or dark spots. Background pixels are ignored.
+3. The colour mix is compared with the expected pattern for each problem in the dataset.
+4. The closest matches show what the problem looks like and what to do about it.
 
-1. The photo is shrunk to 160×160 pixels inside the browser (it never leaves the phone)
-2. Every pixel is sorted into three colour families: **healthy green**, **yellowing**, and **brown/dry**
-3. The colour mix is compared with the expected pattern of each problem in our dataset
-4. The best matches are shown with what the problem looks like and what to do about it
+The result card says this is a colour check, not a lab test, and points serious cases to a RADA extension officer.
 
-The app tells the farmer straight: *this is a simple colour check, not a lab test* 
-and suggests confirming with a RADA extension officer for serious cases.
+## The problem dataset
 
-## 📋 The problem dataset
+`js/problems.js` and `backend/problems.py` hold eight common Jamaican crop problems: nitrogen deficiency, drought stress, early blight, waterlogging, army worm, sun scorch, powdery mildew, and a healthy plant. Each entry lists the crops it affects, what it looks like, the colour pattern the analyser expects, and a practical fix.
 
-`js/problems.js` (browser) and `backend/problems.py` (API) hold 14 common Jamaican crop
-problems, nitrogen deficiency, drought stress, early blight, waterlogging, army worm,
-sun scorch, powdery mildew, and healthy. Each lists which crops it affects, what it looks
-like on the leaf, the colour pattern the analyser expects, and a practical fix.
+## A note on AI
 
-## 🤖 A note on AI
+We used AI tools to help write and review parts of the code. The crop and problem data, the scoring rules, and the testing are ours. We can explain every line.
 
-We're high school students, and we'll say it straight: **we used AI tools to help write
-and polish parts of this code**, the way a professional team would use autocomplete or
-a senior dev's advice. Every design decision, the crop and problem datasets, the scoring
-rules, and all the testing were ours, the AI helped us move faster and fix bugs we
-couldn't figure out alone. We can explain every line of it.
-
-## 🗂 Project structure
+## Project structure
 
 ```
 agrilink/
-├── index.html            ← the whole app (open this!)
-├── css/styles.css        ← the AgriLink look
-├── js/planner.js         ← crop database + planting advice + growth roadmap
-├── js/problems.js        ← crop-problem dataset + photo analyser + problem board
-├── js/app.js             ← glue: onboarding, navigation, weather, climate, screens
-├── backend/main.py       ← FastAPI server (serves the app + JSON API)
-├── backend/crops.py      ← crop database (server-side copy)
-├── backend/problems.py   ← crop-problem dataset (server-side copy)
-├── backend/recommend.py  ← scoring rules (server-side copy)
+├── index.html            the app
+├── css/styles.css        the look
+├── js/planner.js         crop database, planting advice, growth roadmap
+├── js/problems.js        problem dataset, photo analyser, problem board
+├── js/app.js             onboarding, navigation, weather, screens
+├── backend/main.py       FastAPI server
+├── backend/crops.py      crop database (server copy)
+├── backend/problems.py   problem dataset (server copy)
+├── backend/recommend.py  scoring rules (server copy)
 ├── backend/requirements.txt
-├── assets/               ← logo files
-├── manifest.json         ← makes it installable as an app
-├── service-worker.js     ← makes it work offline
-├── icons/                ← app icons (built from the real logo)
-└── docs/                 ← flow chart, logo, screenshots & captions
+├── assets/               logo and fonts
+├── manifest.json         installable app metadata
+├── service-worker.js     offline cache
+├── icons/                app icons
+└── docs/                 flow chart and screenshots
 ```
 
-## 🛠 Built with
+## Built with
 
-Plain **HTML, CSS and JavaScript**, no frameworks, no build tools, no installs.
-That's on purpose: anyone (including us!) can read the code, and anyone can run the app.
+Plain HTML, CSS and JavaScript. No frameworks, no build step. The app is readable and runs from the folder.
+
+Data comes from [Open-Meteo](https://open-meteo.com) and its [historical weather archive](https://open-meteo.com/en/docs/historical-weather-api).

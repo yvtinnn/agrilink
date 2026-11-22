@@ -368,6 +368,10 @@ main { max-width: 680px; margin: 0 auto; padding: 0 16px 28px; }
   font-size: 11px; color: var(--ink-3);
   font-variant-numeric: tabular-nums; white-space: nowrap;
 }
+.rc-prob {
+  font-size: 10px; color: var(--ink-3);
+  font-variant-numeric: tabular-nums; white-space: nowrap;
+}
 .rc-mm.heavy { color: var(--red); font-weight: 700; }
 .rc-mm.some  { color: var(--amber); font-weight: 600; }
 

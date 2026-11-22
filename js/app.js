@@ -139,16 +139,17 @@ document.getElementById("onboard-next").addEventListener("click", () => {
 });
 
 // temporary spot for the location while the tutorial is showing
-let pendingParish = "", pendingTown = "";
+let pendingParish = "", pendingTown = "", pendingName = "";
 
 document.getElementById("onboard-finish").addEventListener("click", () => {
   pendingParish = onboardParish.value;
   pendingTown = document.getElementById("onboard-town").value.trim();
+  pendingName = document.getElementById("onboard-name").value.trim();
   const errorBox = document.getElementById("onboard-error");
 
-  // keep it simple: we really just need a parish + town
-  if (!pendingParish || !pendingTown) {
-    errorBox.textContent = "Choose a parish and enter your town.";
+  // keep it simple: name, parish, town. The name is what shows in the chat.
+  if (!pendingName || !pendingParish || !pendingTown) {
+    errorBox.textContent = "Type your name, choose a parish and enter your town.";
     errorBox.classList.remove("hidden");
     return;
   }
@@ -215,6 +216,7 @@ document.getElementById("tutorial-skip").addEventListener("click", () => {
 document.getElementById("replay-tutorial").addEventListener("click", () => {
   pendingParish = localStorage.getItem("agrilink-parish") || "";
   pendingTown = localStorage.getItem("agrilink-town") || "";
+  pendingName = localStorage.getItem("agrilink-name") || "";
   showTutorialStep(0);
   document.getElementById("onboarding").classList.remove("hidden");
 });
@@ -224,6 +226,9 @@ function finishOnboarding(parish, town) {
   if (parish && town) {
     localStorage.setItem("agrilink-parish", parish);
     localStorage.setItem("agrilink-town", town);
+    // remember the farmer's name too: it signs their chat messages
+    if (pendingName) localStorage.setItem("agrilink-name", pendingName);
+    document.getElementById("chat-name").value = pendingName || localStorage.getItem("agrilink-name") || "";
     document.getElementById("farm-place").textContent = `${town}, ${parish}`;
     loadFarmData(parish);
     renderCrops();
@@ -237,6 +242,7 @@ function finishOnboarding(parish, town) {
 document.getElementById("change-farm").addEventListener("click", () => {
   onboardParish.value = localStorage.getItem("agrilink-parish") || "";
   document.getElementById("onboard-town").value = localStorage.getItem("agrilink-town") || "";
+  document.getElementById("onboard-name").value = localStorage.getItem("agrilink-name") || "";
   document.getElementById("onboard-step-1").classList.remove("active");
   document.getElementById("onboard-step-2").classList.remove("active");
   document.getElementById("onboard-step-3").classList.remove("active");
@@ -324,7 +330,7 @@ async function loadFarmData(parishName) {
     const url =
       "https://api.open-meteo.com/v1/forecast" +
       `?latitude=${parish.lat}&longitude=${parish.lon}` +
-      "&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,wind_speed_10m_max,relative_humidity_2m_mean" +
+      "&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,wind_speed_10m_max,relative_humidity_2m_mean" +
       "&forecast_days=7&timezone=auto";
     const response = await fetch(url, { signal: AbortSignal.timeout(10000) });
     if (!response.ok) throw new Error("forecast request failed");
@@ -338,6 +344,8 @@ async function loadFarmData(parishName) {
         tmax: Math.round(data.daily.temperature_2m_max[i]),
         wind: Math.round(data.daily.wind_speed_10m_max[i]),
         rh: Math.round(data.daily.relative_humidity_2m_mean[i]),
+        prob: data.daily.precipitation_probability_max[i] != null
+          ? Math.round(data.daily.precipitation_probability_max[i]) : null,
       })),
       live: true,
     };
@@ -461,7 +469,8 @@ function renderForecastStrip() {
     col.innerHTML =
       `<span class="rc-day">${i === 0 ? "Today" : dayNames[date.getDay()]}</span>` +
       `<span class="rc-plot"><span class="rc-bar ${level}" style="height:${h}px"></span></span>` +
-      `<span class="rc-mm ${mmCls}">${day.rain} mm</span>`;
+      `<span class="rc-mm ${mmCls}">${day.rain} mm</span>` +
+      (day.prob != null ? `<span class="rc-prob">${day.prob}%</span>` : "");
     strip.appendChild(col);
   });
 
@@ -478,6 +487,30 @@ function renderForecastStrip() {
     window_.classList.remove("hidden");
   } else {
     window_.classList.add("hidden");
+  }
+
+  // ---- the weather predictor: what the numbers say is coming next ----
+  // Combines the rain chance (% from the forecast model) with how much rain
+  // is expected, and answers in one line: what's coming, and when to act.
+  const predictor = document.getElementById("rain-predictor");
+  if (!currentWeather.daily.some((d) => d.prob != null)) {
+    predictor.classList.add("hidden"); // sample/offline data has no probabilities
+  } else {
+    let wetDay = null, wetIndex = -1;
+    for (let i = 0; i < currentWeather.daily.length; i++) {
+      const d = currentWeather.daily[i];
+      if (d.prob != null && d.prob >= 50) { wetDay = d; wetIndex = i; break; }
+    }
+    if (wetDay) {
+      const when = wetIndex === 0 ? "today" : "on " + dayNames[new Date(Date.now() + wetIndex * 86400000).getDay()];
+      const advice = wetDay.rain >= 20
+        ? "Hold off planting and spraying, use the time to mulch."
+        : "Good window to plant just before or right after it falls.";
+      predictor.innerHTML = `Weather predictor: <b>${wetDay.prob}% rain chance ${when}</b> (around ${wetDay.rain} mm). ${advice}`;
+    } else {
+      predictor.innerHTML = `Weather predictor: <b>rain unlikely for 3 days</b>. Plan to irrigate if you plant now.`;
+    }
+    predictor.classList.remove("hidden");
   }
 }
 
@@ -517,6 +550,9 @@ function renderFarmStats() {
   if (!currentWeather) return;
   box.classList.remove("hidden");
   const today = currentWeather.daily && currentWeather.daily[0];
+  const probStat = today && today.prob != null
+    ? `<div class="stat"><span class="label">Rain chance</span><span class="value">${today.prob}<small> %</small></span></div>`
+    : "";
   const windStat = today && today.wind != null
     ? `<div class="stat"><span class="label">Wind today</span><span class="value">${today.wind}<small> km/h</small></span></div>`
     : "";
@@ -529,7 +565,7 @@ function renderFarmStats() {
   box.innerHTML =
     `<div class="stat"><span class="label">Temp now</span><span class="value">${fmtTemp(currentWeather.temp)}<small>°</small></span></div>` +
     `<div class="stat"><span class="label">Rain 7 days</span><span class="value">${currentWeather.rain7}<small> mm</small></span></div>` +
-    windStat + rhStat + climateStat;
+    probStat + windStat + rhStat + climateStat;
 }
 
 // Rain alert: warn BEFORE heavy rain arrives so farmers can plan around it.
@@ -1064,6 +1100,7 @@ document.getElementById("photo-input").addEventListener("change", (event) => {
       colourBar("Healthy green", analysis.greenPct, "#2e9e55") +
       colourBar("Yellowing", analysis.yellowPct, "#e0b03a") +
       colourBar("Brown / dry", analysis.brownPct, "#a3703f") +
+      (analysis.whitePct > 0 ? colourBar("White powder", analysis.whitePct, "#b9b5a9") : "") +
       colourBar("Dark spots", analysis.darkPct, "#4a3b2a");
 
     // 3. match against the problem dataset, then walk the farmer
@@ -1151,6 +1188,7 @@ function restoreLastScan() {
       colourBar("Healthy green", lastPhotoAnalysis.greenPct, "#2e9e55") +
       colourBar("Yellowing", lastPhotoAnalysis.yellowPct, "#e0b03a") +
       colourBar("Brown / dry", lastPhotoAnalysis.brownPct, "#a3703f") +
+      (lastPhotoAnalysis.whitePct > 0 ? colourBar("White powder", lastPhotoAnalysis.whitePct, "#b9b5a9") : "") +
       colourBar("Dark spots", lastPhotoAnalysis.darkPct, "#4a3b2a");
     runPhotoMatch();
     document.getElementById("photo-result").classList.remove("hidden");
@@ -1229,6 +1267,7 @@ document.getElementById("btn-settings").addEventListener("click", () => {
 document.getElementById("settings-change").addEventListener("click", () => {
   onboardParish.value = localStorage.getItem("agrilink-parish") || "";
   document.getElementById("onboard-town").value = localStorage.getItem("agrilink-town") || "";
+  document.getElementById("onboard-name").value = localStorage.getItem("agrilink-name") || "";
   document.getElementById("onboard-step-1").classList.remove("active");
   document.getElementById("onboard-step-2").classList.remove("active");
   document.getElementById("onboard-step-3").classList.remove("active");
@@ -1240,6 +1279,7 @@ document.getElementById("settings-change").addEventListener("click", () => {
 document.getElementById("settings-tutorial").addEventListener("click", () => {
   pendingParish = localStorage.getItem("agrilink-parish") || "";
   pendingTown = localStorage.getItem("agrilink-town") || "";
+  pendingName = localStorage.getItem("agrilink-name") || "";
   showTutorialStep(0);
   document.getElementById("onboarding").classList.remove("hidden");
 });
@@ -1263,6 +1303,8 @@ document.getElementById("settings-clear").addEventListener("click", (event) => {
 // ============ START THE APP ============
 document.body.dataset.screen = "screen-home";
 applyTheme(getTheme());
+// prefill the chat name from onboarding so messages sign themselves
+document.getElementById("chat-name").value = localStorage.getItem("agrilink-name") || "";
 renderChat();
 renderReports();
 renderTypeChips();
