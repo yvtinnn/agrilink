@@ -1,31 +1,54 @@
 # AgriLink
 
-A simple web app that helps Caribbean farmers decide **when to plant**. It works offline, installs on Android, and now covers 14 Caribbean countries.
+A simple web app that helps Caribbean farmers decide **when to plant**. It works offline, installs on Android, and covers 14 Caribbean countries.
+
+**Live app:** https://timely-marshmallow-9054ac.netlify.app
+
+## How to use it
+
+1. Open the app and choose your **country**, **parish/area** and town.
+2. **Home** shows the weather, the top crops to plant right now, and heavy-rain warnings.
+3. **Planner** — pick a crop to see its planting score, best months and this week's forecast.
+4. **Tracker** — enter a crop and planting date to get a dated roadmap from seed to harvest. Tick stages off as they happen.
+5. **Scan** — take a photo of a sick leaf; the phone compares it against common crop problems and suggests a fix. Nothing is uploaded.
+6. **Community** — chat with other farmers and post problems to the board.
+7. **Settings** — change your location, switch light/dark and °C/°F, or clear your data.
 
 ## What it does
 
 - **Planner** — ranks crops for your area using the planting season, 10 years of rainfall history, and the 7-day forecast.
-- **Tracker** — enter a crop and planting date, get a dated growth roadmap from seed to harvest.
-- **Photo check** — take a photo of a sick leaf; the phone compares it against common crop problems and suggests a fix. Nothing is uploaded.
-- **Community** — a farmer chat and a problem board (live sharing with Firebase, local-only without it).
-- **Weather** — live forecast plus heavy-rain warnings before they arrive.
+- **Tracker** — dated growth roadmap with a progress bar and harvest countdown.
+- **Photo check** — on-device colour analysis of a leaf photo against 8 common crop problems.
+- **Community** — farmer chat and problem board (live sharing with Firebase, local-only without it).
 
 ## Countries covered
 
 Jamaica (14 parishes) plus Barbados, Trinidad & Tobago, Guyana, Belize, Haiti, Dominican Republic, St. Lucia, Grenada, St. Vincent & the Grenadines, Antigua & Barbuda, Dominica, St. Kitts & Nevis, and the Bahamas.
 
-## Run it
+## Built with
 
-**Frontend only:** open `index.html` in a browser. Done.
+JavaScript and Python only. No frameworks, no build step.
 
-**With the backend (FastAPI):**
+## This is the backend
+
+The `backend/` folder is the Python server (FastAPI). It serves the app and provides the API the JavaScript frontend calls:
 
 ```bash
 pip install -r backend/requirements.txt
 uvicorn backend.main:app --reload
 ```
 
-Then open `http://localhost:8000`. The API also serves `/docs` with all endpoints (`/api/parishes`, `/api/farm-data/{location}`, `/api/crops`, `/api/recommend/{location}?crop=Corn`, `/api/problems`).
+Then open `http://localhost:8000`. The API also serves `/docs` with all endpoints:
+
+| Endpoint | Returns |
+|---|---|
+| `GET /api/parishes` | all 77 locations across the Caribbean with coordinates |
+| `GET /api/farm-data/{location}` | live forecast and ten-year climate history |
+| `GET /api/crops` | crop database with planting windows and growth stages |
+| `GET /api/recommend/{location}?crop=Corn` | scored planting recommendation |
+| `GET /api/problems` | crop-problem dataset used by the photo checker |
+
+Without the backend, the same app runs standalone from `index.html` (or the Netlify link above) and calls Open-Meteo directly from the browser.
 
 ## How the planting score works
 
@@ -34,17 +57,5 @@ Then open `http://localhost:8000`. The API also serves `/docs` with all endpoint
 3. **Live forecast** — rain and temperature for the next 7 days.
 
 Each signal shows as a plus or minus, so the score is easy to read.
-
-## Project structure
-
-```
-agrilink/
-├── index.html            the app
-├── css/ js/              styles and logic
-├── backend/              FastAPI server + data the app can call
-├── manifest.json         installable app metadata
-├── service-worker.js     offline cache
-└── docs/                 flow chart and screenshots
-```
 
 Data comes from [Open-Meteo](https://open-meteo.com) (free, no key needed).
