@@ -457,6 +457,7 @@ function renderForecastStrip() {
 
     const col = document.createElement("div");
     col.className = "rain-col" + (plantable ? " plantable" : "");
+    col.style.setProperty("--i", i); // stagger the bar grow-in animation
     col.innerHTML =
       `<span class="rc-day">${i === 0 ? "Today" : dayNames[date.getDay()]}</span>` +
       `<span class="rc-plot"><span class="rc-bar ${level}" style="height:${h}px"></span></span>` +

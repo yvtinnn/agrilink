@@ -211,9 +211,42 @@ b, strong { font-weight: 600; }
 main { max-width: 680px; margin: 0 auto; padding: 0 16px 28px; }
 
 .screen { display: none; }
-.screen.active { display: block; animation: screenIn .18s ease both; }
+.screen.active { display: block; }
+
+/* ---------- animation: how things move ---------- */
+/* 1) the sections of a screen rise in, one after another, top to bottom */
+.screen.active > .card,
+.screen.active > .alert-banner,
+.screen.active > #timeline-output {
+  animation: screenIn .28s ease both;
+}
+.screen.active > :nth-child(2) { animation-delay: 45ms; }
+.screen.active > :nth-child(3) { animation-delay: 90ms; }
+.screen.active > :nth-child(4) { animation-delay: 135ms; }
+.screen.active > :nth-child(5) { animation-delay: 180ms; }
 @keyframes screenIn {
-  from { opacity: 0; transform: translateY(4px); }
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* 2) list rows (picks, crops, market, saved, timeline) fade up quickly,
+      the first rows arrive first so the eye reads down the list */
+:is(.top-picks .pick, .crop-list .crop-tile, .market-list .market-row,
+    .my-crops .mini-crop, .saved-list .saved-item, .timeline .stage) {
+  animation: rowIn .28s ease both;
+}
+:is(.top-picks .pick, .crop-list .crop-tile, .market-list .market-row,
+    .my-crops .mini-crop, .saved-list .saved-item, .timeline .stage):nth-child(2) { animation-delay: 40ms; }
+:is(.top-picks .pick, .crop-list .crop-tile, .market-list .market-row,
+    .my-crops .mini-crop, .saved-list .saved-item, .timeline .stage):nth-child(3) { animation-delay: 80ms; }
+:is(.top-picks .pick, .crop-list .crop-tile, .market-list .market-row,
+    .my-crops .mini-crop, .saved-list .saved-item, .timeline .stage):nth-child(4) { animation-delay: 120ms; }
+:is(.top-picks .pick, .crop-list .crop-tile, .market-list .market-row,
+    .my-crops .mini-crop, .saved-list .saved-item, .timeline .stage):nth-child(5) { animation-delay: 160ms; }
+:is(.top-picks .pick, .crop-list .crop-tile, .market-list .market-row,
+    .my-crops .mini-crop, .saved-list .saved-item, .timeline .stage):nth-child(n+6) { animation-delay: 200ms; }
+@keyframes rowIn {
+  from { opacity: 0; transform: translateY(6px); }
   to   { opacity: 1; transform: none; }
 }
 
@@ -319,6 +352,14 @@ main { max-width: 680px; margin: 0 auto; padding: 0 16px 28px; }
   display: block; width: 100%; max-width: 22px;
   border-radius: 2px 2px 0 0;
   background: var(--bar-low);
+  /* bars grow up from the ground, one after another (--i is set in app.js) */
+  transform-origin: bottom;
+  animation: barUp .45s cubic-bezier(.22, 1, .36, 1) both;
+  animation-delay: calc(var(--i, 0) * 45ms);
+}
+@keyframes barUp {
+  from { transform: scaleY(0); }
+  to   { transform: scaleY(1); }
 }
 .rc-bar.lvl-low  { background: var(--bar-low); }
 .rc-bar.lvl-mid  { background: var(--bar-mid); border: 1px solid var(--amber); border-bottom: 0; }
