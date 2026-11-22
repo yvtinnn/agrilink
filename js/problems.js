@@ -238,6 +238,9 @@ function matchProblems(analysis, cropName) {
 }
 
 // ---- Public problem board --------------------------------------------
+// Local mode: reports saved on this phone with demo seeds.
+// Live mode (Firebase configured in js/firebase-config.js): every phone's
+// reports land on the shared board, newest first.
 const SEED_REPORTS = [
   { crop: "Callaloo", problem: "Army worm / caterpillar damage", parish: "St. Elizabeth", note: "Small green worms eating holes in most of the field.", when: "2 days ago" },
   { crop: "Tomato", problem: "Water stress (drought)", parish: "Clarendon", note: "Bottom leaves drying out even though we water twice a week.", when: "2 days ago" },
@@ -257,15 +260,25 @@ function saveReports(reports) {
 }
 
 function addReport(crop, problem, note, parish) {
-  const reports = loadReports();
-  reports.unshift({
+  const report = {
     crop: crop,
     problem: problem,
     parish: parish || localStorage.getItem("agrilink-parish") || "Unknown parish",
     note: note || "",
-    when: "just now",
-    mine: true,
-  });
+  };
+  if (typeof liveMode !== "undefined" && liveMode) {
+    report.ts = firebase.database.ServerValue.TIMESTAMP;
+    const ref = firebase.database().ref("reports").push(report);
+    // remember which shared reports this phone filed, for the green highlight
+    try {
+      const mine = JSON.parse(localStorage.getItem("agrilink-my-reports") || "[]");
+      mine.push(ref.key);
+      localStorage.setItem("agrilink-my-reports", JSON.stringify(mine));
+    } catch {}
+    return;
+  }
+  const reports = loadReports();
+  reports.unshift({ ...report, when: "just now", mine: true });
   saveReports(reports);
   renderReports();
 }
@@ -285,18 +298,25 @@ function renderReports() {
   const feed = document.getElementById("report-feed");
   feed.innerHTML = "";
   const myParish = localStorage.getItem("agrilink-parish") || "";
+  // live mode shows the shared Firebase board, local mode shows this phone
+  const reports = (typeof liveMode !== "undefined" && liveMode && LIVE_REPORTS)
+    ? LIVE_REPORTS
+    : loadReports();
+  // keys of shared reports that THIS phone filed (live mode only)
+  let myReportKeys = [];
+  try { myReportKeys = JSON.parse(localStorage.getItem("agrilink-my-reports") || "[]"); } catch {}
   let shown = 0;
-  for (const report of loadReports()) {
+  for (const report of reports) {
     if (boardFilter === "mine" && report.parish !== myParish) continue;
     shown++;
     const card = document.createElement("div");
-    card.className = "report" + (report.mine ? " mine" : "");
+    card.className = "report" + (report.mine || myReportKeys.includes(report._key) ? " mine" : "");
     const top = document.createElement("div");
     top.className = "report-top";
     top.innerHTML = `<b>${report.crop}</b> · ${report.problem}`;
     const meta = document.createElement("div");
     meta.className = "report-meta";
-    meta.textContent = `${report.parish} · ${report.when}`;
+    meta.textContent = `${report.parish} · ${report.when || (report.ts ? agoLabel(report.ts) : "")}`;
     card.append(top);
     if (report.note) {
       const note = document.createElement("div");

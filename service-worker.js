@@ -4,7 +4,7 @@
    so it opens even when the farm has no signal.
 ============================================================ */
 
-const CACHE_NAME = "agrilink-v32";
+const CACHE_NAME = "agrilink-v33";
 const FILES_TO_CACHE = [
   "./",
   "./index.html",
@@ -43,9 +43,10 @@ self.addEventListener("activate", (event) => {
 });
 
 // Every request: use the cache for app files, but always go online
-// for live weather (so it stays fresh when there IS a connection).
+// for live data (weather and the community database).
 self.addEventListener("fetch", (event) => {
   if (event.request.url.includes("open-meteo.com")) return; // let the browser handle it
+  if (event.request.url.includes("firebaseio.com") || event.request.url.includes("gstatic.com")) return;
   event.respondWith(
     // ignoreSearch so "styles.css?v=21" still matches the cached "styles.css"
     caches.match(event.request, { ignoreSearch: true }).then((cached) => cached || fetch(event.request))

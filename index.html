@@ -19,7 +19,7 @@
       }
     } catch (e) {}
   </script>
-  <link rel="stylesheet" href="css/styles.css?v=32" />
+  <link rel="stylesheet" href="css/styles.css?v=33" />
 </head>
 <body>
 
@@ -379,9 +379,15 @@
     </button>
   </nav>
 
-  <script src="js/planner.js?v=32"></script>
-  <script src="js/community.js?v=32"></script>
-  <script src="js/problems.js?v=32"></script>
-  <script src="js/app.js?v=32"></script>
+  <!-- Firebase (free realtime database for the live community mode).
+       Until a real config is pasted into js/firebase-config.js the app
+       stays in local mode and these scripts are never used for data. -->
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
+  <script src="js/firebase-config.js?v=33"></script>
+  <script src="js/planner.js?v=33"></script>
+  <script src="js/community.js?v=33"></script>
+  <script src="js/problems.js?v=33"></script>
+  <script src="js/app.js?v=33"></script>
 </body>
 </html>

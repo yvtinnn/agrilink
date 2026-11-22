@@ -8,7 +8,22 @@ A planting almanac for Jamaican farmers. It gives a planting window for your par
 - **Weather predictor.** Every forecast day shows its rain chance in percent, and a one-line prediction says what is coming and when to plant around it.
 - **Tracker.** Takes a crop and planting date, then builds a calendar of growth stages with a progress bar and harvest countdown. Roadmaps are saved on the phone.
 - **Photo check.** Shrinks a leaf photo to 160×160, builds a colour-pattern feature vector (green, yellow, brown, dark spots, white powder), and scores it against a 14-problem dataset with an on-device nearest-pattern model. The photo never leaves the phone.
-- **Community.** A local message board, a problem board filtered by parish, and a sample market price table.
+- **Community.** A farmer chat, a problem board filtered by parish, and a sample market price table. With Firebase configured the chat and board are live and shared between phones; without it everything stays local (demo messages keep the feed alive).
+
+## Making the community live (Firebase, free)
+
+The app ships in local mode: chat messages and problem reports stay on one phone. To make them shared and live:
+
+1. Go to [console.firebase.google.com](https://console.firebase.google.com) and click **Add project** (no billing needed)
+2. In the project: **Build → Realtime Database → Create database**. Choose a location, and **test mode** rules to start
+3. **Project settings (gear) → Your apps → Web app (`</>`)**, register it, and copy the `firebaseConfig` values
+4. Paste them into `js/firebase-config.js` (replace every `PASTE_` / `YOUR_PROJECT` placeholder) and redeploy
+
+Now the chat and problem board sync between every phone with the app, live. Notes:
+
+- Test-mode rules allow read/write for 30 days; tighten them later in **Realtime Database → Rules**
+- The `apiKey` in the config is safe to publish for a public web app; security comes from the database rules
+- No config or no signal? The app falls back to local mode automatically and says so with a toast
 - **Offline.** The last real forecast is cached, so the app still opens without signal and says when the data is old.
 
 ## Open it

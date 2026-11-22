@@ -1,8 +1,75 @@
 /* ============================================================
-   community.js, the peer-to-peer farmer chat.
-   Messages from other farmers are saved in the browser
-   (localStorage) so the conversation keeps growing.
+   community.js, the farmer community: chat, market watch.
+
+   Two modes:
+   LIVE mode: a free Firebase Realtime Database (see
+     js/firebase-config.js). Every phone with the app sees the same
+     chat, live, as messages arrive.
+   LOCAL mode (default until a config is pasted): messages stay on
+     this phone and demo farmers keep the feed alive.
 ============================================================ */
+
+// ---- live mode: Firebase Realtime Database ---------------------------
+// Set up by js/firebase-config.js. Until that file holds a real config,
+// the app stays in local mode and nothing here is ever contacted.
+let liveMode = false;
+let LIVE_CHAT = [];      // chat messages from Firebase, oldest first
+let LIVE_REPORTS = null; // problem-board reports from Firebase, newest first
+
+(function initCommunity() {
+  try {
+    const cfg = typeof FIREBASE_CONFIG === "undefined" ? null : FIREBASE_CONFIG;
+    const configured = cfg && cfg.apiKey && !String(cfg.apiKey).startsWith("PASTE")
+      && !String(cfg.databaseURL || "").includes("YOUR_PROJECT");
+    if (typeof firebase !== "undefined" && configured) {
+      firebase.initializeApp(cfg);
+      const db = firebase.database();
+
+      // chat: keep the last 80 messages in sync, live
+      db.ref("chat").limitToLast(80).on("value", (snap) => {
+        const val = snap.val();
+        LIVE_CHAT = val ? Object.entries(val).map(([key, post]) => ({ ...post, _key: key })) : [];
+        renderChat();
+      }, () => communityOffline());
+
+      // problem board: live (problems.js renders whatever this provides)
+      db.ref("reports").limitToLast(80).on("value", (snap) => {
+        const val = snap.val();
+        LIVE_REPORTS = val
+          ? Object.entries(val).map(([key, report]) => ({ ...report, _key: key })).reverse()
+          : [];
+        renderReports();
+      }, () => communityOffline());
+
+      liveMode = true;
+    }
+  } catch { liveMode = false; } // no config, or blocked: local mode it is
+})();
+
+// Firebase broke mid-session (bad rules, no signal): fall back to local
+// data so the screen is never empty.
+function communityOffline() {
+  liveMode = false;
+  if (typeof showToast === "function") showToast("Community offline: showing messages saved on this phone");
+  renderChat();
+  if (typeof renderReports === "function") renderReports();
+}
+
+// which messages THIS phone has already marked helpful (live mode only)
+function myHelpfulMarks() {
+  try { return JSON.parse(localStorage.getItem("agrilink-helpful")) || {}; } catch { return {}; }
+}
+
+// "2 days ago" style labels from a message timestamp
+function agoLabel(ts) {
+  const mins = Math.round((Date.now() - ts) / 60000);
+  if (mins < 1) return "just now";
+  if (mins < 60) return mins + " min ago";
+  const hours = Math.round(mins / 60);
+  if (hours < 24) return hours + " hour" + (hours > 1 ? "s" : "") + " ago";
+  const days = Math.round(hours / 24);
+  return days + " day" + (days > 1 ? "s" : "") + " ago";
+}
 
 // Seed messages: realistic farmer conversations so the community
 // feels alive the first time anyone opens the app.
@@ -54,7 +121,7 @@ function savePosts(posts) {
 // Draw all messages on the screen, with a round initial avatar.
 function renderChat() {
   const feed = document.getElementById("chat-feed");
-  const posts = loadPosts();
+  const posts = liveMode ? LIVE_CHAT : loadPosts();
   const myName = localStorage.getItem("agrilink-name") || "";
 
   feed.innerHTML = "";
@@ -79,22 +146,38 @@ function renderChat() {
 
     const when = document.createElement("div");
     when.className = "when";
-    when.textContent = post.time + (post.helpful ? ` · ${post.helpful} found this helpful` : "");
+    const whenText = post.time || (post.ts ? agoLabel(post.ts) : "");
+    when.textContent = whenText + (post.helpful ? ` · ${post.helpful} found this helpful` : "");
 
     bubble.append(who, text, when);
 
     // "Helpful" reaction, thanks a farmer for good advice.
-    // The button lives inside MY view only (it's a local demo app).
+    // Local mode: saved with the message. Live mode: a transaction on the
+    // shared count, and this phone remembers which ones it already marked.
     const helpful = document.createElement("button");
     helpful.type = "button";
-    helpful.className = "helpful" + (post.iHelped ? " did" : "");
-    helpful.textContent = post.iHelped ? "You found this helpful" : "Helpful";
+    const didHelp = liveMode ? !!myHelpfulMarks()[post._key] : !!post.iHelped;
+    helpful.className = "helpful" + (didHelp ? " did" : "");
+    helpful.textContent = didHelp ? "You found this helpful" : "Helpful";
     helpful.addEventListener("click", () => {
-      const posts = loadPosts();
-      const target = posts.find((x) => x === post);
-      if (target.iHelped) { target.iHelped = false; target.helpful = (target.helpful || 1) - 1; }
-      else { target.iHelped = true; target.helpful = (target.helpful || 0) + 1; }
-      savePosts(posts);
+      if (liveMode) {
+        const marks = myHelpfulMarks();
+        const countRef = firebase.database().ref("chat/" + post._key + "/helpful");
+        if (marks[post._key]) {
+          countRef.transaction((v) => Math.max(0, (v || 1) - 1));
+          delete marks[post._key];
+        } else {
+          countRef.transaction((v) => (v || 0) + 1);
+          marks[post._key] = true;
+        }
+        try { localStorage.setItem("agrilink-helpful", JSON.stringify(marks)); } catch {}
+      } else {
+        const posts = loadPosts();
+        const target = posts.find((x) => x === post);
+        if (target.iHelped) { target.iHelped = false; target.helpful = (target.helpful || 1) - 1; }
+        else { target.iHelped = true; target.helpful = (target.helpful || 0) + 1; }
+        savePosts(posts);
+      }
       renderChat();
     });
     bubble.appendChild(helpful);
@@ -105,17 +188,24 @@ function renderChat() {
   feed.scrollTop = feed.scrollHeight; // scroll to newest message
 }
 
-// Send a new message.
+// Send a new message. Live mode: pushed to Firebase, every phone sees it
+// within a second. Local mode: saved on this phone as before.
 function sendMessage(name, text) {
-  const posts = loadPosts();
-  posts.push({
+  const post = {
     name: name || "Anonymous Farmer",
     region: localStorage.getItem("agrilink-region") || localStorage.getItem("agrilink-parish") || "",
     text: text,
-    time: "just now",
-  });
-  savePosts(posts);
-  renderChat();
+  };
+  if (liveMode) {
+    post.ts = firebase.database.ServerValue.TIMESTAMP;
+    firebase.database().ref("chat").push(post);
+  } else {
+    post.time = "just now";
+    const posts = loadPosts();
+    posts.push(post);
+    savePosts(posts);
+    renderChat();
+  }
 }
 
 // ---- Market watch ----------------------------------------------------
