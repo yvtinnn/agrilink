@@ -1,7 +1,3 @@
-# ============================================================
-# recommend.py, the planting scoring rules (server-side copy of
-# the logic in js/planner.js so both agree with each other).
-# ============================================================
 
 from datetime import datetime
 

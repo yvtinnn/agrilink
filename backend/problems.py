@@ -1,7 +1,3 @@
-# ============================================================
-# problems.py, our dataset of common crop problems (server-side
-# copy of js/problems.js so the API can serve it too).
-# ============================================================
 
 PROBLEMS = [
     {
@@ -42,45 +38,9 @@ PROBLEMS = [
     },
     {
         "name": "Powdery mildew",
-        "crops": ["Pumpkin", "Okra", "Sweet Potato", "Cucumber"],
+        "crops": ["Pumpkin", "Okra", "Sweet Potato"],
         "looksLike": "White or grey powder-like patches on top of leaves.",
         "fix": "Improve air flow between plants, avoid overhead watering. Baking-soda spray (1 tbsp per litre) is a known home remedy.",
-    },
-    {
-        "name": "Aphids / whiteflies",
-        "crops": ["Tomato", "Cabbage", "Callaloo", "Okra", "Sweet Pepper", "Cucumber"],
-        "looksLike": "Leaves curling and sticky, with tiny green, black or white insects clustered under leaves and on new shoots.",
-        "fix": "Blast them off with water, then spray with soapy water (1 tsp soap per litre). Ladybugs eat them for free.",
-    },
-    {
-        "name": "Leaf miner trails",
-        "crops": ["Tomato", "Cabbage", "Callaloo", "Sweet Pepper", "Cucumber", "Lettuce"],
-        "looksLike": "Pale white winding trails or blisters drawn across the leaf like a map.",
-        "fix": "Remove and destroy mined leaves. Yellow sticky traps catch the adult flies. Don't over-spray, it kills the good bugs.",
-    },
-    {
-        "name": "Blossom end rot",
-        "crops": ["Tomato", "Sweet Pepper", "Watermelon"],
-        "looksLike": "A dark, sunken, leathery patch on the bottom of the fruit, not the leaf.",
-        "fix": "It's a calcium and water problem, not a disease. Water evenly, mulch, and don't over-fertilise with nitrogen.",
-    },
-    {
-        "name": "Magnesium deficiency",
-        "crops": ["Tomato", "Cucumber", "Sweet Pepper", "Papaya", "Sweet Potato"],
-        "looksLike": "Yellow between the veins while the veins stay green, on older leaves first.",
-        "fix": "Spray Epsom salts (1 tbsp per litre of water) on the leaves, and again in two weeks. Cheap and fast.",
-    },
-    {
-        "name": "Rust disease",
-        "crops": ["Onion", "Corn", "Okra"],
-        "looksLike": "Small orange-brown pustules like rust powder, mostly under the leaves.",
-        "fix": "Remove badly infected leaves. Improve air flow and avoid wetting the leaves in the evening. Copper spray helps in bad years.",
-    },
-    {
-        "name": "Mosaic virus",
-        "crops": ["Tomato", "Scotch Bonnet", "Sweet Pepper", "Cucumber"],
-        "looksLike": "Light and dark green mottling, like a patchwork, with stunted twisted new leaves.",
-        "fix": "No cure. Pull and bury sick plants so it doesn't spread. Wash your hands and tools after touching them, and control aphids which carry it.",
     },
     {
         "name": "Healthy plant",

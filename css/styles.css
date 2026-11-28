@@ -1,13 +1,4 @@
-/* ============================================================
-   AgriLink, "Field Packet"
-   A planting almanac that reads like a printed seed packet and a
-   market board: chalk paper, heavy rules, stamped labels, big
-   condensed numerals. One leaf green means "go". Amber means
-   caution. Red means stop. Nothing else carries colour.
-   Light is the default because the phone is used in the field.
-   ============================================================ */
 
-/* ---------- type ---------- */
 @font-face {
   font-family: "Barlow";
   src: url("../assets/fonts/barlow-400.woff2") format("woff2");
@@ -121,7 +112,7 @@ body {
   line-height: 1.55;
   color: var(--ink);
   background: var(--paper);
-  padding-bottom: 112px;
+  padding-bottom: 100px;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
@@ -366,10 +357,6 @@ main { max-width: 680px; margin: 0 auto; padding: 0 16px 28px; }
 .rc-bar.lvl-high { background: var(--bar-high); border: 1px solid var(--red); border-bottom: 0; }
 .rc-mm {
   font-size: 11px; color: var(--ink-3);
-  font-variant-numeric: tabular-nums; white-space: nowrap;
-}
-.rc-prob {
-  font-size: 10px; color: var(--ink-3);
   font-variant-numeric: tabular-nums; white-space: nowrap;
 }
 .rc-mm.heavy { color: var(--red); font-weight: 700; }
@@ -804,36 +791,6 @@ select option { color: var(--ink); background: var(--card); }
 }
 .stage .tip { font-size: 13.5px; line-height: 1.45; color: var(--ink-2); margin-top: 3px; }
 
-/* ---------- stage log: tick what really happened ---------- */
-.stage-log {
-  display: flex; align-items: center; flex-wrap: wrap; gap: 6px;
-  margin-top: 9px;
-}
-.log-date {
-  font-family: "Barlow Condensed", "Barlow", sans-serif;
-  font-size: 12.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em;
-  color: var(--green);
-}
-.log-date .log-shift { color: var(--amber); }
-.log-btn {
-  padding: 5px 10px;
-  border: 1px solid var(--line-2);
-  border-radius: 999px;
-  background: var(--card);
-  color: var(--ink-2);
-  font-family: "Barlow Condensed", "Barlow", sans-serif;
-  font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em;
-  cursor: pointer;
-  transition: border-color .15s ease, color .15s ease;
-}
-.log-btn:hover { border-color: var(--green); color: var(--green); }
-.log-btn.tick {
-  border-color: var(--green);
-  background: var(--green);
-  color: var(--on-green);
-}
-.log-btn.tick:hover { background: var(--green-2); border-color: var(--green-2); color: var(--on-green); }
-
 /* ---------- photo check ---------- */
 .upload-box {
   display: flex; flex-direction: column; align-items: center; gap: 12px;
@@ -994,8 +951,7 @@ select option { color: var(--ink); background: var(--card); }
 .tabbar {
   position: fixed; left: 0; right: 0; bottom: 0; z-index: 30;
   display: flex; align-items: flex-end; justify-content: space-around; gap: 2px;
-  /* roomier bar: bigger targets, thumbs land cleanly on every tab */
-  padding: 10px 8px calc(10px + env(safe-area-inset-bottom));
+  padding: 8px 8px calc(8px + env(safe-area-inset-bottom));
   background: var(--paper);
   border-top: 1px solid var(--line);
 }
@@ -1003,8 +959,8 @@ select option { color: var(--ink); background: var(--card); }
   position: relative;
   flex: 1;
   display: flex; flex-direction: column; align-items: center; gap: 3px;
-  min-height: 54px;
-  padding: 6px 0;
+  min-height: 48px;
+  padding: 5px 0;
   border: 0; background: none;
   color: var(--ink-3);
   font-family: "Barlow Condensed", "Barlow", sans-serif;
@@ -1042,7 +998,7 @@ select option { color: var(--ink); background: var(--card); }
   cursor: pointer;
 }
 .scan-btn {
-  width: 62px; height: 62px;
+  width: 58px; height: 58px;
   display: flex; align-items: center; justify-content: center;
   border: 4px solid var(--card);
   border-radius: 50%;
@@ -1057,7 +1013,7 @@ body[data-screen="screen-photo"] .scan-label { color: var(--green); }
 
 /* ---------- toast ---------- */
 .toast {
-  position: fixed; left: 50%; bottom: calc(118px + env(safe-area-inset-bottom));
+  position: fixed; left: 50%; bottom: calc(104px + env(safe-area-inset-bottom));
   z-index: 60;
   max-width: 88vw;
   padding: 10px 16px;

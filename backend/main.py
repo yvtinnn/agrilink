@@ -1,14 +1,3 @@
-# ============================================================
-# AgriLink backend, FastAPI.
-# One command runs the whole app:
-#     uvicorn backend.main:app --reload
-# then open http://localhost:8000
-#
-# The backend serves the frontend AND provides /api endpoints:
-#   - live weather + 10-year climate history (via Open-Meteo)
-#   - crop recommendations (same scoring rules as the frontend)
-#   - growth roadmaps
-# ============================================================
 
 from pathlib import Path
 from datetime import datetime
@@ -22,102 +11,164 @@ from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from starlette.middleware.base import BaseHTTPMiddleware
 
-# ---- Locations across the Caribbean (same list as js/app.js) ----
-# Jamaica keeps its plain parish names; other countries add the country in
-# brackets so every key stays unique. Kingston sits on land at Halfway Tree:
-# the old point fell in Kingston Harbour and returned marine rainfall.
-PARISHES = {
-    # Jamaica (the 14 parishes)
-    "Kingston":      (17.98, -76.79),
-    "St. Andrew":    (18.02, -76.75),
-    "St. Catherine": (17.99, -77.06),
-    "Clarendon":     (17.78, -77.37),
-    "Manchester":    (18.04, -77.44),
-    "St. Elizabeth": (18.07, -77.68),
-    "Westmoreland":  (18.18, -78.14),
-    "Hanover":       (18.36, -78.12),
-    "St. James":     (18.35, -77.90),
-    "Trelawny":      (18.35, -77.55),
-    "St. Ann":       (18.29, -77.20),
-    "St. Mary":      (18.19, -76.93),
-    "Portland":      (18.10, -76.60),
-    "St. Thomas":    (17.88, -76.42),
-    # Barbados
-    "St. Michael (Barbados)":    (13.11, -59.60),
-    "Christ Church (Barbados)":  (13.07, -59.55),
-    "St. James (Barbados)":      (13.09, -59.65),
-    "St. Peter (Barbados)":      (13.16, -59.65),
-    "St. Lucy (Barbados)":       (13.28, -59.64),
-    "St. Andrew (Barbados)":     (13.24, -59.59),
-    "St. Thomas (Barbados)":     (13.17, -59.59),
-    "St. George (Barbados)":     (13.14, -59.56),
-    "St. Philip (Barbados)":     (13.16, -59.50),
-    "St. Joseph (Barbados)":     (13.21, -59.56),
-    "St. John (Barbados)":       (13.19, -59.52),
-    # Trinidad & Tobago
-    "Port of Spain (Trinidad)":  (10.65, -61.50),
-    "San Fernando (Trinidad)":   (10.28, -61.47),
-    "Chaguanas (Trinidad)":      (10.52, -61.41),
-    "Arima (Trinidad)":          (10.64, -61.28),
-    "Couva (Trinidad)":          (10.42, -61.44),
-    "Princes Town (Trinidad)":   (10.27, -61.37),
-    "Sangre Grande (Trinidad)":  (10.59, -61.13),
-    "Penal (Trinidad)":          (10.16, -61.46),
-    "Scarborough (Tobago)":      (11.19, -60.74),
-    # Guyana
-    "Georgetown (Guyana)":       (6.80, -58.16),
-    "New Amsterdam (Guyana)":    (6.25, -57.51),
-    "Linden (Guyana)":           (6.00, -58.31),
-    "Bartica (Guyana)":          (6.40, -58.62),
-    # Belize
-    "Belize City (Belize)":      (17.50, -88.20),
-    "Belmopan (Belize)":         (17.25, -88.77),
-    "Corozal (Belize)":          (18.39, -88.39),
-    "Orange Walk (Belize)":      (18.27, -88.56),
-    "Dangriga (Belize)":         (16.97, -88.23),
-    "Punta Gorda (Belize)":      (15.81, -88.75),
-    # Haiti
-    "Port-au-Prince (Haiti)":    (18.54, -72.34),
-    "Cap-Haïtien (Haiti)":       (19.76, -72.20),
-    "Les Cayes (Haiti)":         (18.19, -73.74),
-    "Gonaïves (Haiti)":          (19.45, -72.69),
-    # Dominican Republic
-    "Santo Domingo (Dominican Republic)": (18.49, -69.93),
-    "Santiago (Dominican Republic)":      (19.45, -70.70),
-    "La Vega (Dominican Republic)":       (19.22, -70.53),
-    "San Cristóbal (Dominican Republic)": (18.42, -70.11),
-    "Punta Cana (Dominican Republic)":    (18.58, -68.41),
-    # St. Lucia
-    "Castries (St. Lucia)":      (14.01, -60.99),
-    "Soufrière (St. Lucia)":     (13.86, -61.06),
-    "Vieux Fort (St. Lucia)":    (13.72, -60.95),
-    "Gros Islet (St. Lucia)":    (14.09, -60.94),
-    "Dennery (St. Lucia)":       (13.90, -60.92),
-    # Grenada
-    "St. George's (Grenada)":    (12.05, -61.75),
-    "Grenville (Grenada)":       (12.11, -61.63),
-    "Sauteurs (Grenada)":        (12.19, -61.60),
-    "Hillsborough (Grenada)":    (12.47, -61.68),
-    # St. Vincent & the Grenadines
-    "Kingstown (St. Vincent)":   (13.16, -61.22),
-    "Calliaqua (St. Vincent)":   (13.15, -61.18),
-    "Barrouallie (St. Vincent)": (13.25, -61.26),
-    "Chateaubelair (St. Vincent)": (13.28, -61.25),
-    "Clifton (St. Vincent)":     (12.61, -61.43),
-    # Antigua & Barbuda
-    "St. John's (Antigua)":      (17.12, -61.85),
-    "All Saints (Antigua)":      (17.09, -61.79),
-    "Codrington (Barbuda)":      (17.64, -61.79),
-    # Dominica
-    "Roseau (Dominica)":         (15.30, -61.39),
-    "Portsmouth (Dominica)":     (15.57, -61.46),
-    "Marigot (Dominica)":        (15.57, -61.29),
-    # St. Kitts & Nevis
-    "Basseterre (St. Kitts)":    (17.30, -62.72),
-    "Charlestown (Nevis)":       (17.19, -62.64),
-    # Bahamas
-    "Nassau (Bahamas)":          (25.06, -77.35),
-    "Freeport (Bahamas)":        (26.53, -78.70),
+# ---- Regions by country: Jamaica's 14 parishes plus the parishes, districts
+#      and departments of the 13 other Caribbean countries AgriLink covers.
+#      Same data as the frontend in js/app.js (rough map coordinates). ----
+LOCATIONS = {
+    "Jamaica": {
+        "Kingston":      (17.97, -76.78),
+        "St. Andrew":    (18.02, -76.75),
+        "St. Catherine": (17.99, -77.06),
+        "Clarendon":     (17.78, -77.37),
+        "Manchester":    (18.04, -77.44),
+        "St. Elizabeth": (18.07, -77.68),
+        "Westmoreland":  (18.18, -78.14),
+        "Hanover":       (18.36, -78.12),
+        "St. James":     (18.35, -77.90),
+        "Trelawny":      (18.35, -77.55),
+        "St. Ann":       (18.29, -77.20),
+        "St. Mary":      (18.19, -76.93),
+        "Portland":      (18.10, -76.60),
+        "St. Thomas":    (17.88, -76.42),
+    },
+    "Antigua & Barbuda": {
+        "Saint John":    (17.12, -61.83),
+        "Saint Mary":    (17.05, -61.85),
+        "Saint Paul":    (17.05, -61.75),
+        "Saint Peter":   (17.10, -61.73),
+        "Saint Philip":  (17.10, -61.66),
+        "Saint George":  (17.15, -61.68),
+        "Barbuda":       (17.62, -61.81),
+    },
+    "Bahamas": {
+        "New Providence": (25.08, -77.35),
+        "Grand Bahama":   (26.53, -78.70),
+        "Abaco":          (26.54, -77.04),
+        "Andros":         (25.18, -78.01),
+        "Eleuthera":      (25.19, -76.25),
+        "Exuma":          (23.49, -75.77),
+    },
+    "Barbados": {
+        "Saint Lucy":    (13.30, -59.64),
+        "Saint Peter":   (13.26, -59.63),
+        "Saint James":   (13.22, -59.62),
+        "Saint Andrew":  (13.27, -59.56),
+        "Saint Joseph":  (13.22, -59.56),
+        "Saint Thomas":  (13.19, -59.58),
+        "Saint John":    (13.20, -59.50),
+        "Saint George":  (13.17, -59.56),
+        "Saint Michael": (13.13, -59.61),
+        "Saint Philip":  (13.15, -59.49),
+        "Christ Church": (13.06, -59.53),
+    },
+    "Belize": {
+        "Belize District": (17.50, -88.20),
+        "Cayo":            (17.25, -88.77),
+        "Corozal":         (18.00, -88.39),
+        "Orange Walk":     (17.82, -88.56),
+        "Stann Creek":     (16.97, -88.23),
+        "Toledo":          (15.81, -88.85),
+    },
+    "Dominica": {
+        "Saint Andrew":  (15.56, -61.28),
+        "Saint David":   (15.44, -61.26),
+        "Saint George":  (15.30, -61.39),
+        "Saint John":    (15.58, -61.44),
+        "Saint Joseph":  (15.47, -61.42),
+        "Saint Luke":    (15.25, -61.38),
+        "Saint Mark":    (15.22, -61.39),
+        "Saint Patrick": (15.32, -61.27),
+        "Saint Paul":    (15.41, -61.41),
+        "Saint Peter":   (15.52, -61.43),
+    },
+    "Grenada": {
+        "Saint George":  (12.05, -61.74),
+        "Saint Andrew":  (12.28, -61.62),
+        "Saint David":   (12.14, -61.60),
+        "Saint John":    (12.14, -61.69),
+        "Saint Mark":    (12.20, -61.70),
+        "Saint Patrick": (12.32, -61.66),
+    },
+    "Guyana": {
+        "Demerara-Mahaica":      (6.80, -58.16),
+        "Pomeroon-Supenaam":     (7.27, -58.52),
+        "Essequibo-W. Demerara": (6.79, -58.42),
+        "Mahaica-Berbice":       (6.47, -57.82),
+        "E. Berbice-Corentyne":  (6.25, -57.53),
+        "Upper Demerara-Berbice": (6.00, -58.30),
+        "Barima-Waini":          (8.25, -59.60),
+    },
+    "Haiti": {
+        "Ouest":      (18.54, -72.34),
+        "Artibonite": (19.45, -72.68),
+        "Nord":       (19.76, -72.20),
+        "Nord-Est":   (19.67, -72.19),
+        "Nord-Ouest": (19.94, -72.83),
+        "Sud":        (18.19, -73.75),
+        "Sud-Est":    (18.23, -72.53),
+        "Grand'Anse": (18.65, -74.12),
+        "Centre":     (19.15, -72.02),
+        "Nippes":     (18.44, -73.08),
+    },
+    "Dominican Republic": {
+        "Distrito Nacional": (18.49, -69.90),
+        "Azua":              (18.46, -70.73),
+        "La Vega":           (19.22, -70.53),
+        "Puerto Plata":      (19.79, -70.71),
+        "Santiago":          (19.45, -70.70),
+        "San Cristóbal":     (18.42, -70.11),
+        "San Juan":          (18.81, -70.72),
+        "Peravia":           (18.28, -70.33),
+        "La Altagracia":     (18.62, -68.71),
+        "Duarte":            (19.30, -70.25),
+        "La Romana":         (18.43, -68.96),
+    },
+    "St. Kitts & Nevis": {
+        "Christ Church Nichola Town": (17.30, -62.72),
+        "Saint Anne Sandy Point":     (17.34, -62.78),
+        "Saint George Basseterre":    (17.29, -62.73),
+        "Saint John Capisterre":      (17.37, -62.79),
+        "Saint Mary Cayon":           (17.31, -62.76),
+        "Saint Paul Capisterre":      (17.40, -62.83),
+        "Saint Peter Basseterre":     (17.31, -62.68),
+        "Trinity Palmetto Point":     (17.29, -62.78),
+        "Saint George Gingerland":    (17.14, -62.59),
+        "Saint James Windward":       (17.18, -62.55),
+        "Saint John Figtree":         (17.14, -62.66),
+        "Saint Paul Charlestown":     (17.14, -62.63),
+        "Saint Thomas Lowland":       (17.17, -62.64),
+    },
+    "St. Lucia": {
+        "Castries":    (14.01, -60.99),
+        "Anse la Raye": (13.92, -61.03),
+        "Canaries":    (13.91, -61.07),
+        "Choiseul":    (13.76, -61.04),
+        "Dennery":     (13.92, -60.92),
+        "Gros Islet":  (14.08, -60.94),
+        "Laborie":     (13.75, -60.99),
+        "Micoud":      (13.82, -60.90),
+        "Soufrière":   (13.86, -61.06),
+        "Vieux Fort":  (13.72, -60.95),
+    },
+    "St. Vincent & the Grenadines": {
+        "Saint George":  (13.16, -61.22),
+        "Saint Andrew":  (13.23, -61.20),
+        "Saint David":   (13.21, -61.15),
+        "Saint Patrick": (13.27, -61.25),
+        "Charlotte":     (13.29, -61.14),
+        "Grenadines":    (12.60, -61.43),
+    },
+    "Trinidad & Tobago": {
+        "Port of Spain": (10.65, -61.50),
+        "San Fernando":  (10.28, -61.46),
+        "Chaguanas":     (10.52, -61.39),
+        "Arima":         (10.64, -61.28),
+        "Couva":         (10.42, -61.32),
+        "Sangre Grande": (10.59, -61.13),
+        "Princes Town":  (10.27, -61.36),
+        "Penal–Debe":    (10.16, -61.45),
+        "Tobago":        (11.19, -60.73),
+    },
 }
 
 MONTH_NAMES = ["January", "February", "March", "April", "May", "June", "July",
@@ -186,40 +237,53 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
 
 app.add_middleware(RateLimitMiddleware)
 
-
-# ---- upstream cache: one fetch per parish per 10 minutes max ---------
-# farm-data costs ~11 Open-Meteo calls; the cache means heavy traffic
-# never translates into heavy upstream usage (and farmers get instant loads).
 FARM_CACHE = {}
 FARM_CACHE_TTL = 600  # seconds
 
 
 # ---- helpers ---------------------------------------------------------
 
-def get_coords(parish: str) -> tuple[float, float]:
-    coords = PARISHES.get(parish)
+def get_coords(country: str, region: str) -> tuple[float, float]:
+    country_map = LOCATIONS.get(country)
+    coords = country_map.get(region) if country_map else None
     if not coords:
-        raise HTTPException(status_code=404, detail=f"Unknown parish: {parish}")
+        raise HTTPException(status_code=404, detail=f"Unknown region: {region}, {country}")
     return coords
+
+
+def get_coords_by_name(parish: str) -> tuple[str, str]:
+    """Old one-segment lookups: search countries in order, first match wins."""
+    for country, regions in LOCATIONS.items():
+        if parish in regions:
+            return country, parish
+    raise HTTPException(status_code=404, detail=f"Unknown parish: {parish}")
+
+
+def location_label(country: str, region: str) -> str:
+    return f"{region}, {country}" if country in LOCATIONS else region
 
 
 # ---- API endpoints ---------------------------------------------------
 
 @app.get("/api/parishes")
 async def list_parishes():
-    """All parishes AgriLink supports, with map coordinates."""
-    return [{"name": name, "lat": lat, "lon": lon} for name, (lat, lon) in PARISHES.items()]
+    """Every region AgriLink supports, grouped by country, with coordinates."""
+    return [
+        {"country": country, "name": name, "lat": lat, "lon": lon}
+        for country, regions in LOCATIONS.items()
+        for name, (lat, lon) in regions.items()
+    ]
 
 
-@app.get("/api/farm-data/{parish}")
-async def farm_data(parish: str):
-    """Live 7-day forecast + 10-year climate history for one parish."""
-    lat, lon = get_coords(parish)
+async def farm_data_impl(country: str, region: str):
+    """Live 7-day forecast + 10-year climate history for one region."""
+    lat, lon = get_coords(country, region)
+    label = location_label(country, region)
     now = datetime.now()
     month_index = now.month - 1
 
     # serve from the 10-minute cache when we have it
-    cached = FARM_CACHE.get(parish)
+    cached = FARM_CACHE.get(label)
     if cached and time.monotonic() - cached[0] < FARM_CACHE_TTL:
         return cached[1]
 
@@ -268,12 +332,26 @@ async def farm_data(parish: str):
         }
 
     result = {
-        "parish": parish,
+        "country": country,
+        "parish": region,
+        "location": label,
         "forecast": {"temp": temp, "rain_7d": rain7, "rain_3d": [round(p) for p in daily["precipitation_sum"][:3]], "daily": daily_list, "live": True},
         "climate": climate,
     }
-    FARM_CACHE[parish] = (time.monotonic(), result)
+    FARM_CACHE[label] = (time.monotonic(), result)
     return result
+
+
+@app.get("/api/farm-data/{country}/{region}")
+async def farm_data(country: str, region: str):
+    return await farm_data_impl(country, region)
+
+
+@app.get("/api/farm-data/{parish}")
+async def farm_data_legacy(parish: str):
+    """Old Jamaica-style single-name route, kept working."""
+    country, region = get_coords_by_name(parish)
+    return await farm_data_impl(country, region)
 
 
 @app.get("/api/crops")
@@ -290,9 +368,8 @@ async def list_problems():
     return PROBLEMS
 
 
-@app.get("/api/recommend/{parish}")
-async def recommend(parish: str, crop: str = Query(..., description="Crop name, e.g. Corn")):
-    """Full planting recommendation for one crop in one parish."""
+async def recommend_impl(country: str, region: str, crop: str):
+    """Full planting recommendation for one crop in one region."""
     from backend.crops import CROPS
     from backend.recommend import recommend_crop
 
@@ -300,11 +377,24 @@ async def recommend(parish: str, crop: str = Query(..., description="Crop name, 
     if not crop_data:
         raise HTTPException(status_code=404, detail=f"Unknown crop: {crop}")
 
-    farm = await farm_data(parish)
+    farm = await farm_data_impl(country, region)
     result = recommend_crop(crop_data, farm["forecast"], farm["climate"])
     result["crop"] = crop_data["name"]
-    result["parish"] = parish
+    result["parish"] = region
+    result["location"] = location_label(country, region)
     return result
+
+
+@app.get("/api/recommend/{country}/{region}")
+async def recommend(country: str, region: str, crop: str = Query(..., description="Crop name, e.g. Corn")):
+    return await recommend_impl(country, region, crop)
+
+
+@app.get("/api/recommend/{parish}")
+async def recommend_legacy(parish: str, crop: str = Query(..., description="Crop name, e.g. Corn")):
+    """Old Jamaica-style single-name route, kept working."""
+    country, region = get_coords_by_name(parish)
+    return await recommend_impl(country, region, crop)
 
 
 # ---- serve the frontend (single-command launch!) --------------------

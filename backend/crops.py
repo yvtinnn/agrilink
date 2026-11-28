@@ -1,8 +1,4 @@
-# ============================================================
-# crops.py, the AgriLink crop database (mirrors js/planner.js).
-# bestMonths: 1 = January ... 12 = December (Jamaica climate).
-# stages: growth stages and how many days each one takes.
-# ============================================================
+
 
 CROPS = [
     {

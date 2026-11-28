@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>AgriLink: a planting almanac for Jamaica</title>
+  <title>AgriLink: a planting almanac for the Caribbean</title>
   <meta name="description" content="AgriLink is a planting almanac: best planting weeks from live weather and 10-year rainfall history, a growth tracker, and an offline photo check for crop problems." />
   <meta name="theme-color" content="#F5F2E9" />
   <link rel="manifest" href="manifest.json" />
@@ -19,7 +19,7 @@
       }
     } catch (e) {}
   </script>
-  <link rel="stylesheet" href="css/styles.css?v=37" />
+  <link rel="stylesheet" href="css/styles.css?v=38" />
 </head>
 <body>
 
@@ -29,7 +29,7 @@
       <img src="assets/logo-mark.png" alt="AgriLink logo" class="logo-badge" />
       <div class="logo-text">
         <h1>Agri<span>Link</span></h1>
-        <p>A planting almanac for Jamaica</p>
+        <p>A planting almanac for the Caribbean</p>
       </div>
     </div>
     <div class="topbar-right">
@@ -87,7 +87,7 @@
       <div class="card soft" id="how-it-works">
         <h2>How it works</h2>
         <ol class="steps">
-          <li><b>Set your parish and town</b><span>Once, on this phone.</span></li>
+          <li><b>Set your country and parish</b><span>Once, on this phone.</span></li>
           <li><b>We read the weather</b><span>This week's forecast and ten years of rainfall for your parish.</span></li>
           <li><b>Get a planting date</b><span>Best crops now, plus dated stages for the ones you track.</span></li>
           <li><b>Check a sick plant</b><span>Photograph a leaf and compare it with common crop problems.</span></li>
@@ -323,7 +323,7 @@
         <img src="assets/logo-mark.png" alt="" class="onboard-logo" />
         <span class="label">AgriLink · Jamaica</span>
         <h2>Welcome to AgriLink</h2>
-        <p class="muted">Planting dates, growth stages and a leaf check for Jamaican farms.</p>
+        <p class="muted">Planting dates, growth stages and a leaf check for Caribbean farms.</p>
         <p class="muted small">First, tell us where you farm.</p>
         <button id="onboard-next" class="btn-primary">Get started</button>
       </div>
@@ -334,7 +334,7 @@
         <input id="onboard-name" type="text" placeholder="e.g. Miss Pauline" autocomplete="name" />
         <label for="onboard-country">Country</label>
         <select id="onboard-country"></select>
-        <label for="onboard-parish">Parish / area</label>
+        <label for="onboard-parish">Parish / region</label>
         <select id="onboard-parish"></select>
         <label for="onboard-town">Town / community</label>
         <input id="onboard-town" type="text" placeholder="e.g. Santa Cruz" autocomplete="address-level3" />
@@ -386,10 +386,10 @@
        stays in local mode and these scripts are never used for data. -->
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
-  <script src="js/firebase-config.js?v=37"></script>
-  <script src="js/planner.js?v=37"></script>
-  <script src="js/community.js?v=37"></script>
-  <script src="js/problems.js?v=37"></script>
-  <script src="js/app.js?v=37"></script>
+  <script src="js/firebase-config.js?v=38"></script>
+  <script src="js/planner.js?v=38"></script>
+  <script src="js/community.js?v=38"></script>
+  <script src="js/problems.js?v=38"></script>
+  <script src="js/app.js?v=38"></script>
 </body>
 </html>

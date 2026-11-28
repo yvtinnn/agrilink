@@ -34,9 +34,34 @@ The code can also be downloaded from this repo: click the green **Code** button 
 - **Photo check** — on-device colour analysis of a leaf photo against 8 common crop problems.
 - **Community** — farmer chat and problem board (live sharing with Firebase, local-only without it).
 
-## Countries covered
+## Countries and regions covered
 
-Jamaica (14 parishes) plus Barbados, Trinidad & Tobago, Guyana, Belize, Haiti, Dominican Republic, St. Lucia, Grenada, St. Vincent & the Grenadines, Antigua & Barbuda, Dominica, St. Kitts & Nevis, and the Bahamas.
+**126 regions across 14 Caribbean countries.** Pick your country on first launch, then your parish/district/region from that country's list:
+
+| Country | Regions |
+|---|---|
+| Jamaica | 14 parishes |
+| Barbados | 11 parishes |
+| St. Kitts & Nevis | 13 parishes (St. Kitts + Nevis) |
+| Dominican Republic | 11 regions |
+| Haiti | 10 departments |
+| St. Lucia | 10 districts |
+| Dominica | 10 parishes |
+| Trinidad & Tobago | 9 areas incl. Tobago |
+| Guyana | 7 regions |
+| Antigua & Barbuda | 6 parishes + Barbuda |
+| Belize | 6 districts |
+| Bahamas | 6 islands |
+| Grenada | 6 parishes |
+| St. Vincent & the Grenadines | 6 parishes + the Grenadines |
+
+Region names repeat across countries (several have a "Saint George"), so the app always keeps the country with the region — in the location label ("Town, Region, Country"), the saved settings and the API.
+
+## App flow
+
+How a farmer moves through the app, from first launch to the community board:
+
+![AgriLink app flow chart](docs/agrilink-app-flow-chart.svg)
 
 ## Built with
 
@@ -55,11 +80,13 @@ Then open `http://localhost:8000`. The API also serves `/docs` with all endpoint
 
 | Endpoint | Returns |
 |---|---|
-| `GET /api/parishes` | all 77 locations across the Caribbean with coordinates |
-| `GET /api/farm-data/{location}` | live forecast and ten-year climate history |
+| `GET /api/parishes` | all 126 regions across 14 countries, grouped by country, with coordinates |
+| `GET /api/farm-data/{country}/{region}` | live forecast and ten-year climate history (e.g. `/api/farm-data/Jamaica/Clarendon`) |
 | `GET /api/crops` | crop database with planting windows and growth stages |
-| `GET /api/recommend/{location}?crop=Corn` | scored planting recommendation |
+| `GET /api/recommend/{country}/{region}?crop=Corn` | scored planting recommendation |
 | `GET /api/problems` | crop-problem dataset used by the photo checker |
+
+The old one-name routes (`/api/farm-data/{parish}`, `/api/recommend/{parish}`) still work for Jamaica parishes.
 
 Without the backend, the same app runs standalone from `index.html` (or the Netlify link above) and calls Open-Meteo directly from the browser.
 
