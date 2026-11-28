@@ -1,8 +1,10 @@
-# AgriLink — Backend
+# AgriLink Backend
 
 The Python server (FastAPI) behind **AgriLink**, a planting-almanac app that helps Caribbean farmers decide **when to plant**. It serves the app and provides the API the frontend calls: live weather, ten years of climate history, a crop database and a planting recommendation engine.
 
-The app itself is deployed at **https://timely-marshmallow-9054ac.netlify.app** — this repo holds only the backend code.
+**Live app:** https://timely-marshmallow-9054ac.netlify.app
+
+This repo holds only the backend code. The frontend runs separately (deployed on Netlify above) and calls this API for its data.
 
 ## Run it
 
@@ -12,6 +14,12 @@ uvicorn backend.main:app --reload
 ```
 
 Then open `http://localhost:8000`. If the frontend files are placed next to the `backend/` folder, the same command serves the whole app; interactive API docs are always at `http://localhost:8000/docs`.
+
+## Database
+
+The app's shared data (farmer chat and the community problem board) is stored in **Firebase Realtime Database**. The frontend talks to Firebase directly, so farmers see each other's posts live. Without a Firebase config the same features fall back to local-only storage on the phone.
+
+Crop data, regions and the photo-check problem dataset are plain Python files in `backend/` (no database needed), and weather/climate data is fetched live from Open-Meteo.
 
 ## API
 
@@ -27,9 +35,9 @@ The old one-name routes (`/api/farm-data/{parish}`, `/api/recommend/{parish}`) s
 
 Other features:
 
-- **Rate limiting** — per-IP sliding window on the weather endpoints (they trigger ~11 upstream calls each), with `X-RateLimit-*` headers and `429` responses.
-- **Caching** — farm data is cached for 10 minutes per region.
-- **Static hosting** — the server mounts the parent directory, so it can serve the frontend in one command.
+- **Rate limiting**: per-IP sliding window on the weather endpoints (they trigger about 11 upstream calls each), with `X-RateLimit-*` headers and `429` responses.
+- **Caching**: farm data is cached for 10 minutes per region.
+- **Static hosting**: the server mounts the parent directory, so it can serve the frontend in one command.
 
 ## Countries and regions covered
 
@@ -52,7 +60,7 @@ Other features:
 | Grenada | 6 parishes |
 | St. Vincent & the Grenadines | 6 parishes + the Grenadines |
 
-Region names repeat across countries (several have a "Saint George"), so the API always keeps the country with the region — every response includes both, and the frontend labels locations "Town, Region, Country".
+Region names repeat across countries (several have a "Saint George"), so the API always keeps the country with the region. Every response includes both, and the app labels locations "Town, Region, Country".
 
 ## App flow
 
@@ -62,13 +70,13 @@ How a farmer moves through the app, from first launch to the community board:
 
 ## How the planting score works
 
-1. **Season** — is this one of the crop's best months?
-2. **Climate history** — the 10-year average rainfall for this month in the farmer's area.
-3. **Live forecast** — rain and temperature for the next 7 days.
+1. **Season**: is this one of the crop's best months?
+2. **Climate history**: the 10-year average rainfall for this month in the farmer's area.
+3. **Live forecast**: rain and temperature for the next 7 days.
 
 Each signal shows as a plus or minus, so the score is easy to read.
 
-Data comes from [Open-Meteo](https://open-meteo.com) (free, no key needed).
+Weather and climate history come from [Open-Meteo](https://open-meteo.com) (free, no key needed).
 
 ## Built with
 
