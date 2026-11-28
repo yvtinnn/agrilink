@@ -1,3 +1,12 @@
 __pycache__/
 *.pyc
 .DS_Store
+
+# frontend lives outside this repo (deployed on Netlify / served locally)
+/index.html
+/manifest.json
+/service-worker.js
+/css/
+/js/
+/assets/
+/icons/

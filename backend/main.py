@@ -398,5 +398,8 @@ async def recommend_legacy(parish: str, crop: str = Query(..., description="Crop
 
 
 # ---- serve the frontend (single-command launch!) --------------------
+# The frontend lives outside this repo; when its files sit next to the
+# backend folder, the same command serves the whole app.
 frontend_dir = Path(__file__).resolve().parent.parent
-app.mount("/", StaticFiles(directory=frontend_dir, html=True), name="frontend")
+if (frontend_dir / "index.html").exists():
+    app.mount("/", StaticFiles(directory=frontend_dir, html=True), name="frontend")
